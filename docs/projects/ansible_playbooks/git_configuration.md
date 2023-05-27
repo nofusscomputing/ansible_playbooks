@@ -24,6 +24,6 @@ This playbook is intended to run our ansible role [git_configuration](projects/g
 
 ``` yaml title="git_configuration.yaml" linenums="1"
 
-;--8<-- "git_configuration.yaml"
+--8<-- "git_configuration.yaml"
 
 ```
