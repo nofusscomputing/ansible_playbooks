@@ -1,0 +1,18 @@
+---
+
+include:
+  - project: nofusscomputing/projects/gitlab-ci
+    ref: development
+    file:
+      - .gitlab-ci_common.yaml
+      # uncomment below when gitlab-ci repo is updated with job
+      # - automation/.gitlab-ci.ansible.yaml
+      - conventional_commits/.gitlab-ci.yml
+      - gitlab_release/.gitlab-ci.yml
+      - template/website.gitlab-ci.yaml
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  #GIT_SYNC_URL: "https://$GITHUB_USERNAME_ROBOT:$GITHUB_TOKEN_ROBOT@github.com/NoFussComputing/ansible_playbooks.git"
+  MY_PROJECT_ID: "46364551"
+  PAGES_ENVIRONMENT_PATH: projects/ansible_playbooks/
