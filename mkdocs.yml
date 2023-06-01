@@ -17,11 +17,17 @@ nav:
 
   - projects/index.md
 
-  - Ansible Playbooks: 
+  - Ansible:
 
-    - projects/ansible_playbooks/index.md
+    - Playbooks: 
 
-    - projects/ansible_playbooks/git_configuration.md
+      - projects/ansible/playbooks/index.md
+
+      - projects/ansible/playbooks/git_configuration.md
+    
+    - Roles:
+
+      - projects/ansible/roles/index.md
 
 - Operations: 
 
