@@ -5,11 +5,8 @@ include:
     ref: development
     file:
       - .gitlab-ci_common.yaml
-      # uncomment below when gitlab-ci repo is updated with job
-      # - automation/.gitlab-ci.ansible.yaml
-      - conventional_commits/.gitlab-ci.yml
-      - gitlab_release/.gitlab-ci.yml
-      - template/website.gitlab-ci.yaml
+      - automation/.gitlab-ci.ansible.yaml
+
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
