@@ -1,0 +1,10 @@
+---
+- name: Git Configuration as Code
+  hosts: localhost
+  gather_facts: yes
+  vars:
+    ansible_connection: local
+
+  roles:
+    - name: Configure git from Code
+      role: git_configuration
