@@ -23,8 +23,16 @@ nav:
 
       - projects/ansible/playbooks/index.md
 
+      - projects/ansible/playbooks/awx.md
+
+      - projects/ansible/playbooks/backup.md
+
       - projects/ansible/playbooks/git_configuration.md
-    
+
+      - projects/ansible/playbooks/mariadb.md
+
+      - projects/ansible/playbooks/postgresdb.md
+
     - Roles:
 
       - projects/ansible/roles/index.md

@@ -1,0 +1,61 @@
+---
+- name: Add inventory
+  awx.awx.inventory:
+    name: "Production"
+    description: "{{ awx_inventory.description | default('') }}"
+    controller_host: "{{ awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ awx_controller_username | default(omit) }}"
+    controller_password: "{{ awx_controller_password | default(omit) }}"
+    organization: "{{ awx_organization.name }}"
+    state: present
+  # no_log: true
+  diff: true
+
+
+- name: Add an inventory source
+  awx.awx.inventory_source:
+    name: "{{ awx_project.name }}"
+    description: "{{ awx_inventory.description | default('') }}"
+    controller_host: "{{ awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ awx_controller_username | default(omit) }}"
+    controller_password: "{{ awx_controller_password | default(omit) }}"
+    organization: "{{ awx_organization.name }}"
+    inventory: "Production"
+    # credential: previously-created-credential
+    # overwrite: True
+    # update_on_launch: True
+    source_project: "{{ awx_project.name }}"
+    source_path: inventory/production/
+    source: scm
+    state: present
+    verbosity: 2
+    overwrite: "{{ awx_inventory.inventory_overwrite | default(true) | bool }}"
+    overwrite_vars: "{{ awx_inventory.inventory_overwrite_vars | default(true) | bool }}"
+    scm_branch: "{{ awx_inventory.scm_branch | default(omit) }}"
+  # no_log: true
+  diff: true
+
+
+- name: "Update inventory sources {{ awx_project.name }}/{{ awx_project.name }}"
+  awx.awx.inventory_source_update:
+    name: "{{ awx_project.name }}"
+    inventory: "Production"
+    controller_host: "{{ awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ awx_controller_username | default(omit) }}"
+    controller_password: "{{ awx_controller_password | default(omit) }}"
+    organization: "{{ awx_organization.name }}"
+  # no_log: true
+  diff: true
+
+
+- name: "RBAC - {{ awx_organization.name }}/Project/{{ awx_project.name }}/Inventory"
+  ansible.builtin.include_tasks:
+    file: tasks/awx/rbac.yaml
+  loop: "{{ awx_project.rbac.inventory }}"
+  loop_control:
+    loop_var: awx_rbac
+  vars:
+    awx_inventory_name: "Production"

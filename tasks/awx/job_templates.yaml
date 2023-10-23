@@ -1,0 +1,53 @@
+---
+
+- name: Debug
+  ansible.builtin.debug:
+    msg:
+      - "{{ awx_playbook_filename }}"
+
+
+- name: Create fact from Playbook
+  ansible.builtin.set_fact:
+    awx_tower_templates: []
+    playbook_contents: "{{ lookup('file', item.root + awx_playbook_filename) | from_yaml }}"
+  when: awx_playbook_filename | default('') != ''
+  failed_when: false
+
+
+- name: Playbook Failsafe
+  ansible.builtin.set_fact:
+    playbook_contents: []
+  when: (( playbook_contents | type_debug) != 'list')
+
+
+- name: Job Template from Playbook
+  ansible.builtin.set_fact:
+    awx_tower_templates: "{{ awx_tower_templates + job_template.vars.awx_tower_template }}"
+  when: >
+    job_template.vars | default({}) | length | int > 0
+      and
+    job_template.vars.awx_tower_template | default({}) | length | int > 0
+  loop: "{{ playbook_contents }}"
+  loop_control:
+    loop_var: job_template
+  failed_when: false
+
+
+- name: Add Job template
+  ansible.builtin.include_tasks:
+    file: tasks/awx/job_template.yaml
+  loop: "{{ awx_tower_templates }}"
+  loop_control:
+    loop_var: awx_job_template
+  when: >
+    item.state == 'file'
+      and
+    'yaml' in item.path
+      and
+    item.path|basename|replace(".yaml","") not in awx_project.job_template_ignore | default([])
+
+
+- name: Fact Cleanup - job_template
+  ansible.builtin.set_fact:
+    awx_tower_templates: []
+    awx_playbook_filename:

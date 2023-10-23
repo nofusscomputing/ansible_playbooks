@@ -1,0 +1,53 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# description:
+#              Task file for backing up Specified paths to an archive.
+#
+# image: nofusscomputing/ansible-ee >= 0.1.0
+# tags: nil
+#
+- name: Set Global Facts
+  ansible.builtin.set_fact:
+    filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime(ansible_date_time.epoch) }}"
+  when: filename_date_time | default('does_not_exist') == 'does_not_exist'
+
+
+- name: File Backup
+  block:
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        directory_tasks: '/tmp/task_backup'
+
+
+    - name: Create Task Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: directory
+        mode: '700'
+
+
+    - name: Prepare Encryption Certificate
+      ansible.builtin.copy:
+        content: "{{ file_encryption_key }}"
+        dest: "{{ directory_tasks }}/encryption_certificate"
+        mode: '700'
+
+
+    - name: Backup Files
+      ansible.builtin.include_tasks:
+        file: backup/files.yaml
+      loop: "{{ backup.files }}"
+      loop_control:
+        loop_var: backup_file
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: absent
