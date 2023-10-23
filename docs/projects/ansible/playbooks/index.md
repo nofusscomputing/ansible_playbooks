@@ -15,9 +15,13 @@ Available Playbooks:
 
 1. [awx.yaml](awx.md) 
 
+1. [backup.yaml](backup.md)
+
 1. [git_configuration.yaml](git_configuration.md)
 
 1. [mariadb.yaml](mariadb.md)
+
+1. [postgresdb.yaml](postgresdb.md)
 
 
 ## Docs ToDo
