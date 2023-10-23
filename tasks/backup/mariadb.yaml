@@ -1,0 +1,98 @@
+---
+
+- name: MariaDB Backup
+  block:
+    # Ref: https://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/
+
+
+    # - name: Set Global Facts
+    #   ansible.builtin.set_fact:
+    #     filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime(ansible_date_time.epoch) }}"
+    #   when: filename_date_time | default('does_not_exist') == 'does_not_exist'
+
+
+    # - name: Set Task Facts
+    #   ansible.builtin.set_fact:
+    #     directory_tasks: '/tmp/task_backup_mariadb'
+
+
+    - name: Prepare Backup Filename
+      ansible.builtin.set_fact:
+        file_backup_no_extension_mariadb: "{{ filename_date_time }}-mariadb-{{ mariadb.name }}-{{ inventory_hostname }}"
+
+
+    - name: Backup {{ mariadb.name }} Database
+      ansible.builtin.shell:
+        cmd: |
+          docker run \
+            --rm \
+            --name mysqldump-keycloak \
+            -v {{ backup.mariadb.socket }}:/socket-mysqld/mysqld.sock \
+            -v {{ directory_tasks }}:{{ directory_tasks }} \
+          mariadb:10.6.14 \
+          mysqldump \
+            --socket=/socket-mysqld/mysqld.sock \
+            --quote-names \
+            --protocol=socket \
+            --user={{ backup.mariadb.user }} \
+            --password={{ backup.mariadb.password }} \
+            --lock-tables \
+            --add-drop-database \
+            --flush-privileges \
+            --dump-date \
+            {{ mariadb.database }} \
+          | openssl \
+              smime -encrypt \
+              -binary -text -{{ backup.encryption_algorithm }} \
+              -out {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc \
+              -outform DER {{ directory_tasks }}/encryption_certificate;
+          tar \
+            --directory={{ directory_tasks }} \
+            -czf {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz \
+            {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
+
+      args:
+        executable: bash
+      # loop: "{{ mysql_backup }}"
+      become: true
+      register: mysql_backup
+      failed_when: >
+        't connect to local server' in mysql_backup.stderr
+          or
+        'Unable to' in mysql_backup.stderr
+          or
+        'could not' in mysql_backup.stderr
+          or
+        'Exiting with failure' in mysql_backup.stderr
+
+
+
+    - name: Store Backup
+      ansible.builtin.copy:
+        src: "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz"
+        dest: "/opt/backup/"
+        remote_src: true
+      become: true
+
+
+  rescue:
+
+    - name: Remove Failed Backup
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz"
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc"

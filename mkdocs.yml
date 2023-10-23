@@ -26,7 +26,8 @@ nav:
       - projects/ansible/playbooks/awx.md
 
       - projects/ansible/playbooks/git_configuration.md
-    
+
+      - projects/ansible/playbooks/mariadb.md
     - Roles:
 
       - projects/ansible/roles/index.md
