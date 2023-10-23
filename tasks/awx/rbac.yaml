@@ -1,0 +1,29 @@
+---
+- name: >-
+    "RBAC Config {{ awx_organization.name }}/{%- if awx_inventory.name | default('') != '' -%}
+    inventory/{{ awx_inventory.name }}{% else %}project/{{ awx_project.name }}{%- endif -%}/
+    {%- if awx_rbac.type == 'team' -%}Team{%- else -%}User{%- endif -%}/{{ awx_rbac.name }}"
+  awx.awx.role:
+    controller_host: "{{ awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ awx_controller_username | default(omit) }}"
+    controller_password: "{{ awx_controller_password | default(omit) }}"
+    team: "{% if awx_rbac.type == 'team' %}{{ awx_rbac.name | default(omit) }}{% else %}{{ f | default(omit) }}{% endif %}"
+    user: "{% if awx_rbac.type == 'user' %}{{ awx_rbac.name | default(omit) }}{% else %}{{ f | default(omit) }}{% endif %}"
+    project: "{{ awx_project_name | default(omit) }}"
+    job_templates: "{{ awx_job_template_name | default(omit) }}"
+    inventory: "{{ awx_inventory_name | default(omit) }}"
+    organizations: "{{ awx_organization_name | default(omit) }}"
+    role: "{{ awx_rbac.role }}"
+    state: "{{ awx_rbac.state | default('present') }}"
+  # no_log: true
+  diff: true
+
+
+# - name: RBAC Var Cleanup
+#   ansible.builtin.set_fact:
+#     awx_rbac: null
+#     awx_organization_name: null
+#     awx_inventory_name: null
+#     awx_project_name: null
+#     job_template_name: null

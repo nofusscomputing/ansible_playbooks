@@ -1,0 +1,41 @@
+---
+- name: Organization Setup
+  awx.awx.organization:
+    name: "{{ awx_organization.name }}"
+    controller_host: "{{ awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ awx_controller_username | default(omit) }}"
+    controller_password: "{{ awx_controller_password | default(omit) }}"
+    description: "{{ awx_organization.description | default(omit) }}"
+    # instance_groups: "{{ item.instance_groups | default(omit) | from_yaml_all }}"
+    # instance_groups: "{{ item.instance_groups | flatten | map(attribute='name') }}"
+    state: "{{ awx_organization.state | default('present') }}"
+    validate_certs: "{{ awx_organization.validate_certs | default('yes') }}"
+  # no_log: true
+  diff: true
+
+
+- name: "Teams - {{ awx_organization.name }}"
+  ansible.builtin.include_tasks:
+    file: tasks/awx/team.yaml
+  loop: "{{ awx_organization.teams }}"
+  loop_control:
+    loop_var: awx_team
+
+
+- name: "RBAC - {{ awx_organization.name }}"
+  ansible.builtin.include_tasks:
+    file: tasks/awx/rbac.yaml
+  loop: "{{ awx_organization.rbac }}"
+  loop_control:
+    loop_var: awx_rbac
+  vars:
+    awx_organization_name: "{{ awx_organization.name }}"
+
+
+- name: "Projects - {{ awx_organization.name }}"
+  ansible.builtin.include_tasks:
+    file: tasks/awx/project.yaml
+  loop: "{{ awx_organization.projects }}"
+  loop_control:
+    loop_var: awx_project

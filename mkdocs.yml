@@ -23,6 +23,8 @@ nav:
 
       - projects/ansible/playbooks/index.md
 
+      - projects/ansible/playbooks/awx.md
+
       - projects/ansible/playbooks/git_configuration.md
     
     - Roles:
