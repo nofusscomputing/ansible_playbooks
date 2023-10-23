@@ -1,0 +1,272 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# Playbook for backing up and restoring a PostgreSQL Database.
+# tags must be sepcified for the playbook to function.
+#
+# image: nofusscomputing/ansible-ee >= 0.3.0
+#
+# Tags:
+#
+#   - backup
+#      Dump the specified database to a file
+#
+#   - restore
+#     Restore a database from file
+#
+
+- name: PostgresDB Backup/Restore
+  hosts: localhost
+  gather_facts: true
+
+  tasks:
+
+# Dependencies:
+#   ansible-galaxy collection install community.postgresql
+#   apt install postgresql-common postgresql-client
+#   pip install psycopg2
+
+
+    # - name: Check for Tags
+    #   ansible.builtin.assert:
+    #     that:
+    #       - "'backup' in {{ ansible_run_tags }} or 'restore' in {{ ansible_run_tags }}"
+    #     fail_msg: "You must specify an ansible tag. available 'backup/restore'"
+    #   tags:
+    #     - always
+    - name: Backup PostgresDB
+      ansible.builtin.include_tasks:
+        file: tasks/backup-postgres.yaml
+        apply:
+          tags:
+            - restore
+      when: backup.postgresdb.databases | default([]) | length | int > 0
+      tags:
+        - backup
+
+    - name: Check Variables
+      ansible.builtin.assert:
+        that:
+          - postgresDB_directory_backup | default('') != ''
+          - postgresDB_host | default('') != ''
+          - postgresDB_user | default('') != ''
+          - postgresDB_password | default('') != ''
+          - postgresDB_database_name | default('') != ''
+        fail_msg: "You must specify variables 'postgresDB_directory_backup/postgresDB_host/postgresDB_user/postgresDB_password/postgresDB_database_name'"
+      tags:
+        - restore
+
+
+    - name: Check Restore Variables
+      ansible.builtin.assert:
+        that:
+          - postgresDB_filename_restore | default('') != ''
+        fail_msg: "You must specify variable 'postgresDB_filename_restore'"
+      tags:
+        - restore
+
+
+    - name: Dependency Versions
+      ansible.builtin.command:
+        cmd: "{{ item.cmd }}"
+      changed_when: false
+      failed_when: false
+      loop: "{{ check_versions }}"
+      tags:
+        - always
+      vars:
+        check_versions:
+          - cmd: "pip show psycopg2"
+          - cmd: "pg_dump --version"
+
+
+    - name: Set Backup Facts
+      ansible.builtin.set_fact:
+        postgresDB_filename_backup: recovery.sql
+      tags:
+        - restore
+
+
+    - name: Backup database
+      tags:
+        - restore
+      block:
+
+
+        - name: Dump an existing database to a file
+          community.postgresql.postgresql_db:
+            name: "{{ postgresDB_database_name }}"
+            state: dump
+            target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+            login_host: "{{ postgresDB_host }}"
+            login_user: "{{ postgresDB_user }}"
+            login_password: "{{ postgresDB_password }}"
+
+
+        - name: Backup File Details
+          ansible.builtin.stat:
+            name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+
+      rescue:
+
+        - name: Remove Failed Backup
+          ansible.builtin.file:
+            name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+            state: absent
+
+        - name: Fail Play
+          ansible.builtin.assert:
+            that:
+              - false
+            fail_msg: Backup of Postgres database '{{ postgresDB_database_name }}' Failed!
+
+
+    - name: Restore database
+      tags:
+        - restore
+      block:
+
+        - name: Drop DB
+          community.postgresql.postgresql_db:
+            name: "{{ postgresDB_database_name }}"
+            state: absent
+            force: true
+            login_host: "{{ postgresDB_host }}"
+            login_user: "{{ postgresDB_user }}"
+            login_password: "{{ postgresDB_password }}"
+
+
+        - name: Create DB
+          community.postgresql.postgresql_db:
+            name: "{{ postgresDB_database_name }}"
+            state: present
+            login_host: "{{ postgresDB_host }}"
+            login_user: "{{ postgresDB_user }}"
+            login_password: "{{ postgresDB_password }}"
+
+        - name: Restore an existing database to a file
+          community.postgresql.postgresql_db:
+            name: "{{ postgresDB_database_name }}"
+            state: restore
+            target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_restore }}"
+            login_host: "{{ postgresDB_host }}"
+            login_user: "{{ postgresDB_user }}"
+            login_password: "{{ postgresDB_password }}"
+
+      always:
+
+        - name: Remove the restore dump
+          ansible.builtin.file:
+            name: "{{ postgresDB_directory_backup }}/restore.sql"
+
+
+  vars:
+    ansible_connection: local          # String, Default 'local' DONT change.
+    postgresDB_directory_backup: ""    # String, Required
+    postgresDB_host: ""                # String, Required
+    postgresDB_user: ""                # String, Required
+    postgresDB_password: ""            # String, Required
+    postgresDB_database_name: ""       # String, Required
+    postgresDB_filename_restore: ""    # String, Required for Restore ONLY
+
+    awx_tower_template:
+      - name: "PostgresDB"
+        ask_tags_on_launch: true
+        description: |
+          Playbook to backup or restore a PostgreSQL database
+          Available tags:
+            'backup' Backup a postgres Database,
+            'restore' Resotre a postgres database from specified file.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: backup, restore
+        labels:
+          - backup
+          - restore
+          - postgres
+        # credentials:
+        #   - "Local"
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey_spec: |
+          {
+            "name": "",
+            "description": "",
+            "spec": [
+                {
+                    "max": 1024,
+                    "min": 5,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresDB_host",
+                    "new_question": false,
+                    "question_name": "Host",
+                    "question_description": "IP or Hostname of the PostgreSQL Server"
+                },
+                {
+                    "max": 1024,
+                    "min": 3,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresDB_user",
+                    "new_question": true,
+                    "question_name": "Postgres User",
+                    "question_description": "User with Access to the database to backup"
+                },
+                {
+                    "max": 1024,
+                    "min": 6,
+                    "type": "password",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresDB_password",
+                    "new_question": false,
+                    "question_name": "Postgres Password",
+                    "question_description": "Password for user accessing the database to backup"
+                },
+                {
+                    "max": 1024,
+                    "min": 2,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresDB_database_name",
+                    "new_question": true,
+                    "question_name": "Database",
+                    "question_description": "Database name to backup/restore"
+                },
+                {
+                    "max": 1024,
+                    "min": 4,
+                    "type": "text",
+                    "choices": "",
+                    "default": "/backup",
+                    "required": true,
+                    "variable": "postgresDB_directory_backup",
+                    "new_question": true,
+                    "question_name": "Backup Directory",
+                    "question_description": "Directory to store Backup in"
+                },
+                {
+                    "max": 1024,
+                    "min": 5,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": false,
+                    "variable": "postgresDB_filename_restore",
+                    "new_question": true,
+                    "question_name": "Restore Filename",
+                    "question_description": "(Only required for Restore) Name of the SQL dump file to restore"
+                }
+            ]
+          }
