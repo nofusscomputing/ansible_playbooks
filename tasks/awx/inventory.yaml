@@ -2,12 +2,12 @@
 - name: Add inventory
   awx.awx.inventory:
     name: "Production"
-    description: "{{ awx_inventory.description | default('') }}"
-    controller_host: "{{ awx_controller_host | default(omit) }}"
-    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
-    controller_username: "{{ awx_controller_username | default(omit) }}"
-    controller_password: "{{ awx_controller_password | default(omit) }}"
-    organization: "{{ awx_organization.name }}"
+    description: "{{ nfc_pb_awx_inventory.description | default('') }}"
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    organization: "{{ nfc_pb_awx_organization.name }}"
     state: present
     validate_certs: "{{ validate_certs | default(true) }}"
   # no_log: true
@@ -16,37 +16,49 @@
 
 - name: Add an inventory source
   awx.awx.inventory_source:
+    name: "{{ nfc_pb_awx_project.name }}"
+    description: "{{ nfc_pb_awx_inventory.description | default('') }}"
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
     validate_certs: "{{ validate_certs | default(true) }}"
+    organization: "{{ nfc_pb_awx_organization.name }}"
     inventory: "Production"
     # credential: previously-created-credential
     # overwrite: True
     # update_on_launch: True
-    source_project: "{{ awx_project.name }}"
+    source_project: "{{ nfc_pb_awx_project.name }}"
     source_path: inventory/production/
     source: scm
     state: present
     verbosity: 2
-    overwrite: "{{ awx_inventory.inventory_overwrite | default(true) | bool }}"
-    overwrite_vars: "{{ awx_inventory.inventory_overwrite_vars | default(true) | bool }}"
-    scm_branch: "{{ awx_inventory.scm_branch | default(omit) }}"
+    overwrite: "{{ nfc_pb_awx_inventory.inventory_overwrite | default(true) | bool }}"
+    overwrite_vars: "{{ nfc_pb_awx_inventory.inventory_overwrite_vars | default(true) | bool }}"
+    scm_branch: "{{ nfc_pb_awx_inventory.scm_branch | default(omit) }}"
   # no_log: true
   diff: true
 
 
-- name: "Update inventory sources {{ awx_project.name }}/{{ awx_project.name }}"
+- name: "Update inventory sources {{ nfc_pb_awx_project.name }}/{{ nfc_pb_awx_project.name }}"
   awx.awx.inventory_source_update:
-    name: "{{ awx_project.name }}"
+    name: "{{ nfc_pb_awx_project.name }}"
     inventory: "Production"
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    organization: "{{ nfc_pb_awx_organization.name }}"
     validate_certs: "{{ validate_certs | default(true) }}"
   # no_log: true
   diff: true
 
 
-- name: "RBAC - {{ awx_organization.name }}/Project/{{ awx_project.name }}/Inventory"
+- name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Inventory"
   ansible.builtin.include_tasks:
     file: tasks/awx/rbac.yaml
-  loop: "{{ awx_project.rbac.inventory }}"
+  loop: "{{ nfc_pb_awx_project.rbac.inventory }}"
   loop_control:
-    loop_var: awx_rbac
+    loop_var: nfc_pb_awx_rbac
   vars:
-    awx_inventory_name: "Production"
+    nfc_pb_awx_inventory_name: "Production"

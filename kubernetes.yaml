@@ -12,7 +12,7 @@
         common_gather_facts: true
 
   vars:
-    awx_tower_template:
+    nfc_pb_awx_tower_template:
       - name: "Kubernetes"
         ask_tags_on_launch: true
         ask_limit_on_launch: true

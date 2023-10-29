@@ -70,7 +70,7 @@
 
   vars:
 
-    awx_tower_template:
+    nfc_pb_awx_tower_template:
       - name: "Backup(s) from Inventory config"
         ask_limit_on_launch: true
         ask_tags_on_launch: true

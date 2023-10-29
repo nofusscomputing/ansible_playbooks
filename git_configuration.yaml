@@ -11,7 +11,7 @@
 
   vars:
     ansible_connection: local
-    awx_tower_template:
+    nfc_pb_awx_tower_template:
       - name: "Configure Gitlab / Github Repositories"
         ask_tags_on_launch: true
         ask_inventory_on_launch: true

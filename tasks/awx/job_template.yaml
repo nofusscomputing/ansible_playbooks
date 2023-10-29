@@ -5,22 +5,23 @@
     - name: Debug
       ansible.builtin.debug:
         msg:
-          - "{{ awx_playbook_filename }}"
-          - "{{ awx_job_template }}"
+          - "{{ nfc_pb_awx_playbook_filename }}"
+          - "{{ nfc_pb_awx_job_template }}"
+          - "{{ nfc_pb_awx_job_template_name | default('Not Yet Defined') }}"
 
     # - name: Create fact from Playbook
     #   ansible.builtin.set_fact:
-    #     playbook_contents: "{{ lookup('file', awx_playbook_filename) | from_yaml }}"
-    #   when: awx_playbook_filename | default('') != ''
+    #     playbook_contents: "{{ lookup('file', nfc_pb_awx_playbook_filename) | from_yaml }}"
+    #   when: nfc_pb_awx_playbook_filename | default('') != ''
     #   failed_when: false
 
 
     # - name: Job Template from Playbook
     #   ansible.builtin.set_fact:
     #     # playbook_contents: "{{ playbook_contents[0] }}"
-    #     # awx_name: "{{ playbook_contents[0].name }}"
-    #     awx_tower_template: "{{ awx_job_template.vars.awx_tower_template }}"
-    #   when: playbook_contents[0].vars.awx_tower_template | default([]) | length | int > 0
+    #     # nfc_pb_awx_name: "{{ playbook_contents[0].name }}"
+    #     nfc_pb_awx_tower_template: "{{ nfc_pb_awx_job_template.vars.nfc_pb_awx_tower_template }}"
+    #   when: playbook_contents[0].vars.nfc_pb_awx_tower_template | default([]) | length | int > 0
     #   loop: "{{ playbook_contents }}"
     #   loop_control:
     #     loop_var: job_template
@@ -28,65 +29,72 @@
 
     - name: Create Labels
       awx.awx.label:
-        controller_host: "{{ awx_controller_host | default(omit) }}"
-        controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
-        controller_username: "{{ awx_controller_username | default(omit) }}"
-        controller_password: "{{ awx_controller_password | default(omit) }}"
+        controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+        controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+        controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+        controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
         name: "{{ item }}"
-        organization: "{{ awx_organization.name }}"
+        organization: "{{ nfc_pb_awx_organization.name }}"
         state: present
         validate_certs: "{{ validate_certs | default(true) }}"
+      loop: "{{ nfc_pb_awx_job_template.labels | default([]) }}"
 
 
-    - name: "Configure Job Template {{ awx_playbook_dir | default('') }}{{ awx_playbook_filename }}"
+    - name: "Configure Job Template {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
       awx.awx.job_template:
-        name: "{{ awx_job_template.name }}"
-        description: "{{ awx_job_template.description | default(omit) }}"
-        controller_host: "{{ awx_controller_host | default(omit) }}"
-        controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
-        controller_username: "{{ awx_controller_username | default(omit) }}"
-        controller_password: "{{ awx_controller_password | default(omit) }}"
-        execution_environment: "{{ awx_job_template.execution_environment | default(omit) }}"
-        job_type: "{{ awx_job_template.job_type | default('run') }}"
-        job_tags: "{{ awx_job_template.job_tags | default(omit) }}"
-        organization: "{{ awx_organization.name }}"
-        # inventory: "{{ awx_inventory.name | default(omit) }}"
-        project: "{{ awx_project.name }}"
-        playbook: "{{ awx_project.path | default('') }}{{ awx_playbook_filename }}"
-        # scm_branch: "{{ awx_branch }}"
-        ask_tags_on_launch: "{{ awx_job_template.ask_tags_on_launch | default(false) | bool }}"
-        ask_inventory_on_launch: "{{ awx_job_template.ask_inventory_on_launch | default(true) | bool }}"
-        credentials: "{{ awx_job_template.credentials | default(omit) }}"
-        state: "{{ awx_job_template.state | default('present') }}"
-        survey_enabled: "{{ awx_job_template.survey_enabled | default(false) | bool }}"
-        # survey_spec: "{{ awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
+        name: "{{ nfc_pb_awx_job_template.name }}"
+        description: "{{ nfc_pb_awx_job_template.description | default(omit) }}"
+        controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+        controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+        controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+        controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+        execution_environment: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
+        job_type: "{{ nfc_pb_awx_job_template.job_type | default('run') }}"
+        job_tags: "{{ nfc_pb_awx_job_template.job_tags | default(omit) }}"
+        organization: "{{ nfc_pb_awx_organization.name }}"
+        # inventory: "{{ nfc_pb_awx_inventory.name | default(omit) }}"
+        project: "{{ nfc_pb_awx_project.name }}"
+        playbook: "{{ nfc_pb_awx_project.path | default('') }}{{ nfc_pb_awx_playbook_filename }}"
+        # scm_branch: "{{ nfc_pb_awx_branch }}"
+        ask_tags_on_launch: "{{ nfc_pb_awx_job_template.ask_tags_on_launch | default(false) | bool }}"
+        ask_inventory_on_launch: "{{ nfc_pb_awx_job_template.ask_inventory_on_launch | default(true) | bool }}"
+        credentials: "{{ nfc_pb_awx_job_template.credentials | default(omit) }}"
+        state: "{{ nfc_pb_awx_job_template.state | default('present') }}"
+        survey_enabled: "{{ nfc_pb_awx_job_template.survey_enabled | default(false) | bool }}"
+        # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
         survey_spec: >-
-          {%- if awx_job_template.survey_spec | default ('') == '' -%}
+          {%- if nfc_pb_awx_job_template.survey_spec | default ('') == '' -%}
           {{ omit }}
           {%- else -%}
-          {{ awx_job_template.survey_spec | from_yaml | to_json }}
+          {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
           {%- endif -%}
+        labels: "{{ nfc_pb_awx_job_template.labels | default(omit) }}"
+        verbosity: "{{ nfc_pb_awx_job_template.verbosity | default(2) }}"
+        ask_scm_branch_on_launch: "{{ nfc_pb_awx_job_template.ask_scm_branch_on_launch | default(false) | bool }}"
+        ask_limit_on_launch: "{{ nfc_pb_awx_job_template.ask_limit_on_launch | default(false) | bool }}"
+        ask_job_type_on_launch: "{{ nfc_pb_awx_job_template.ask_job_type_on_launch | default(true) | bool }}"
+        use_fact_cache: "{{ nfc_pb_awx_job_template.use_fact_cache | default(true) | bool }}"
         validate_certs: "{{ validate_certs | default(true) }}"
       # no_log: true
-      when: awx_tower_template | default('') != ''
+      when: nfc_pb_awx_tower_template | default('') != ''
       diff: true
 
 
-    - name: "RBAC - {{ awx_organization.name }}/Project/{{ awx_project.name }}/Job/{{ awx_job_template.name }}"
+    - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Job/{{ nfc_pb_awx_job_template.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
-      loop: "{{ awx_project.rbac.job }}"
+      loop: "{{ nfc_pb_awx_project.rbac.job }}"
       loop_control:
-        loop_var: awx_rbac
+        loop_var: nfc_pb_awx_rbac
       when:
         (
-          awx_project.type | lower == 'playbook'
+          nfc_pb_awx_project.type | lower == 'playbook'
             or
-          awx_project.type | lower == 'both'
+          nfc_pb_awx_project.type | lower == 'both'
         )
       vars:
-        job_template_name: "{{ awx_job_template.name }}"
+        nfc_pb_awx_job_template_name: "{{ nfc_pb_awx_job_template.name }}"
 
     # - name: Fact Cleanup - job_template
     #   ansible.builtin.set_fact:
-    #     awx_tower_template:
+    #     nfc_pb_awx_job_template_name:

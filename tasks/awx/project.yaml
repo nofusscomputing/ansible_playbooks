@@ -3,79 +3,79 @@
   block:
 
 
-    - name: Project - {{ awx_project.name }}
+    - name: Project - {{ nfc_pb_awx_project.name }}
       awx.awx.project:
-        name: "{{ awx_project.name }}"
-        new_name: "{{ awx_project.new_name | default(omit) }}"
-        description: "{{ awx_project.description | default('') }}"
-        controller_host: "{{ awx_controller_host | default(omit) }}"
-        controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
-        controller_username: "{{ awx_controller_username | default(omit) }}"
-        controller_password: "{{ awx_controller_password | default(omit) }}"
-        organization: "{{ awx_organization.name }}"
-        scm_url: "{{ awx_project.scm_url | default('') }}"
-        scm_track_submodules: "{{ awx_project.scm_track_submodules | default(false) | bool }}"
-        scm_type: "{{ awx_project.scm_type | default('') }}"
-        scm_clean: "{{ awx_project.scm_clean | default('true') }}"
-        scm_credential: "{{ awx_project.scm_credential | default('') }}"
-        scm_branch: "{{ awx_project.scm_branch | default(omit) }}"
-        state: "{{ awx_project.state | default('present') }}"
-        update_project: "{{ awx_project.update_project | default('true') }}"
-        wait: "{{ awx_project.wait | default('true') }}"
-        scm_allow_override: "{{ awx_project.scm_branch_allow_override | default(false) | bool }}"
+        name: "{{ nfc_pb_awx_project.name }}"
+        new_name: "{{ nfc_pb_awx_project.new_name | default(omit) }}"
+        description: "{{ nfc_pb_awx_project.description | default('') }}"
+        controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+        controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+        controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+        controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+        organization: "{{ nfc_pb_awx_organization.name }}"
+        scm_url: "{{ nfc_pb_awx_project.scm_url | default('') }}"
+        scm_track_submodules: "{{ nfc_pb_awx_project.scm_track_submodules | default(false) | bool }}"
+        scm_type: "{{ nfc_pb_awx_project.scm_type | default('') }}"
+        scm_clean: "{{ nfc_pb_awx_project.scm_clean | default('true') }}"
+        scm_credential: "{{ nfc_pb_awx_project.scm_credential | default('') }}"
+        scm_branch: "{{ nfc_pb_awx_project.scm_branch | default(omit) }}"
+        state: "{{ nfc_pb_awx_project.state | default('present') }}"
+        update_project: "{{ nfc_pb_awx_project.update_project | default('true') }}"
+        wait: "{{ nfc_pb_awx_project.wait | default('true') }}"
+        scm_allow_override: "{{ nfc_pb_awx_project.scm_branch_allow_override | default(false) | bool }}"
         # default_environment: nfc
         validate_certs: "{{ validate_certs | default(true) }}"
       diff: true
 
 
-    - name: "RBAC - {{ awx_organization.name }}/Project/{{ awx_project.name }}"
+    - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
-      loop: "{{ awx_project.rbac.project }}"
+      loop: "{{ nfc_pb_awx_project.rbac.project }}"
       loop_control:
-        loop_var: awx_rbac
+        loop_var: nfc_pb_awx_rbac
       vars:
-        awx_project_name: "{{ awx_project.name }}"
+        nfc_pb_awx_project_name: "{{ nfc_pb_awx_project.name }}"
 
 
-    - name: "Inventory - {{ awx_organization.name }}/Project/{{ awx_project.name }}"
+    - name: "Inventory - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/inventory.yaml
       when: >
         (
-          awx_project.type | lower == 'inventory'
+          nfc_pb_awx_project.type | lower == 'inventory'
             or
-          awx_project.type | lower == 'both'
+          nfc_pb_awx_project.type | lower == 'both'
         )
 
     # - name: GIT Checkout Project
     #   ansible.builtin.git:
-    #     repo: "{{ awx_project.scm_url }}"
+    #     repo: "{{ nfc_pb_awx_project.scm_url }}"
     #     dest: /tmp/project
     #     # separate_git_dir: /tmp/project
     #     # clone: true
     #     # depth: 1
-    #     version: "{{ awx_project.scm_branch | default('master') }}"
+    #     version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
     #     # single_branch: true
     #   when: >
-    #     awx_project.scm_url | default('') != ''
+    #     nfc_pb_awx_project.scm_url | default('') != ''
     #       and
-    #     awx_project.type | lower == 'playbook'
+    #     nfc_pb_awx_project.type | lower == 'playbook'
 
     - name: GIT Checkout Project
       ansible.builtin.command:
-        cmd: "git clone --depth 1 -b {{ awx_project.scm_branch | default('master') }} {{ awx_project.scm_url }} /tmp/project"
-        # repo: "{{ awx_project.scm_url }}"
+        cmd: "git clone --depth 1 -b {{ nfc_pb_awx_project.scm_branch | default('master') }} {{ nfc_pb_awx_project.scm_url }} /tmp/project"
+        # repo: "{{ nfc_pb_awx_project.scm_url }}"
         # dest: /tmp/project
         # # separate_git_dir: /tmp/project
         # # clone: true
         # # depth: 1
-        # version: "{{ awx_project.scm_branch | default('master') }}"
+        # version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
         # # single_branch: true
       when: >
-        awx_project.scm_url | default('') != ''
+        nfc_pb_awx_project.scm_url | default('') != ''
           and
-        awx_project.type | lower == 'playbook'
+        nfc_pb_awx_project.type | lower == 'playbook'
 
 
     - name: Add Job templates
@@ -87,21 +87,21 @@
           and
         'yaml' in item.path
           and
-        item.path|basename|replace(".yaml","") not in awx_project.job_template_ignore | default([])
+        item.path|basename|replace(".yaml","") not in nfc_pb_awx_project.job_template_ignore | default([])
           and
-        awx_project.type | lower == 'playbook'
+        nfc_pb_awx_project.type | lower == 'playbook'
       vars:
-        awx_playbook_filename: "{{ item.path }}"
-        awx_playbook_dir: "{{ item.root }}"
-        awx_branch: awx_project.scm_branch
+        nfc_pb_awx_playbook_filename: "{{ item.path }}"
+        nfc_pb_awx_playbook_dir: "{{ item.root }}"
+        nfc_pb_awx_branch: nfc_pb_awx_project.scm_branch
 
 
-    - name: "RBAC - {{ awx_organization.name }}/Project/{{ awx_project.name }}"
+    - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
-      loop: "{{ awx_project.rbac.project }}"
+      loop: "{{ nfc_pb_awx_project.rbac.project }}"
       loop_control:
-        loop_var: awx_rbac
+        loop_var: nfc_pb_awx_rbac
 
   always:
 

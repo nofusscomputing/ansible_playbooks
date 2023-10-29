@@ -171,7 +171,7 @@
     postgresDB_database_name: ""       # String, Required
     postgresDB_filename_restore: ""    # String, Required for Restore ONLY
 
-    awx_tower_template:
+    nfc_pb_awx_tower_template:
       - name: "PostgresDB"
         ask_tags_on_launch: true
         description: |
