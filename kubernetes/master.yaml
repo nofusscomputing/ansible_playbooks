@@ -1,0 +1,20 @@
+---
+- name: Kubernetes Master Hosts
+  hosts: kubernetes_master
+  gather_facts: true
+  become: true
+
+
+  roles:
+
+    - name: Install/Configure Kubernetes Prime Master Node
+      role: nfc_kubernetes
+      when:
+        kubernetes_config.cluster.prime.name == inventory_hostname
+
+
+    - name: Install/Configure Kubernetes on remaining Master Nodes
+      role: nfc_kubernetes
+      when:
+        kubernetes_config.cluster.prime.name != inventory_hostname
+
