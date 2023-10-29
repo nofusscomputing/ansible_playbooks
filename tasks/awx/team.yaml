@@ -2,13 +2,6 @@
 
 - name: Teams Setup
   awx.awx.team:
-    name: "{{ awx_team.name }}"
-    description: "{{ awx_team.description | default('') }}"
-    controller_host: "{{ awx_controller_host | default(omit) }}"
-    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
-    controller_username: "{{ awx_controller_username | default(omit) }}"
-    controller_password: "{{ awx_controller_password | default(omit) }}"
-    organization: "{{ awx_organization.name | default('') }}"
-    state: "{{ awx_team.state | default('present') }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
   # no_log: true
   diff: true

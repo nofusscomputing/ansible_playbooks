@@ -10,7 +10,7 @@
     # instance_groups: "{{ item.instance_groups | default(omit) | from_yaml_all }}"
     # instance_groups: "{{ item.instance_groups | flatten | map(attribute='name') }}"
     state: "{{ awx_organization.state | default('present') }}"
-    validate_certs: "{{ awx_organization.validate_certs | default('yes') }}"
+    validate_certs: "{{ validate_certs | default('yes') }}"
   # no_log: true
   diff: true
 

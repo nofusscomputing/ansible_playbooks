@@ -24,6 +24,7 @@
         wait: "{{ awx_project.wait | default('true') }}"
         scm_allow_override: "{{ awx_project.scm_branch_allow_override | default(false) | bool }}"
         # default_environment: nfc
+        validate_certs: "{{ validate_certs | default(true) }}"
       diff: true
 
 

@@ -9,19 +9,14 @@
     controller_password: "{{ awx_controller_password | default(omit) }}"
     organization: "{{ awx_organization.name }}"
     state: present
+    validate_certs: "{{ validate_certs | default(true) }}"
   # no_log: true
   diff: true
 
 
 - name: Add an inventory source
   awx.awx.inventory_source:
-    name: "{{ awx_project.name }}"
-    description: "{{ awx_inventory.description | default('') }}"
-    controller_host: "{{ awx_controller_host | default(omit) }}"
-    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
-    controller_username: "{{ awx_controller_username | default(omit) }}"
-    controller_password: "{{ awx_controller_password | default(omit) }}"
-    organization: "{{ awx_organization.name }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
     inventory: "Production"
     # credential: previously-created-credential
     # overwrite: True
@@ -42,11 +37,7 @@
   awx.awx.inventory_source_update:
     name: "{{ awx_project.name }}"
     inventory: "Production"
-    controller_host: "{{ awx_controller_host | default(omit) }}"
-    controller_oauthtoken: "{{ awx_controller_oauthtoken | default(omit) }}"
-    controller_username: "{{ awx_controller_username | default(omit) }}"
-    controller_password: "{{ awx_controller_password | default(omit) }}"
-    organization: "{{ awx_organization.name }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
   # no_log: true
   diff: true
 
