@@ -74,6 +74,7 @@
       - name: "Backup(s) from Inventory config"
         ask_limit_on_launch: true
         ask_tags_on_launch: true
+        ask_credential_on_launch: true
         description: |
           Playbook to backup various systems using config within inventory
           Available tags:
