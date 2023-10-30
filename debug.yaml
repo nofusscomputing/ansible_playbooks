@@ -1,0 +1,12 @@
+---
+- name: Debug
+  hosts: all
+  gather_facts: true
+  # become: true
+
+
+  tasks:
+
+    - name: Show All Variables
+      ansible.builtin.debug:
+        msg: "{{ vars }}"
