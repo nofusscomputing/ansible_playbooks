@@ -14,7 +14,12 @@ flow:
 
 1. deploy Kubernetes to remaining master nodes
 
+1. Copy Manifest(s) and Expand Templated Manifests to prim master nodes manifest directory.
+
+    > These not the manifests required to setup the cluster. They are the manifests for what's deployed to the cluster.
+
 1. deploy Kubernetes to worker nodes.
+
 
 ## Ansible AWX / Tower / Automation Platform
 
