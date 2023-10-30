@@ -23,6 +23,8 @@ Available Playbooks:
 
 1. [postgresdb.yaml](postgresdb.md)
 
+1. [restore.yaml](restore.md)
+
 
 ## Docs ToDo
 

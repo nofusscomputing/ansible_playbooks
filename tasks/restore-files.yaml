@@ -1,0 +1,55 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# description:
+#              Task file for Restoring files to specified path.
+#
+# image: nofusscomputing/ansible-ee >= 0.1.0
+# tags: nil
+#
+- name: Set Global Facts
+  ansible.builtin.set_fact:
+    filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime(ansible_date_time.epoch) }}"
+  when: filename_date_time | default('does_not_exist') == 'does_not_exist'
+
+
+- name: File Restore
+  block:
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        directory_tasks: '/tmp/task_restore'
+
+
+    - name: Create Task Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: directory
+        mode: '700'
+
+
+    - name: Prepare Decryption Certificate
+      ansible.builtin.copy:
+        content: "{{ file_decryption_key | indent(0) }}"
+        dest: "{{ directory_tasks }}/decryption_certificate"
+        mode: '700'
+
+
+    - name: Backup Files
+      ansible.builtin.include_tasks:
+        file: restore/files.yaml
+      loop: "{{ restore.files }}"
+      loop_control:
+        loop_var: restore_file
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: absent
+
+    # Secure erase cert. possible???

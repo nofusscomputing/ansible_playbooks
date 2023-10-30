@@ -16,3 +16,8 @@ backup for:
 - mariaDB
 
 - PostgresDB
+
+
+## Files Backup
+
+Backup files created by the playbook can be restored with our [restore](restore.md) playbook 
