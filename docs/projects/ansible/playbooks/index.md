@@ -28,3 +28,4 @@ Available Playbooks:
 
 - notate usage/inclusions within ansible-ee image
 - notate gitlab-ci jobs etc
+- notate playbook variables prefix must be `nfc_pb_`
