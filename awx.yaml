@@ -21,6 +21,7 @@
       - name: "AWX / Tower Configure"
         ask_tags_on_launch: false
         ask_inventory_on_launch: true
+        ask_credential_on_launch: true
         description: Configure AWX from Inventory
         execution_environment: "No Fuss Computing EE"
         job_type: "run"
