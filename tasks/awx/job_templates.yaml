@@ -22,14 +22,14 @@
 
 - name: Job Template from Playbook
   ansible.builtin.set_fact:
-    nfc_pb_awx_tower_templates: "{{ nfc_pb_awx_tower_templates + job_template.vars.awx_tower_template }}"
+    nfc_pb_awx_tower_templates: "{{ nfc_pb_awx_tower_templates + nfc_pb_awx_job_template.vars.nfc_pb_awx_tower_template }}"
   when: >
-    job_template.vars | default({}) | length | int > 0
+    nfc_pb_awx_job_template.vars | default({}) | length | int > 0
       and
-    job_template.vars.awx_tower_template | default({}) | length | int > 0
+    nfc_pb_awx_job_template.vars.nfc_pb_awx_tower_template | default({}) | length | int > 0
   loop: "{{ playbook_contents }}"
   loop_control:
-    loop_var: job_template
+    loop_var: nfc_pb_awx_job_template
   failed_when: false
 
 

@@ -77,7 +77,7 @@
         use_fact_cache: "{{ nfc_pb_awx_job_template.use_fact_cache | default(true) | bool }}"
         validate_certs: "{{ validate_certs | default(true) }}"
       # no_log: true
-      when: nfc_pb_awx_tower_template | default('') != ''
+      # when: nfc_pb_awx_tower_template | default('') != ''
       diff: true
 
 
