@@ -160,6 +160,7 @@
         - name: Remove the restore dump
           ansible.builtin.file:
             name: "{{ postgresDB_directory_backup }}/restore.sql"
+            state: absent
 
 
   vars:
