@@ -83,6 +83,7 @@
             'postgresdb' Backup a postgres Database.
           If no tag is specified, all tasks will run if the applicable variables are set.
         execution_environment: "No Fuss Computing EE"
+        forks: 3
         job_type: "run"
         job_tags: files, mariadb, postgresdb
         labels:
