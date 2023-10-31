@@ -75,6 +75,7 @@
         ask_limit_on_launch: "{{ nfc_pb_awx_job_template.ask_limit_on_launch | default(false) | bool }}"
         ask_job_type_on_launch: "{{ nfc_pb_awx_job_template.ask_job_type_on_launch | default(true) | bool }}"
         ask_credential_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(false) | bool }}"
+        ask_variables_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(false) | bool }}"
         use_fact_cache: "{{ nfc_pb_awx_job_template.use_fact_cache | default(true) | bool }}"
         validate_certs: "{{ validate_certs | default(true) }}"
       # no_log: true

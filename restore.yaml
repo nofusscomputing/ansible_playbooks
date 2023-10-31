@@ -46,7 +46,7 @@
       - name: "Restore specified backup from Inventory config"
         ask_limit_on_launch: true
         ask_tags_on_launch: true
-        ask_credentials_on_launch: true
+        ask_credential_on_launch: true
         description: |
           Playbook to restore backups to various systems using config from inventory
           Available tags:
