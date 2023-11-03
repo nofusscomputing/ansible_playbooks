@@ -102,7 +102,7 @@
     - name: Add Kubernetes Manifest Files
       ansible.builtin.copy:
         src: "{{ item }}"
-        dest: "/var/lib/rancher/k3s/server/manifests/{{ item | basename | lower }}"
+        dest: "/var/lib/rancher/k3s/server/manifests/{{ item | basename | lower | replace('_', '-') }}"
         mode: '700'
         owner: root
         group: root
@@ -116,7 +116,7 @@
     - name: Expand and add Kubernetes template manifest files
       ansible.builtin.template:
         src: "{{ item }}"
-        dest: "/var/lib/rancher/k3s/server/manifests/{{ item | basename | lower }}"
+        dest: "/var/lib/rancher/k3s/server/manifests/{{ item | basename | lower | replace('_', '-') }}"
         mode: '700'
         owner: root
         group: root
