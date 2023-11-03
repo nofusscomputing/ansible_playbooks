@@ -10,6 +10,8 @@ This playbook configures an AWX / Tower / Automation Platform instance(s) using 
 
 Items supported for configuration:
 
+- Credential Types
+
 - Organization
 
 - Project

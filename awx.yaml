@@ -7,6 +7,13 @@
   tasks:
 
 
+    - name: Credential Types
+      ansible.builtin.include_tasks:
+        file: tasks/awx/credential_type.yaml
+      loop: "{{ my_awx_config.credential_types }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_credential_type
+
     - name: Organizations
       ansible.builtin.include_tasks:
         file: tasks/awx/organization.yaml
