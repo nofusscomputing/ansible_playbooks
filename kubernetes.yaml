@@ -17,6 +17,7 @@
         ask_credential_on_launch: true
         ask_tags_on_launch: true
         ask_limit_on_launch: true
+        ask_variables_on_launch: true
         description: |
           Playbook to Install/Configure Kubernetes using configuration
           from code.
