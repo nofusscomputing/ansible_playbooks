@@ -24,7 +24,7 @@
 #
 - name: OpenSSH Server Setup
   hosts: all
-  become: no
+  become: true
   gather_facts: false
 
 
