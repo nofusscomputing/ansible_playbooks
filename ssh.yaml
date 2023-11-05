@@ -61,10 +61,12 @@
         job_tags: check,configure,install,renew
         job_type: "run"
         labels:
-          - awx
           - configure
-        # credentials:
-        #   - "Local"
+          - install
+          - openssh
+          - renew
+          - sign
+          - ssh
         verbosity: 2
         use_fact_cache: true
         survey_enabled: false
