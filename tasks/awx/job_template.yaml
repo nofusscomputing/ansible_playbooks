@@ -72,7 +72,7 @@
         labels: "{{ nfc_pb_awx_job_template.labels | default(omit) }}"
         verbosity: "{{ nfc_pb_awx_job_template.verbosity | default(2) }}"
         ask_scm_branch_on_launch: "{{ nfc_pb_awx_job_template.ask_scm_branch_on_launch | default(false) | bool }}"
-        ask_limit_on_launch: "{{ nfc_pb_awx_job_template.ask_limit_on_launch | default(false) | bool }}"
+        ask_limit_on_launch: "{{ nfc_pb_awx_job_template.ask_limit_on_launch | default(true) | bool }}"
         ask_job_type_on_launch: "{{ nfc_pb_awx_job_template.ask_job_type_on_launch | default(true) | bool }}"
         ask_credential_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(false) | bool }}"
         ask_variables_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(false) | bool }}"
