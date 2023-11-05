@@ -10,14 +10,20 @@
 #
 # Tags:
 #
-#   - backup
-#      Dump the specified database to a file
+#   - check
+#     Check the host certificate
 #
-#   - restore
-#     Restore a database from file
+#   - configure
+#     Configure an existing OpenSSH installation
+#
+#   - install
+#     Install and Configure OpenSSH
+#
+#   - renew
+#     Renew the hosts SSH Keys (and Resign with the Host CA if enabled)
 #
 - name: OpenSSH Server Setup
-  hosts: localhost
+  hosts: all
   become: no
   gather_facts: false
 
