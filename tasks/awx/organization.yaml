@@ -1,0 +1,41 @@
+---
+- name: Organization Setup
+  awx.awx.organization:
+    name: "{{ nfc_pb_awx_organization.name }}"
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    description: "{{ nfc_pb_awx_organization.description | default(omit) }}"
+    # instance_groups: "{{ item.instance_groups | default(omit) | from_yaml_all }}"
+    # instance_groups: "{{ item.instance_groups | flatten | map(attribute='name') }}"
+    state: "{{ nfc_pb_awx_organization.state | default('present') }}"
+    validate_certs: "{{ validate_certs | default('yes') }}"
+  # no_log: true
+  diff: true
+
+
+- name: "Teams - {{ nfc_pb_awx_organization.name }}"
+  ansible.builtin.include_tasks:
+    file: tasks/awx/team.yaml
+  loop: "{{ nfc_pb_awx_organization.teams }}"
+  loop_control:
+    loop_var: nfc_pb_awx_team
+
+
+- name: "RBAC - {{ nfc_pb_awx_organization.name }}"
+  ansible.builtin.include_tasks:
+    file: tasks/awx/rbac.yaml
+  loop: "{{ nfc_pb_awx_organization.rbac }}"
+  loop_control:
+    loop_var: nfc_pb_awx_rbac
+  vars:
+    nfc_pb_awx_organization_name: "{{ nfc_pb_awx_organization.name }}"
+
+
+- name: "Projects - {{ nfc_pb_awx_organization.name }}"
+  ansible.builtin.include_tasks:
+    file: tasks/awx/project.yaml
+  loop: "{{ nfc_pb_awx_organization.projects }}"
+  loop_control:
+    loop_var: nfc_pb_awx_project

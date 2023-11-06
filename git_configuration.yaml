@@ -1,10 +1,35 @@
 ---
 - name: Git Configuration as Code
   hosts: localhost
-  gather_facts: yes
-  vars:
-    ansible_connection: local
+  gather_facts: true
+
 
   roles:
     - name: Configure git from Code
       role: git_configuration
+
+
+  vars:
+    ansible_connection: local
+    nfc_pb_awx_tower_template:
+      - name: "Configure Gitlab / Github Repositories"
+        ask_tags_on_launch: true
+        ask_inventory_on_launch: true
+        description: |
+          Create/Configure Gitlab or Github repositories from an inventory.
+          Available tags:
+            'gitlab' configure a Gitlab repository,
+            'github' configure a Github repository.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: gitlab, github
+        labels:
+          - config
+          - git
+          - gitlab
+          - github
+        # credentials:
+        #   - "Local"
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: false

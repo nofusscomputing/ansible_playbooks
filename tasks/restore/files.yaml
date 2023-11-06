@@ -1,0 +1,42 @@
+---
+
+- name: File Restoration
+  block:
+
+
+    - name: Check/Create Restore Path
+      ansible.builtin.file:
+        name: "{{ restore_file.root_directory | default('/') }}"
+        state: directory
+
+
+    - name: Restore file
+      ansible.builtin.shell:
+        cmd: |
+          openssl smime -decrypt \
+            -in {{ backup_storage_directory | default('/backup') }}/{{ restore_backup_date }}-files-{{ restore_file.name }}-{{ backup.encryption_algorithm }}.enc.tar.gz \
+            -binary -inform DEM \
+            -inkey {{ directory_tasks }}/decryption_certificate \
+            -out {{ directory_tasks }}/{{ restore_backup_date }}-files-{{ restore_file.name }}.tar.gz; \
+          tar -xzf \
+            {{ directory_tasks }}/{{ restore_backup_date }}-files-{{ restore_file.name }}.tar.gz \
+            -C {{ restore_file.root_directory | default('/') }};
+          # rm {{ directory_tasks }}/{{ restore_backup_date }}-files-{{ restore_file.name }}.tar.gz
+      args:
+        executable: bash
+      changed_when: false
+      register: file_restoration
+      become: true
+      failed_when: "'Error' in file_restoration.stderr"
+
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_tasks }}/{{ restore_backup_date }}-files-{{ restore_file.name }}.tar.gz"

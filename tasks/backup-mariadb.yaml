@@ -1,0 +1,59 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# description:
+#              Task file for backing up a MariaDB Database.
+#
+# image: nofusscomputing/ansible-ee >= 0.1.0
+# tags: nil
+#
+- name: MariaDB Backup
+  block:
+    # Ref: https://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/
+
+
+    - name: Set Global Facts
+      ansible.builtin.set_fact:
+        filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime(ansible_date_time.epoch) }}"
+      when: filename_date_time | default('does_not_exist') == 'does_not_exist'
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        directory_tasks: '/tmp/task_backup_mariadb'
+
+
+    - name: Create Task Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: directory
+        mode: '700'
+
+
+    - name: Prepare Encryption Certificate
+      ansible.builtin.copy:
+        content: "{{ file_encryption_key }}"
+        dest: "{{ directory_tasks }}/encryption_certificate"
+        mode: '700'
+
+
+    - name: Backup MariaDB Database
+      ansible.builtin.include_tasks:
+        file: 'backup/mariadb.yaml'
+      loop: "{{ backup.mariadb.databases }}"
+      loop_control:
+        loop_var: mariadb
+
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_tasks }}"

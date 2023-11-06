@@ -1,0 +1,72 @@
+---
+- name: Backup File
+  block:
+    # Ref: https://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/
+
+
+    - name: Prepare Backup Filename
+      ansible.builtin.set_fact:
+        file_backup_no_extension: "{{ filename_date_time }}-files-{{ backup_file.name | replace(' ', '_') }}-{{ inventory_hostname }}"
+
+
+    - name: Backup data
+      ansible.builtin.shell: |
+        tar -czf {{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz \
+          --acls \
+          --xattrs \
+          {%- for exclude_path in backup_file.excludes | default([]) %}
+          --exclude="{{ exclude_path }}" \
+          {%- endfor %}
+          {% for path in backup_file.paths %}
+          {{ path }} \
+          {%- endfor %};
+        openssl \
+          smime -encrypt -binary -text -{{ backup.encryption_algorithm }} \
+          -in {{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz \
+          -out {{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz \
+          -outform DER {{ directory_tasks }}/encryption_certificate;
+        rm -f {{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz;
+
+      args:
+        executable: /bin/bash
+      become: true
+      changed_when: false
+      # loop: "{{ backup_data }}"
+      register: backup_data
+      failed_when: >
+        'Exiting with failure' in backup_data.stderr
+          or
+        'Unable to' in backup_data.stderr
+          or
+        'could not' in backup_data.stderr
+          or
+        'Exiting with failure' in backup_data.stderr
+
+
+    - name: Store Backup
+      ansible.builtin.copy:
+        src: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        dest: "{{ backup.directory }}"
+        remote_src: true
+      become: true
+
+
+  # rescue:
+
+  #   - name: Remove Task Temp Files
+  #     ansible.builtin.file:
+  #       name: "{{ directory_tasks }}"
+  #       state: absent
+
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz"
+          - "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
