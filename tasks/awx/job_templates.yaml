@@ -7,12 +7,14 @@
     playbook_contents: "{{ lookup('file', item.root + nfc_pb_awx_playbook_filename) | from_yaml }}"
   when: nfc_pb_awx_playbook_filename | default('') != ''
   failed_when: false
+  no_log: true
 
 
 - name: Playbook Failsafe
   ansible.builtin.set_fact:
     playbook_contents: []
   when: (( playbook_contents | type_debug) != 'list')
+  no_log: true
 
 
 - name: Job Template from Playbook
@@ -26,6 +28,7 @@
   loop_control:
     loop_var: nfc_pb_playbook
   failed_when: false
+  no_log: true
 
 
 - name: Add Job template
@@ -47,3 +50,4 @@
     nfc_pb_awx_tower_templates: []
     nfc_pb_awx_playbook_filename:
     # nfc_pb_awx_job_template_name:
+  no_log: true
