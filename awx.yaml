@@ -21,6 +21,13 @@
       loop_control:
         loop_var: nfc_pb_awx_instance
 
+    - name: Instance Groups
+      ansible.builtin.include_tasks:
+        file: tasks/awx/instance_group.yaml
+      loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_instance_group
+
     - name: Organizations
       ansible.builtin.include_tasks:
         file: tasks/awx/organization.yaml
