@@ -41,12 +41,10 @@
     - name: "Inventory - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/inventory.yaml
-      when: >
-        (
-          nfc_pb_awx_project.type | lower == 'inventory'
-            or
-          nfc_pb_awx_project.type | lower == 'both'
-        )
+      loop: "{{ nfc_pb_awx_project.inventories | default([]) | list }}"
+      loop_control:
+        loop_var: nfc_pb_awx_inventory
+
 
     # - name: GIT Checkout Project
     #   ansible.builtin.git:
@@ -72,16 +70,13 @@
         # # depth: 1
         # version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
         # # single_branch: true
-      when: >
-        nfc_pb_awx_project.scm_url | default('') != ''
-          and
-        nfc_pb_awx_project.type | lower == 'playbook'
+      when: nfc_pb_awx_project.playbook_path is defined
 
 
     - name: Add Job templates
       ansible.builtin.include_tasks:
         file: tasks/awx/job_templates.yaml
-      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + path | default('')) }}"
+      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.playbook_path | default('')) }}"
       when: >
         item.state == 'file'
           and
@@ -89,7 +84,7 @@
           and
         item.path|basename|replace(".yaml","") not in nfc_pb_awx_project.job_template_ignore | default([])
           and
-        nfc_pb_awx_project.type | lower == 'playbook'
+        nfc_pb_awx_project.playbook_path is defined
       vars:
         nfc_pb_awx_playbook_filename: "{{ item.path }}"
         nfc_pb_awx_playbook_dir: "{{ item.root }}"
