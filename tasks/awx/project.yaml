@@ -100,7 +100,7 @@
 
   always:
 
-    - name: clean Project Temp Files
+    - name: Clean Project Temp Files
       ansible.builtin.file:
         name: /tmp/project
         state: absent

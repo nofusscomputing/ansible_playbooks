@@ -2,12 +2,12 @@
 
 - name: Job Template
   block:
-    - name: Debug
-      ansible.builtin.debug:
-        msg:
-          - "{{ nfc_pb_awx_playbook_filename }}"
-          - "{{ nfc_pb_awx_job_template }}"
-          - "{{ nfc_pb_awx_job_template_name | default('Not Yet Defined') }}"
+    # - name: Debug
+    #   ansible.builtin.debug:
+    #     msg:
+    #       - "{{ nfc_pb_awx_playbook_filename }}"
+    #       - "{{ nfc_pb_awx_job_template }}"
+    #       - "{{ nfc_pb_awx_job_template_name | default('Not Yet Defined') }}"
 
     # - name: Create fact from Playbook
     #   ansible.builtin.set_fact:
