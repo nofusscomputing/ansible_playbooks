@@ -7,6 +7,10 @@
   tasks:
 
 
+    - name: Configure AWX
+      ansible.builtin.include_tasks:
+        file: tasks/awx/settings.yaml
+
     - name: Credential Types
       ansible.builtin.include_tasks:
         file: tasks/awx/credential_type.yaml
