@@ -7,17 +7,35 @@
   tasks:
 
 
+    - name: Configure AWX
+      ansible.builtin.include_tasks:
+        file: tasks/awx/settings.yaml
+
     - name: Credential Types
       ansible.builtin.include_tasks:
         file: tasks/awx/credential_type.yaml
-      loop: "{{ my_awx_config.credential_types }}" # Fix as this var should be dynamic
+      loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
       loop_control:
         loop_var: nfc_pb_awx_credential_type
+
+    - name: Instances
+      ansible.builtin.include_tasks:
+        file: tasks/awx/instances.yaml
+      loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_instance
+
+    - name: Instance Groups
+      ansible.builtin.include_tasks:
+        file: tasks/awx/instance_group.yaml
+      loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_instance_group
 
     - name: Organizations
       ansible.builtin.include_tasks:
         file: tasks/awx/organization.yaml
-      loop: "{{ my_awx_config.organizations }}" # Fix as this var should be dynamic
+      loop: "{{ my_awx_config.organizations | default([]) | list }}" # Fix as this var should be dynamic
       loop_control:
         loop_var: nfc_pb_awx_organization
 
@@ -62,46 +80,6 @@
 
 
 #################################################################################################################################
-
-# turned off until can figure out instances
-    # - name: Instance group setup
-    #   awx.awx.instance_group:
-    #     name: "{{ item[1].name }}"
-    #     controller_host: "{{ item[0].controller_host | default(omit) }}"
-    #     controller_oauthtoken: "{{ item[0].controller_oauthtoken| default(omit) }}"
-    #     controller_username: "{{ item[0].controller_username | default(omit) }}"
-    #     controller_password: "{{ item[0].controller_password| default(omit) }}"
-    #     max_concurrent_jobs: "{{ item[0].max_concurrent_jobs | default('0') }}"
-    #     max_forks: "{{ item[0].max_forks | default('0') }}"
-    #     state: "{{ item[1].state | default('present') }}"
-    #   when: nfc_pb_awx_config is defined and nfc_pb_awx_config.organizations is defined and item[1]|length > 0
-    #   #with_items: "{{ awx.organizations }}.instance_groups"
-    #   # with_list: "{{ awx.organizations.instance_groups }}"
-    #   with_subelements:
-    #     - "{{awx_config.organizations}}"
-    #     - instance_groups
-
-
-    # - name: Update all inventory sources
-    #   awx.awx.inventory_source_update:
-    #     name: "{{ item[1].name }}"
-    #     inventory: "{{ item[1].name }}"
-    #     organization: "{{ item[0].name }}"
-    #     controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
-    #     controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
-    #     controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
-    #     controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
-    #   with_subelements:
-    #     - "{{ nfc_pb_awx_config_variable.organizations }}"
-    #     - projects
-    #   when: nfc_pb_awx_config is defined and nfc_pb_awx_config.organizations is defined and item[1] | length > 0
-    #   # no_log: true
-    #   diff: true
-    #   tags:
-    #     - inventory_source_update
-    #     - sync
-    #     - inventory
-    #     - rbac
 
     # #
     # # required pip modules pytz, python-dateutil

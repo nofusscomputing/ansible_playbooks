@@ -18,6 +18,8 @@ Items supported for configuration:
 
 - Inventory
 
+- Inventory Sources
+
 - Roles for access to Inventories, organizations and projects
 
 - Job Templates from playbooks

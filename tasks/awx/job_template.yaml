@@ -2,12 +2,12 @@
 
 - name: Job Template
   block:
-    - name: Debug
-      ansible.builtin.debug:
-        msg:
-          - "{{ nfc_pb_awx_playbook_filename }}"
-          - "{{ nfc_pb_awx_job_template }}"
-          - "{{ nfc_pb_awx_job_template_name | default('Not Yet Defined') }}"
+    # - name: Debug
+    #   ansible.builtin.debug:
+    #     msg:
+    #       - "{{ nfc_pb_awx_playbook_filename }}"
+    #       - "{{ nfc_pb_awx_job_template }}"
+    #       - "{{ nfc_pb_awx_job_template_name | default('Not Yet Defined') }}"
 
     # - name: Create fact from Playbook
     #   ansible.builtin.set_fact:
@@ -55,7 +55,7 @@
         organization: "{{ nfc_pb_awx_organization.name }}"
         # inventory: "{{ nfc_pb_awx_inventory.name | default(omit) }}"
         project: "{{ nfc_pb_awx_project.name }}"
-        playbook: "{{ nfc_pb_awx_project.path | default('') }}{{ nfc_pb_awx_playbook_filename }}"
+        playbook: "{{ nfc_pb_awx_project.playbook_path | default('') }}{{ nfc_pb_awx_playbook_filename }}"
         # scm_branch: "{{ nfc_pb_awx_branch }}"
         ask_tags_on_launch: "{{ nfc_pb_awx_job_template.ask_tags_on_launch | default(false) | bool }}"
         ask_inventory_on_launch: "{{ nfc_pb_awx_job_template.ask_inventory_on_launch | default(true) | bool }}"
@@ -89,12 +89,7 @@
       loop: "{{ nfc_pb_awx_project.rbac.job }}"
       loop_control:
         loop_var: nfc_pb_awx_rbac
-      when:
-        (
-          nfc_pb_awx_project.type | lower == 'playbook'
-            or
-          nfc_pb_awx_project.type | lower == 'both'
-        )
+      when: nfc_pb_awx_project.playbook_path | default('') != ''
       vars:
         nfc_pb_awx_job_template_name: "{{ nfc_pb_awx_job_template.name }}"
 

@@ -1,0 +1,20 @@
+---
+
+
+- name: Instance - {{ nfc_pb_awx_instance.hostname }}
+  awx.awx.instance:
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
+
+    hostname: "{{ nfc_pb_awx_instance.hostname }}"
+    enabled: "{{ nfc_pb_awx_instance.enabled | default(true) | bool }}"
+    managed_by_policy: "{{ nfc_pb_awx_instance.managed_by_policy | default(true) | bool }}"
+    node_type: "{{ nfc_pb_awx_instance.node_type | default('execution') }}"
+    node_state: "{{ nfc_pb_awx_instance.node_state | default('installed') }}"
+    listener_port: "{{ nfc_pb_awx_instance.listener_port | default(27199) | int }}"
+    peers: "{{ nfc_pb_awx_instance.peers | default([]) | list }}"
+    peers_from_control_nodes: "{{ nfc_pb_awx_instance.peers_from_control_nodes | default(false) | bool }}"
+  diff: true

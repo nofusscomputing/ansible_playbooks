@@ -24,7 +24,3 @@
 - name: RBAC Var Cleanup
   ansible.builtin.set_fact:
     nfc_pb_awx_rbac: null
-#     nfc_pb_awx_organization_name: null
-#     nfc_pb_awx_inventory_name: null
-#     nfc_pb_awx_project_name: null
-#     job_template_name: null

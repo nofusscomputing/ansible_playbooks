@@ -1,0 +1,22 @@
+---
+
+
+- name: Instance Group- {{ nfc_pb_awx_instance_group.name }}
+  awx.awx.instance_group:
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
+
+    name: "{{ nfc_pb_awx_instance_group.name }}"
+    is_container_group: "{{ nfc_pb_awx_instance_group.is_container_group | default(false) | bool }}"
+    policy_instance_percentage: "{{ nfc_pb_awx_instance_group.policy_instance_percentage | default(omit) | int }}"
+    policy_instance_minimum: "{{ nfc_pb_awx_instance_group.policy_instance_minimum | default(omit) | int }}"
+    max_concurrent_jobs: "{{ nfc_pb_awx_instance_group.max_concurrent_jobs | default(0) | int }}"
+    max_forks: "{{ nfc_pb_awx_instance_group.max_forks | default(0) | int }}"
+    policy_instance_list: "{{ nfc_pb_awx_instance_group.policy_instance_list | default([]) | list }}"
+    pod_spec_override: "{{ nfc_pb_awx_instance_group.pod_spec_override | default('') }}"
+    instances: "{{ nfc_pb_awx_instance_group.instances | default([]) | list }}"
+    state: "{{ nfc_pb_awx_instance_group.state | default('present') }}"
+  diff: true
