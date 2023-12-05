@@ -73,8 +73,9 @@
 - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Inventory"
   ansible.builtin.include_tasks:
     file: tasks/awx/rbac.yaml
-  loop: "{{ nfc_pb_awx_project.rbac.inventory }}"
+  loop: "{{ nfc_pb_awx_inventory.rbac | default([]) | list }}"
   loop_control:
     loop_var: nfc_pb_awx_rbac
   vars:
-    nfc_pb_awx_inventory_name: "Production"
+    nfc_pb_awx_inventory_name: "{{ nfc_pb_awx_inventory.name }}"
+    # nfc_pb_awx_rbac: "{{ nfc_pb_awx_inventory.rbac }}"
