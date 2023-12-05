@@ -86,10 +86,10 @@
     - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Job/{{ nfc_pb_awx_job_template.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
-      loop: "{{ nfc_pb_awx_project.rbac.job }}"
+      loop: "{{ nfc_pb_awx_project.rbac.job | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_rbac
-      when: nfc_pb_awx_project.playbook_path | default('') != ''
+      #when: nfc_pb_awx_project.playbook_path | default('') != ''
       vars:
         nfc_pb_awx_job_template_name: "{{ nfc_pb_awx_job_template.name }}"
 
