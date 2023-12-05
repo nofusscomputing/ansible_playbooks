@@ -75,6 +75,7 @@
         # # depth: 1
         # version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
         # # single_branch: true
+      no_log: true # Contains credentials.
       when: nfc_pb_awx_project.playbook_path is defined
 
 
