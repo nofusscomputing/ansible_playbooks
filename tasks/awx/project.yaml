@@ -62,7 +62,12 @@
 
     - name: GIT Checkout Project
       ansible.builtin.command:
-        cmd: "git clone --depth 1 -b {{ nfc_pb_awx_project.scm_branch | default('master') }} {{ nfc_pb_awx_project.scm_url }} /tmp/project"
+        cmd: |-
+          git clone --depth 1 -b {{ nfc_pb_awx_project.scm_branch | default('master') }} https://
+          {%- if nfc_pb_git_username is defined -%}
+            {{ nfc_pb_git_username }}:{{ nfc_pb_git_token }}@
+          {%- endif -%}
+          {{- nfc_pb_awx_project.scm_url | replace('https://', '') }} /tmp/project
         # repo: "{{ nfc_pb_awx_project.scm_url }}"
         # dest: /tmp/project
         # # separate_git_dir: /tmp/project
