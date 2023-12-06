@@ -52,7 +52,6 @@
           cat {{ tower.filename.git_credential_file }} > ~/.gitconfig;
           chmod 700 ~/.gitconfig;
           chown $(whoami):$(whoami) ~/.gitconfig;
-        creates: ~/.gitconfig
       become: true
       when: tower.filename.git_credential_file is defined
 
