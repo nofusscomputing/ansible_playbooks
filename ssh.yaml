@@ -92,13 +92,15 @@
               required:
                 - ca_public_key
                 - ca_signing_key
-            injectors: >
+            injectors: |
+              {% raw -%}
               file:
-                template: "{{ '{{'}} ca_signing_key }}"
+                template: '{{ ca_signing_key }}'
               extra_vars:
-                nfc_ssh_path_host_ca_key: "{{ '{{'}} tower.filename }}"
-                nfc_ssh_host_ca_public_key: "{{ '{{'}} ca_public_key }}"
-                nfc_ssh_host_ca_decryption_key:  "{{ '{{'}} password | default('') }}"
+                nfc_ssh_path_host_ca_key: '{{ tower.filename }}'
+                nfc_ssh_host_ca_public_key: '{{ ca_public_key }}'
+                nfc_ssh_host_ca_decryption_key:  '{{ password | default('') }}'
+              {%- endraw %}
 
           - name: role/nfc_ssh/nfc_ssh_user_ca_public_key
             description: A Credential type for No Fuss Computings nfc_ssh role
@@ -112,5 +114,7 @@
               required:
                 - ca_public_key
             injectors: |
+              {% raw -%}
               extra_vars:
-                nfc_ssh_user_ca_public_key: "{{ '{{'}} ca_public_key }}"
+                nfc_ssh_user_ca_public_key: '{{ ca_public_key }}'
+              {%- endraw %}
