@@ -20,7 +20,7 @@
         scm_credential: "{{ nfc_pb_awx_project.scm_credential | default('') }}"
         scm_branch: "{{ nfc_pb_awx_project.scm_branch | default(omit) }}"
         state: "{{ nfc_pb_awx_project.state | default('present') }}"
-        update_project: "{{ nfc_pb_awx_project.update_project | default('true') }}"
+        update_project: "{{ nfc_pb_awx_project.update_project | default('false') }}"
         wait: "{{ nfc_pb_awx_project.wait | default('true') }}"
         scm_allow_override: "{{ nfc_pb_awx_project.scm_branch_allow_override | default(false) | bool }}"
         # default_environment: nfc
