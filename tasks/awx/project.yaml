@@ -79,6 +79,14 @@
       when: nfc_pb_awx_project.playbook_path is defined
 
 
+    - name: GIT Init Submodule
+      ansible.builtin.command:
+        cmd: git submodule update --init
+        chdir: /tmp/project
+      no_log: true # Contains credentials.
+      when: nfc_pb_awx_project.playbook_path is defined
+
+
     - name: Add Job templates
       ansible.builtin.include_tasks:
         file: tasks/awx/job_templates.yaml
