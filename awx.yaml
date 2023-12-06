@@ -95,6 +95,7 @@
                   secret: true
               required:
                 - username
+                - url
                 - token
             injectors: >
               {% raw -%}
