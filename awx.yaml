@@ -98,13 +98,11 @@
                 - url
                 - token
             injectors: >
-              {% raw -%}
               file:
                 template.git_credential_file: |
                   [credential "{{ '{{' }} url }}"]
                       username = {{ '{{' }} username }}
                       helper = "!f() { test \"$1\" = get && echo \"password={{ '{{' }} token }}\"; }; f"
-              {%- endraw %}
 
 
 #################################################################################################################################
