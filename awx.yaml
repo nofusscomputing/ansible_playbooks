@@ -77,6 +77,33 @@
             ],
             "description": ""
           }
+        credential_types:
+          - name: Git Credentials
+            description: Creates ~/gitconfig with credentials that enable git operations on a private repository
+            inputs: |
+              fields:
+                - id: username
+                  type: string
+                  label: GIT Username
+                - id: url
+                  type: string
+                  label: GIT URL
+                  help_text: Ensure that `https://` is prefixed to url
+                - id: token
+                  type: string
+                  label: GIT Token
+                  secret: true
+              required:
+                - username
+                - token
+            injectors: >
+              {% raw -%}
+              file:
+                template.git_credential_file: |
+                  [credential "{{ '{{' }} url }}"]
+                      username = {{ '{{' }} username }}
+                      helper = "!f() { test \"$1\" = get && echo \"password={{ '{{' }} token }}\"; }; f"
+              {%- endraw %}
 
 
 #################################################################################################################################
