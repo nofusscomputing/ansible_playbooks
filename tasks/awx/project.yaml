@@ -46,45 +46,24 @@
         loop_var: nfc_pb_awx_inventory
 
 
-    # - name: GIT Checkout Project
-    #   ansible.builtin.git:
-    #     repo: "{{ nfc_pb_awx_project.scm_url }}"
-    #     dest: /tmp/project
-    #     # separate_git_dir: /tmp/project
-    #     # clone: true
-    #     # depth: 1
-    #     version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
-    #     # single_branch: true
-    #   when: >
-    #     nfc_pb_awx_project.scm_url | default('') != ''
-    #       and
-    #     nfc_pb_awx_project.type | lower == 'playbook'
+    - name: "[helper] Setup Git credentials if present"
+      ansible.builtin.shell:
+        cmd: |
+          cat {{ tower.filename.git_credential_file }} > ~/.gitconfig;
+          chmod 700 ~/.gitconfig;
+          chown $(whoami):$(whoami) ~/.gitconfig;
+        creates: ~/.gitconfig
+      become: true
+      when: tower.filename.git_credential_file is defined
 
     - name: GIT Checkout Project
-      ansible.builtin.command:
-        cmd: |-
-          git clone --depth 1 -b {{ nfc_pb_awx_project.scm_branch | default('master') }} https://
-          {%- if nfc_pb_git_username is defined -%}
-            {{ nfc_pb_git_username }}:{{ nfc_pb_git_token }}@
-          {%- endif -%}
-          {{- nfc_pb_awx_project.scm_url | replace('https://', '') }} /tmp/project
-        # repo: "{{ nfc_pb_awx_project.scm_url }}"
-        # dest: /tmp/project
-        # # separate_git_dir: /tmp/project
-        # # clone: true
-        # # depth: 1
-        # version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
-        # # single_branch: true
-      no_log: true # Contains credentials.
-      when: nfc_pb_awx_project.playbook_path is defined
-
-
-    - name: GIT Init Submodule
-      ansible.builtin.command:
-        cmd: git submodule update --init
-        chdir: /tmp/project
-      no_log: true # Contains credentials.
-      when: nfc_pb_awx_project.playbook_path is defined
+      ansible.builtin.git:
+        repo: "{{ nfc_pb_awx_project.scm_url }}"
+        dest: /tmp/project
+        version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
+        single_branch: true
+      when: >
+        nfc_pb_awx_project.playbook_path is defined
 
 
     - name: Add Job templates
