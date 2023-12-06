@@ -97,3 +97,10 @@
       ansible.builtin.file:
         name: /tmp/project
         state: absent
+
+    - name: "Clean-up Git credentials"
+      ansible.builtin.file:
+        name: ~/.gitconfig;
+        state: absent
+      become: true
+      when: tower.filename.git_credential_file is defined

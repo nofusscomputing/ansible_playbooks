@@ -98,6 +98,6 @@
     - name: Add Credential Type from Playbook template
       ansible.builtin.include_tasks:
         file: tasks/awx/credential_type.yaml
-      loop: "{{ nfc_pb_awx_project.credential_types | default([]) | list }}"
+      loop: "{{ nfc_pb_awx_job_template.credential_types | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_credential_type
