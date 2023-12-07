@@ -61,8 +61,20 @@
         dest: /tmp/project
         version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
         single_branch: true
+        depth: 1
+        # track_submodules: false
+        recursive: false
       when: >
         nfc_pb_awx_project.playbook_path is defined
+
+
+      # ansible.builtin.git.track_submodules=true does not work so this task exists 
+      #    --recursive is not an option with nested submodules
+    - name: GIT Submodule init
+      ansible.builtin.command:
+        cmd: git submodule update --init
+        chdir: /tmp/project
+      changed_when: false
 
 
     - name: Add Job templates
