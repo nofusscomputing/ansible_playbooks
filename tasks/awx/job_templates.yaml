@@ -1,4 +1,9 @@
 ---
+- name: Debug
+  ansible.builtin.debug:
+    msg:
+     - "{{ item.root }}"
+     - "{{ nfc_pb_awx_playbook_filename }}"
 
 
 - name: Create fact from Playbook
@@ -7,7 +12,7 @@
     playbook_contents: "{{ lookup('file', item.root + nfc_pb_awx_playbook_filename) | from_yaml }}"
   when: nfc_pb_awx_playbook_filename | default('') != ''
   failed_when: false
-  no_log: true
+  # no_log: true
 
 
 - name: Playbook Failsafe
