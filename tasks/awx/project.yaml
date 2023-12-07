@@ -49,7 +49,7 @@
     - name: "[helper] Setup Git credentials if present"
       ansible.builtin.shell:
         cmd: |
-          cat {{ tower.filename.git_credential_file }} > ~/.gitconfig;
+          cat {{ tower.filename.git_credential_file }} >> ~/.gitconfig;
           chmod 700 ~/.gitconfig;
           chown $(whoami):$(whoami) ~/.gitconfig;
       become: true
