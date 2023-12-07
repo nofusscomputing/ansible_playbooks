@@ -108,6 +108,7 @@
       ansible.builtin.file:
         name: /tmp/project
         state: absent
+      no_log: true
 
     - name: "Clean-up Git credentials"
       ansible.builtin.file:
