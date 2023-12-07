@@ -30,6 +30,8 @@ Items supported for configuration:
 !!! tip
     Cloning a repository that requires credentials is possible if you put credentials in your `~/.gitconfig` file. If your using Ansible Automation Platform / AWX on playbook import a custom Git credential will be created that will setup the `~/.gitconfig` file, that you can use in job templates.
 
+!!! danger "Security"
+    As there is an expectation that git credentials will be saved to `~/.gitconfig` for use when cloning private repositories. It's strongly recommended that you assess if this is viable within your threat model. The stance taken within this role is that credentials would only be saved to `~/.gitconfig` when running the play within an execution environment container that would dissapear post the job running.
 
 ## Playbook AWX / Tower / Automation Platform Template import
 
