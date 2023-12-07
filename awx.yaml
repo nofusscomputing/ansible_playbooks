@@ -103,6 +103,10 @@
                   [credential "{{ url }}"]
                       username = {{ username }}
                       helper = "!f() { test \"$1\" = get && echo \"password={{ token }}\"; }; f"
+              extra_vars:
+                tower:
+                  filename:
+                    git_credential_file: "{{ tower.filename.git_credential_file }}"
 
 
 #################################################################################################################################
