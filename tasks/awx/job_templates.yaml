@@ -12,6 +12,7 @@
     playbook_contents: "{{ lookup('file', item.root + nfc_pb_awx_playbook_filename) | from_yaml }}"
   when: nfc_pb_awx_playbook_filename | default('') != ''
   failed_when: false
+  ignore_errors: true
   # no_log: true
 
 
