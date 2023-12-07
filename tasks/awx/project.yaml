@@ -84,7 +84,7 @@
       when: >
         item.state == 'file'
           and
-        'yaml' in item.path
+        '.yaml' in item.path|basename
           and
         item.path|basename|replace(".yaml","") not in nfc_pb_awx_project.job_template_ignore | default([])
           and
