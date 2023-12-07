@@ -1,4 +1,9 @@
 ---
+- name: Debug
+  ansible.builtin.debug:
+    msg:
+     - "{{ item.root }}"
+     - "{{ nfc_pb_awx_playbook_filename }}"
 
 
 - name: Create fact from Playbook
