@@ -1,0 +1,69 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# Playbook for running the nfc_common role.
+#
+# image: nofusscomputing/ansible-ee >= 0.9.0
+#
+# Role Documentation: https://nofusscomputing.com/projects/ansible/roles/common/
+#
+- name: Role nfc_common
+  hosts: all
+  gather_facts: false
+
+
+  tasks:
+
+    - name: Common tasks
+      ansible.builtin.import_role:
+        name: nfc_common
+      vars:
+        common_gather_facts: true
+
+
+  vars:
+
+
+    nfc_pb_awx_tower_template:
+
+
+      - name: "Common"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          This play runs the nfc_common role and will
+          use the configuration from inventory.
+        execution_environment: "No Fuss Computing EE"
+        forks: 3
+        job_type: "run"
+        labels:
+          - common
+          - soe
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: "Host Stats Collection"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          This play will collect the stats for host(s)
+          in the play and return them as an artifact.
+        execution_environment: "No Fuss Computing EE"
+        forks: 3
+        job_type: "run"
+        job_tags: stats_hosts
+        skip_tags: always
+        labels:
+          - artifact
+          - hosts
+          - ITSM
+          - stats
+        verbosity: 2
+        use_fact_cache: true
