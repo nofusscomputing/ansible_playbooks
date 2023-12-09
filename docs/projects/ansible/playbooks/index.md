@@ -17,6 +17,8 @@ Available Playbooks:
 
 1. [backup.yaml](backup.md)
 
+1. [common.yaml](common.md)
+
 1. [git_configuration.yaml](git_configuration.md)
 
 1. [mariadb.yaml](mariadb.md)
