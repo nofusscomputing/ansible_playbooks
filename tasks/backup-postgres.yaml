@@ -17,6 +17,7 @@
     postgresDB_directory_backup: "{{ backup.directory | default('/backup') }}"
     # ansible_connection_original: "{{ ansible_connection }}"
     # ansible_connection: "{{ backup.postgresdb.connection | default(ansible_connection) }}"
+  no_log: true
 
 
 - name: Check Variables (manual)

@@ -18,6 +18,7 @@
         login_password: "{{ postgresDB_password }}"
       connection: "{{ backup.postgresdb.connection | default(omit) }}"
       delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+      no_log: true
 
 
     - name: Backup File Details
