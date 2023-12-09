@@ -18,3 +18,5 @@ execution_environment.Submodule.Deploy:
   extends: .submodule_update_trigger
   variables:
     SUBMODULE_UPDATE_TRIGGER_PROJECT: nofusscomputing/projects/ansible/execution_environment
+    GIT_COMMIT_TYPE: feat
+    GIT_COMMIT_TYPE_CATEGORY: $CI_PROJECT_NAME

@@ -1,0 +1,59 @@
+---
+- name: Debug
+  ansible.builtin.debug:
+    msg:
+     - "{{ item.root }}"
+     - "{{ nfc_pb_awx_playbook_filename }}"
+
+
+- name: Create fact from Playbook
+  ansible.builtin.set_fact:
+    nfc_pb_awx_tower_templates: []
+    playbook_contents: "{{ lookup('file', item.root + nfc_pb_awx_playbook_filename) | from_yaml }}"
+  when: nfc_pb_awx_playbook_filename | default('') != ''
+  failed_when: false
+  ignore_errors: true
+  # no_log: true
+
+
+- name: Playbook Failsafe
+  ansible.builtin.set_fact:
+    playbook_contents: []
+  when: (( playbook_contents | type_debug) != 'list')
+  no_log: true
+
+
+- name: Job Template from Playbook
+  ansible.builtin.set_fact:
+    nfc_pb_awx_tower_templates: "{{ nfc_pb_awx_tower_templates + nfc_pb_playbook.vars.nfc_pb_awx_tower_template }}"
+  when: >
+    nfc_pb_playbook.vars | default({}) | length | int > 0
+      and
+    nfc_pb_playbook.vars.nfc_pb_awx_tower_template | default({}) | length | int > 0
+  loop: "{{ playbook_contents }}"
+  loop_control:
+    loop_var: nfc_pb_playbook
+  failed_when: false
+  no_log: true
+
+
+- name: Add Job template
+  ansible.builtin.include_tasks:
+    file: tasks/awx/job_template.yaml
+  loop: "{{ nfc_pb_awx_tower_templates }}"
+  loop_control:
+    loop_var: nfc_pb_awx_job_template
+  when: >
+    item.state == 'file'
+      and
+    'yaml' in item.path
+      and
+    item.path|basename|replace(".yaml","") not in nfc_pb_awx_project.job_template_ignore | default([])
+
+
+- name: Fact Cleanup - job_template
+  ansible.builtin.set_fact:
+    nfc_pb_awx_tower_templates: []
+    nfc_pb_awx_playbook_filename:
+    # nfc_pb_awx_job_template_name:
+  no_log: true

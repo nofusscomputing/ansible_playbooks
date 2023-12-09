@@ -1,0 +1,130 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# description:
+#              Task file for backing up a PostgreSQL Database.
+#
+# image: nofusscomputing/ansible-ee >= 0.3.0
+# tags: nil
+#
+- name: Fetch Inventory Details
+  ansible.builtin.set_fact:
+    postgresDB_host: "{{ backup.postgresdb.host | default('') }}"
+    postgresDB_user: "{{ backup.postgresdb.user | default('') }}"
+    postgresDB_password: "{{ backup.postgresdb.password | default('') }}"
+    postgresDB_directory_backup: "{{ backup.directory | default('/backup') }}"
+    # ansible_connection_original: "{{ ansible_connection }}"
+    # ansible_connection: "{{ backup.postgresdb.connection | default(ansible_connection) }}"
+  no_log: true
+
+
+- name: Check Variables (manual)
+  ansible.builtin.assert:
+    that:
+      - postgresDB_directory_backup | default('/backup') != ''
+      - postgresDB_host | default('') != ''
+      - postgresDB_user | default('') != ''
+      - postgresDB_password | default('') != ''
+      - postgresDB_database_name | default('') != ''
+    fail_msg: "You must specify variables 'postgresDB_directory_backup/postgresDB_host/postgresDB_user/postgresDB_password/postgresDB_database_name'"
+  when:
+    (
+      backup.postgresdb.host | default('') == ''
+        or
+      backup.postgresdb.user | default('') == ''
+        or
+      backup.postgresdb.password | default('') == ''
+    )
+
+
+- name: Check Variables (Inventory)
+  ansible.builtin.assert:
+    that:
+      - postgresDB_directory_backup | default('/backup') != ''
+      - postgresDB_host | default('') != ''
+      - postgresDB_user | default('') != ''
+      - postgresDB_password | default('') != ''
+      - postgres.databases | default([]) | length | int > 0
+    fail_msg: "You must specify variables 'postgresDB_directory_backup/postgres.host/postgres.user/postgres.password/postgres.databases'"
+  when:
+    (
+      backup.postgres.host | default('') != ''
+        or
+      backup.postgres.user | default('') != ''
+        or
+      backup.postgres.password | default('') != ''
+    )
+
+
+- name: Set Global Facts
+  ansible.builtin.set_fact:
+    filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime(ansible_date_time.epoch) }}"
+  when: filename_date_time | default('does_not_exist') == 'does_not_exist'
+
+
+- name: Dependency Versions
+  ansible.builtin.command:
+    cmd: "{{ item.cmd }}"
+  changed_when: false
+  failed_when: false
+  loop: "{{ check_versions }}"
+  vars:
+    check_versions:
+      - cmd: "pip show psycopg2"
+      - cmd: "pg_dump --version"
+  connection: "{{ backup.postgresdb.connection | default(omit) }}"
+  delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+
+
+- name: Backup Postgres Databases
+  block:
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        directory_tasks: '/tmp/task_backup_postgresdb'
+
+
+    - name: Create Task Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: directory
+        mode: '700'
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+
+
+    - name: Prepare Encryption Certificate
+      ansible.builtin.copy:
+        content: "{{ file_encryption_key }}"
+        dest: "{{ directory_tasks }}/encryption_certificate"
+        mode: '700'
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+
+
+    - name: Backup database
+      ansible.builtin.include_tasks:
+        file: backup/postgres.yaml
+      loop: "{{ backup.postgresdb.databases }}"
+      loop_control:
+        loop_var: postgresdb
+
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_tasks }}"
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+
+    # - name: Fetch Inventory Details
+    #   ansible.builtin.set_fact:
+    #     ansible_connection: "{{ ansible_connection_original }}"

@@ -1,0 +1,116 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# Playbook for running the nfc_ssh role.
+# tags must be sepcified for the playbook to function.
+#
+# image: nofusscomputing/ansible-ee >= 0.4.0rc1
+#
+# Tags:
+#
+#   - check
+#     Check the host certificate
+#
+#   - configure
+#     Configure an existing OpenSSH installation
+#
+#   - install
+#     Install and Configure OpenSSH
+#
+#   - renew
+#     Renew the hosts SSH Keys (and Resign with the Host CA if enabled)
+#
+- name: OpenSSH Server Setup
+  hosts: all
+  become: true
+  gather_facts: false
+
+
+  roles:
+    - name: Common tasks
+      role: nfc_common
+      vars:
+        common_gather_facts: true
+        init: true # disable the ssh setup portion
+
+    - name: SSH Install
+      role: nfc_ssh
+
+
+  tasks: [] 
+
+
+  vars:
+    nfc_pb_awx_tower_template:
+      - name: "SSH Server Configure"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Configure SSH from Inventory
+          Available tags:
+            'check' Check the Host SSH Certificate,
+            'configure' Configure OpenSSH,
+            'install' Install and Configure OpenSSH,
+            'renew' Renew the SSH Keys.
+          If no tag is specified, all tasks will run if the applicable variables are set.
+        execution_environment: "No Fuss Computing EE"
+        job_tags: check,configure,install,renew
+        job_type: "run"
+        labels:
+          - configure
+          - install
+          - openssh
+          - renew
+          - sign
+          - ssh
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: false
+        credential_types:
+          - name: role/nfc_ssh/host_ca_signing_key
+            description: A Credential type for No Fuss Computings nfc_ssh role
+            inputs: |
+              fields:
+                - id: ca_public_key
+                  type: string
+                  label: Host Certificate Authority Public Key
+                  secret: false
+                  multiline: true
+                - id: ca_signing_key
+                  type: string
+                  label: Host Certificate Authority Signing Key
+                  secret: true
+                  multiline: true
+                - id: password
+                  type: string
+                  label: Key Decryption Password
+                  secret: true
+              required:
+                - ca_public_key
+                - ca_signing_key
+            injectors: >
+              file:
+                template: '{{ ca_signing_key }}'
+              extra_vars:
+                nfc_ssh_path_host_ca_key: '{{ tower.filename }}'
+                nfc_ssh_host_ca_public_key: '{{ ca_public_key }}'
+                nfc_ssh_host_ca_decryption_key:  '{{ password | default("") }}'
+
+          - name: role/nfc_ssh/nfc_ssh_user_ca_public_key
+            description: A Credential type for No Fuss Computings nfc_ssh role
+            inputs: |
+              fields:
+                - id: ca_public_key
+                  type: string
+                  label: SSH User Certificate Authority Public Key
+                  secret: false
+                  multiline: true
+              required:
+                - ca_public_key
+            injectors: >
+              extra_vars:
+                nfc_ssh_user_ca_public_key: '{{ ca_public_key }}'

@@ -1,0 +1,26 @@
+---
+- name: |-
+    "RBAC Config {{ nfc_pb_awx_organization.name }}/{%- if nfc_pb_awx_inventory.name | default('') != '' -%}
+    inventory/{{ nfc_pb_awx_inventory.name }}{% else %}project/{{ nfc_pb_awx_project.name }}{%- endif -%}/
+    {%- if nfc_pb_awx_rbac.type == 'team' -%}Team{%- else -%}User{%- endif -%}/{{ nfc_pb_awx_rbac.name }}"
+  awx.awx.role:
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    team: "{% if nfc_pb_awx_rbac.type == 'team' %}{{ nfc_pb_awx_rbac.name | default(omit) }}{% else %}{{ f | default(omit) }}{% endif %}"
+    user: "{% if nfc_pb_awx_rbac.type == 'user' %}{{ nfc_pb_awx_rbac.name | default(omit) }}{% else %}{{ f | default(omit) }}{% endif %}"
+    project: "{{ nfc_pb_awx_project_name | default(omit) }}"
+    job_templates: "{{ nfc_pb_awx_job_template_name | default(omit) }}"
+    inventory: "{{ nfc_pb_awx_inventory_name | default(omit) }}"
+    organizations: "{{ nfc_pb_awx_organization_name | default(omit) }}"
+    role: "{{ nfc_pb_awx_rbac.role }}"
+    state: "{{ nfc_pb_awx_rbac.state | default('present') }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
+  # no_log: true
+  diff: true
+
+
+- name: RBAC Var Cleanup
+  ansible.builtin.set_fact:
+    nfc_pb_awx_rbac: null

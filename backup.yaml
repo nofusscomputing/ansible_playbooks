@@ -1,0 +1,99 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# Playbook for Backing up various systems.
+# tags are optional, with each task only running if applicable variabls are set.
+#
+# image: nofusscomputing/ansible-ee >= 0.3.0
+#
+# Tags:
+#
+#   - files
+#     Backup Specified files to archive
+#
+#   - mariadb
+#     Backup Mariadb/MySQL Database
+#
+#   - postgres
+#     backup PostgresDB Database
+#
+- name: Conduct Backup
+  hosts: all
+  gather_facts: "{% if task_nfc_common_required | default(false) | bool %}false{% else %}true{% endif %}"
+  # become: true
+  # vars:
+  #   encryption_algorithm: aes256
+  #   backup_storage_directory: /backup
+
+  tasks:
+
+    - name: Common tasks
+      ansible.builtin.import_role:
+        name: nfc_common
+      vars:
+        common_gather_facts: true
+      when: task_nfc_common_required | default(false) | bool
+
+
+    - name: Backup Files
+      ansible.builtin.include_tasks:
+        file: tasks/backup-files.yaml
+        apply:
+          tags:
+            - files
+      when: backup.files | default([]) | length | int > 0
+      tags:
+        - files
+
+    - name: Backup mariadb
+      ansible.builtin.include_tasks:
+        file: tasks/backup-mariadb.yaml
+        apply:
+          tags:
+            - mariadb
+      when: backup.mariadb.databases | default([]) | length | int > 0
+      tags:
+        - mariadb
+
+    - name: Backup PostgresDB
+      ansible.builtin.include_tasks:
+        file: tasks/backup-postgres.yaml
+        apply:
+          tags:
+            - postgresdb
+      when: backup.postgresdb.databases | default([]) | length | int > 0
+      tags:
+        - postgresdb
+
+
+  vars:
+
+    nfc_pb_awx_tower_template:
+      - name: "Backup(s) from Inventory config"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: true
+        ask_credential_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Playbook to backup various systems using config within inventory
+          Available tags:
+            'files' Backup Specified files Database,
+            'mariadb' Backup a MariaDB Database,
+            'postgresdb' Backup a postgres Database.
+          If no tag is specified, all tasks will run if the applicable variables are set.
+        execution_environment: "No Fuss Computing EE"
+        forks: 3
+        job_type: "run"
+        job_tags: files, mariadb, postgresdb
+        labels:
+          - backup
+          - files
+          - mariadb
+          - postgres
+        # credentials:
+        #   - "Local"
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true

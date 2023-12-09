@@ -1,0 +1,55 @@
+---
+
+- name: Backup database
+  block:
+
+    - name: Prepare Backup Filename
+      ansible.builtin.set_fact:
+        postgresDB_filename_backup: "{{ filename_date_time }}-postgres-{{ postgresdb.name }}.sql"
+
+
+    - name: Dump an existing database to a file
+      community.postgresql.postgresql_db:
+        name: "{{ postgresdb.database }}"
+        state: dump
+        target: "{{ directory_tasks }}/{{ postgresDB_filename_backup }}"
+        login_host: "{{ postgresDB_host }}"
+        login_user: "{{ postgresDB_user }}"
+        login_password: "{{ postgresDB_password }}"
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+      no_log: true
+
+
+    - name: Backup File Details
+      ansible.builtin.stat:
+        name: "{{ directory_tasks }}/{{ postgresDB_filename_backup }}"
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+
+
+    - name: Store Backup
+      ansible.builtin.copy:
+        src: "{{ directory_tasks }}/{{ postgresDB_filename_backup }}"
+        dest: "{{ backup.directory }}"
+        remote_src: true
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+
+
+  rescue:
+
+    - name: Remove Failed Backup
+      ansible.builtin.file:
+        name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+        state: absent
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+
+    - name: Fail Play
+      ansible.builtin.assert:
+        that:
+          - false
+        fail_msg: Backup of Postgres database '{{ postgresdb.name }}' Failed!
+      connection: "{{ backup.postgresdb.connection | default(omit) }}"
+      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"

@@ -1,0 +1,90 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# Playbook for restoring backups various systems.
+# tags are optional, with each task only running if applicable variabls are set.
+#
+# image: nofusscomputing/ansible-ee >= 0.1.0
+#
+# Tags:
+#
+#   - files
+#     Restore Specified backup files to path
+#
+#
+- name: Conduct Restoration of Backup(s)
+  hosts: all
+  gather_facts: "{% if task_nfc_common_required | default(false) | bool %}false{% else %}true{% endif %}"
+
+  tasks:
+
+    - name: Common tasks
+      ansible.builtin.include_role:
+        name: nfc_common
+      vars:
+        common_gather_facts: true
+      when: task_nfc_common_required | default(false) | bool
+
+
+    - name: Restore Files
+      ansible.builtin.include_tasks:
+        file: tasks/restore-files.yaml
+        apply:
+          tags:
+            - files
+      when: restore.files | default([]) | length | int > 0
+      tags:
+        - files
+
+  vars:
+    # restore_backup_date:
+    # backup_storage_directory: /backup
+
+    nfc_pb_awx_tower_template:
+      - name: "Restore specified backup from Inventory config"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: true
+        ask_credential_on_launch: true
+        description: |
+          Playbook to restore backups to various systems using config from inventory
+          Available tags:
+            'files' Restore Specified file(s),
+          If no tag is specified, all tasks will run if the applicable variables are set.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: files
+        labels:
+          - restore
+          - files
+        # credentials:
+        #   - "Local"
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey: |
+          {
+            "max": 25,
+            "min": 25,
+            "type": "text",
+            "choices": "",
+            "default": "",
+            "required": true,
+            "variable": "restore_backup_date",
+            "new_question": true,
+            "question_name": "Date of backup to restore",
+            "question_description": "Enter the backup Date-Time stamp. this is the suffix of the backup file."
+          },
+          {
+              "max": 100,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "/backup",
+              "required": true,
+              "variable": "backup_storage_directory",
+              "new_question": true,
+              "question_name": "Backup Storage Directory",
+              "question_description": "The root directory of where the backups are stored"
+          }

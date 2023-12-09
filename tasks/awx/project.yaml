@@ -1,0 +1,118 @@
+---
+- name: Project
+  block:
+
+
+    - name: Project - {{ nfc_pb_awx_project.name }}
+      awx.awx.project:
+        name: "{{ nfc_pb_awx_project.name }}"
+        new_name: "{{ nfc_pb_awx_project.new_name | default(omit) }}"
+        description: "{{ nfc_pb_awx_project.description | default('') }}"
+        controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+        controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+        controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+        controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+        organization: "{{ nfc_pb_awx_organization.name }}"
+        scm_url: "{{ nfc_pb_awx_project.scm_url | default('') }}"
+        scm_track_submodules: "{{ nfc_pb_awx_project.scm_track_submodules | default(false) | bool }}"
+        scm_type: "{{ nfc_pb_awx_project.scm_type | default('') }}"
+        scm_clean: "{{ nfc_pb_awx_project.scm_clean | default('true') }}"
+        scm_credential: "{{ nfc_pb_awx_project.scm_credential | default('') }}"
+        scm_branch: "{{ nfc_pb_awx_project.scm_branch | default(omit) }}"
+        state: "{{ nfc_pb_awx_project.state | default('present') }}"
+        update_project: "{{ nfc_pb_awx_project.update_project | default('false') }}"
+        wait: "{{ nfc_pb_awx_project.wait | default('true') }}"
+        scm_allow_override: "{{ nfc_pb_awx_project.scm_branch_allow_override | default(false) | bool }}"
+        # default_environment: nfc
+        validate_certs: "{{ validate_certs | default(true) }}"
+      diff: true
+
+
+    - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
+      ansible.builtin.include_tasks:
+        file: tasks/awx/rbac.yaml
+      loop: "{{ nfc_pb_awx_project.rbac.project | default([]) | list }}"
+      loop_control:
+        loop_var: nfc_pb_awx_rbac
+      vars:
+        nfc_pb_awx_project_name: "{{ nfc_pb_awx_project.name }}"
+
+
+    - name: "Inventory - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
+      ansible.builtin.include_tasks:
+        file: tasks/awx/inventory.yaml
+      loop: "{{ nfc_pb_awx_project.inventories | default([]) | list }}"
+      loop_control:
+        loop_var: nfc_pb_awx_inventory
+
+
+    - name: "[helper] Setup Git credentials if present"
+      ansible.builtin.shell:
+        cmd: |
+          cat {{ tower.filename.git_credential_file }} >> ~/.gitconfig;
+          chmod 700 ~/.gitconfig;
+          chown $(whoami):$(whoami) ~/.gitconfig;
+      become: true
+      when: tower.filename.git_credential_file is defined
+
+    - name: GIT Checkout Project
+      ansible.builtin.git:
+        repo: "{{ nfc_pb_awx_project.scm_url }}"
+        dest: /tmp/project
+        version: "{{ nfc_pb_awx_project.scm_branch | default('master') }}"
+        single_branch: true
+        depth: 1
+        # track_submodules: false
+        recursive: false
+      when: >
+        nfc_pb_awx_project.playbook_path is defined
+
+
+      # ansible.builtin.git.track_submodules=true does not work so this task exists 
+      #    --recursive is not an option with nested submodules
+    - name: GIT Submodule init
+      ansible.builtin.command:
+        cmd: git submodule update --init
+        chdir: /tmp/project
+      changed_when: false
+
+
+    - name: Add Job templates
+      ansible.builtin.include_tasks:
+        file: tasks/awx/job_templates.yaml
+      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.playbook_path | default('')) }}"
+      when: >
+        item.state == 'file'
+          and
+        '.yaml' in item.path|basename
+          and
+        item.path|basename|replace(".yaml","") not in nfc_pb_awx_project.job_template_ignore | default([])
+          and
+        nfc_pb_awx_project.playbook_path is defined
+      vars:
+        nfc_pb_awx_playbook_filename: "{{ item.path }}"
+        nfc_pb_awx_playbook_dir: "{{ item.root }}"
+        nfc_pb_awx_branch: nfc_pb_awx_project.scm_branch
+
+
+    - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
+      ansible.builtin.include_tasks:
+        file: tasks/awx/rbac.yaml
+      loop: "{{ nfc_pb_awx_project.rbac.project | default([]) | list }}"
+      loop_control:
+        loop_var: nfc_pb_awx_rbac
+
+  always:
+
+    - name: Clean Project Temp Files
+      ansible.builtin.file:
+        name: /tmp/project
+        state: absent
+      no_log: true
+
+    - name: "Clean-up Git credentials"
+      ansible.builtin.file:
+        name: ~/.gitconfig;
+        state: absent
+      become: true
+      when: tower.filename.git_credential_file is defined

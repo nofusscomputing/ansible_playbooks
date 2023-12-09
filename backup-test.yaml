@@ -1,0 +1,19 @@
+---
+- name: Test hiding error with default
+  hosts: localhost
+  gather_facts: true
+  # vars:
+  #   ansible_connection: local
+  #   existing_var_random_name: 
+  #     - 'a value here'
+  #     - 'b value here'
+
+
+  tasks:
+
+
+    - name: Common tasks
+      ansible.builtin.import_role:
+        name: nfc_common
+      vars:
+        common_gather_facts: true

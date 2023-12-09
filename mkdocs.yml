@@ -2,7 +2,7 @@ INHERIT: website-template/mkdocs.yml
 
 docs_dir: 'docs'
 
-repo_name: Gitlab-CI
+repo_name: Ansible Playbooks
 repo_url: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 edit_uri: '/-/ide/project/nofusscomputing/projects/ansible/ansible_playbooks/edit/development/-/docs/'
 
@@ -19,15 +19,35 @@ nav:
 
   - Ansible:
 
+    - projects/ansible/index.md
+
     - Playbooks: 
 
       - projects/ansible/playbooks/index.md
 
+      - projects/ansible/playbooks/awx.md
+
+      - projects/ansible/playbooks/backup.md
+
+      - projects/ansible/playbooks/common.md
+
       - projects/ansible/playbooks/git_configuration.md
-    
+
+      - projects/ansible/playbooks/kubernetes.md
+
+      - projects/ansible/playbooks/mariadb.md
+
+      - projects/ansible/playbooks/postgresdb.md
+
+      - projects/ansible/playbooks/restore.md
+
     - Roles:
 
       - projects/ansible/roles/index.md
+
+      - common:
+
+        - projects/ansible/roles/common/index.md
 
 - Operations: 
 

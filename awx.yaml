@@ -1,0 +1,136 @@
+---
+- name: AWX / Tower Setup
+  hosts: localhost
+  become: false
+  gather_facts: true
+
+  tasks:
+
+
+    - name: Configure AWX
+      ansible.builtin.include_tasks:
+        file: tasks/awx/settings.yaml
+
+    - name: Credential Types
+      ansible.builtin.include_tasks:
+        file: tasks/awx/credential_type.yaml
+      loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_credential_type
+
+    - name: Instances
+      ansible.builtin.include_tasks:
+        file: tasks/awx/instances.yaml
+      loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_instance
+
+    - name: Instance Groups
+      ansible.builtin.include_tasks:
+        file: tasks/awx/instance_group.yaml
+      loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_instance_group
+
+    - name: Organizations
+      ansible.builtin.include_tasks:
+        file: tasks/awx/organization.yaml
+      loop: "{{ my_awx_config.organizations | default([]) | list }}" # Fix as this var should be dynamic
+      loop_control:
+        loop_var: nfc_pb_awx_organization
+
+
+  vars:
+    ansible_connection: local
+    nfc_pb_awx_tower_template:
+      - name: "AWX / Tower Configure"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        description: Configure AWX from Inventory
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        labels:
+          - awx
+          - configure
+        # credentials:
+        #   - "Local"
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey_spec: |
+          {
+            "name": "",
+            "spec": [
+              {
+                "max": 1024,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "my_awx_config",
+                "required": true,
+                "variable": "nfc_pb_awx_config_variable",
+                "new_question": true,
+                "question_name": "Inventory Variable",
+                "question_description": "The Variable in the Inventory the AWX config is under"
+              }
+            ],
+            "description": ""
+          }
+        credential_types:
+          - name: Git Credentials
+            description: Creates ~/gitconfig with credentials that enable git operations on a private repository
+            inputs: |
+              fields:
+                - id: username
+                  type: string
+                  label: GIT Username
+                - id: url
+                  type: string
+                  label: GIT URL
+                  help_text: Ensure that `https://` is prefixed to url
+                - id: token
+                  type: string
+                  label: GIT Token
+                  secret: true
+              required:
+                - username
+                - url
+                - token
+            injectors: >
+              file:
+                template.git_credential_file: |
+                  [credential "{{ url }}"]
+                      username = {{ username }}
+                      helper = "!f() { test \"$1\" = get && echo \"password={{ token }}\"; }; f"
+              extra_vars:
+                tower:
+                  filename:
+                    git_credential_file: "{{ tower.filename.git_credential_file }}"
+
+
+#################################################################################################################################
+
+    # #
+    # # required pip modules pytz, python-dateutil
+    # #
+    # - name: Schedule configuration
+    #   awx.awx.schedule:
+    #     controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    #     controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    #     controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    #     controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    #     name: "{{ item[1].name }}"
+    #     state: "{{ item[1].state | default('present') }}"
+    #     scm_branch: "{{ item[1].scm_branch | default(omit) }}"
+    #     unified_job_template: "{{ item[1].template }}"
+    #     job_tags: "{{ item[1].job_tags | default(omit) }}"
+    #     job_type: "{{ item[1].job_type }}"
+    #     rrule: "{{ query('awx.awx.schedule_rrule', item[1].schedule.terms, every=item[1].schedule.every, timezone=item[1].schedule.timezone) }}" # "{{ item[1].schedule }}"
+    #   with_subelements:
+    #     - "{{ nfc_pb_awx_config.organizations }}"
+    #     - schedules
+    #   # no_log: true
+    #   diff: true
+    #   tags:
+    #     - schedule
