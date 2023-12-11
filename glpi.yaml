@@ -29,9 +29,45 @@
         - ticket_template_from_itil_category
 
 
+    - name: Create GLPI Ticket
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/tickets/create.yaml
+        apply:
+          tags:
+            - always
+      tags:
+        - ticket_create
+
   vars:
 
     nfc_pb_awx_tower_template:
+      - name: "ITSM/GLPI/Ticket/Create"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Create a Ticket in GLPI.
+          Available tags:
+            'ticket_template_from_itil_category' Optional Tag to fetch ticket templete from itil category,
+            'ticket_create' Create ticket.
+          A Tag MUST be set.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_itil_category: 0
+          nfc_pb_glpi_ticket_type: request
+        job_tags: ticket_template_from_itil_category,ticket_create
+        job_type: "run"
+        labels:
+          - create
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
       - name: "ITSM/GLPI/Ticket/Template/From_ITIL_Category"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true

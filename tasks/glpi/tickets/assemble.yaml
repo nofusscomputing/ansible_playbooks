@@ -1,0 +1,102 @@
+---
+
+- name: Ticket ititial fact
+  ansible.builtin.set_fact:
+    nfc_pb_glpi_ticket_assembled: {}
+    nfc_pb_glpi_ticket_items_id: []
+
+
+- name: Ticket has Template
+  when: nfc_pb_glpi.ticket.template is defined
+  block:
+
+
+    - name: Copy Ticket Template
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
+            field.key: field.value
+          }) }}"
+      loop: "{{ nfc_pb_glpi.ticket.template | dict2items }}"
+      loop_control:
+        loop_var: field
+      when: field.value is not mapping and (field.value is string or filed.value is number)
+
+
+    - name: Assemble Ticket Body
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
+            field.key: field.value
+          }) }}"
+      loop: "{{ nfc_pb_glpi_ticket_create | dict2items }}"
+      loop_control:
+        loop_var: field
+      when: >
+        field.key not in nfc_pb_glpi.ticket.template
+
+
+    - name: Assemple Ticket title and description
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
+            'name': ( nfc_pb_glpi.ticket.template.name | default('') | string + nfc_pb_glpi_ticket_create.name | default('')| string),
+            'content': ( nfc_pb_glpi.ticket.template.content | default('') | string + nfc_pb_glpi_ticket_create.content | default('')| string)
+          }) }}"
+
+
+    - name: Create Body for Linked Items
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_items_id: "{{ nfc_pb_glpi_ticket_items_id + [{
+            'itemtype': (item | split('_'))[0],
+            'items_id': ((item | split('_'))[1] | int)
+          }] }}"
+      loop: "{{ nfc_pb_glpi.ticket.template.items_id }}"
+
+
+# ToDo: Add ticket assemble for ticket that doesn't use template
+
+- name: Assemble Ticket Fact
+  ansible.builtin.set_fact:
+    nfc_pb_glpi_ticket: "{{ nfc_pb_glpi.ticket | combine({
+            'create': (nfc_pb_glpi_ticket_create | from_yaml),
+            'assembled': (nfc_pb_glpi_ticket_assembled | from_yaml),
+            'items_id': (nfc_pb_glpi_ticket_items_id | from_yaml)
+        }) }}"
+    nfc_pb_glpi_ticket_assembled: null
+
+
+- name: validate Mandatory Fields
+  ansible.builtin.assert:
+    that:
+      - field in nfc_pb_glpi_ticket.assembled
+      - nfc_pb_glpi_ticket.assembled[field] != ''
+    msg: "'{{ field }}' is a mandatory item as specified in the ticket template or the value is empty"
+  loop: "{{ nfc_pb_glpi.ticket.mandatory_fields }}"
+  loop_control:
+    loop_var: field
+
+
+- name: validate Ticket for Creation
+  ansible.builtin.assert:
+    that:
+      - item in nfc_pb_glpi_ticket.assembled
+      - nfc_pb_glpi_ticket.assembled[item] != ''
+    msg: "'{{ item }}' is a mandatory item as specified in the ticket template or the value is empty"
+  loop: "{{ field }}"
+  vars:
+    field:
+      - name
+      - content
+      - entities_id
+      - priority
+      - urgency
+      - type
+
+
+- name: validate Ticket for Creation (absent fields)
+  ansible.builtin.assert:
+    that:
+      - item not in nfc_pb_glpi_ticket.assembled
+    msg: "'{{ item }}' must not be specified"
+  loop: "{{ field }}"
+  vars:
+    field:
+      - status

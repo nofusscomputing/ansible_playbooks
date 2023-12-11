@@ -1,0 +1,71 @@
+---
+
+- name: Always End Session
+  block:
+
+    - name: Validation 'nfc_pb_glpi_ticket_create' must exist.
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_ticket_create is defined
+        msg: "'nfc_pb_glpi_ticket_create' must be defined."
+
+
+    - name: Assemble Ticket
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/tickets/assemble.yaml
+
+
+    - name: Start Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-create.yaml
+      when: nfc_pb_glpi_session | default('') == ''
+
+
+    - name: Create GLPI Ticket
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      vars:
+        glpi_api_create_name: Create Ticket
+        glpi_api_create_path: Ticket
+        glpi_api_create_register: glpi_ticket_create
+        glpi_api_body: "{{ nfc_pb_glpi_ticket.assembled | from_yaml }}"
+
+
+    - name: Add ticket ID to fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket: "{{ nfc_pb_glpi_ticket | combine({
+            'id': (glpi_ticket_create.json.id | int)
+          }) }}"
+        glpi_ticket_create: null
+
+
+    - name: Link Assosiated Items to Ticket
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      loop: "{{ nfc_pb_glpi_ticket.items_id }}"
+      vars:
+        glpi_api_create_name: Link Assosiated Items to Ticket
+        glpi_api_create_path: Ticket/{{ nfc_pb_glpi_ticket.id | int }}/Item_Ticket
+        # glpi_api_create_register: glpi_ticket_create
+        glpi_api_body: "{{ (item | from_yaml ) | combine({
+          'tickets_id': nfc_pb_glpi_ticket.id | int
+          }) }}"
+
+
+  always:
+
+
+    - name: End Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-end.yaml
+      when: glpi_session_get.status | default(0) | int == 200
+
+
+    - name: Create Artifact
+      ansible.builtin.set_stats:
+        data:
+          nfc_pb_glpi: {
+            "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}"
+
+          }
+        per_host: false
