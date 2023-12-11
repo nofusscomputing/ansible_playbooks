@@ -15,7 +15,7 @@
 # Ensure not saved as facts
 - name: Clear Variables
   ansible.builtin.set_fact:
-    nfc_pb_glpi_session: null
-    nfc_pb_glpi_host: null
-    nfc_pb_glpi_app_token: null
-    nfc_pb_glpi_user_token: null
+    nfc_pb_glpi_session: ''
+    nfc_pb_glpi_host: ''
+    nfc_pb_glpi_app_token: ''
+    nfc_pb_glpi_user_token: ''
