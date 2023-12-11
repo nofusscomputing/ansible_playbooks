@@ -20,9 +20,3 @@
       - nfc_pb_glpi_user_token is defined
     msg: "'nfc_pb_glpi_user_token' variable is missing'"
 
-
-- name: Ensure 'itil_category' variable defined
-  ansible.builtin.assert:
-    that:
-      - nfc_pb_glpi_itil_category is defined
-    msg: "'nfc_pb_glpi_itil_category' variable is missing'"
