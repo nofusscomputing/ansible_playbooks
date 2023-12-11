@@ -33,6 +33,8 @@ nav:
 
       - projects/ansible/playbooks/git_configuration.md
 
+      - projects/ansible/playbooks/glpi.md
+
       - projects/ansible/playbooks/kubernetes.md
 
       - projects/ansible/playbooks/mariadb.md
