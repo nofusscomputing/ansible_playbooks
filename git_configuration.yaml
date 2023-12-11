@@ -34,3 +34,27 @@
         verbosity: 2
         use_fact_cache: true
         survey_enabled: false
+
+      - name: "Webhook/gitlab/Create Artifact"
+        ask_credential_on_launch: false
+        ask_limit_on_launch: false
+        ask_instance_groups_on_launch: false
+        ask_inventory_on_launch: false
+        ask_job_type_on_launch: false
+        ask_tags_on_launch: false
+        ask_variables_on_launch: false
+        description: |
+          This job template is intended to create an Artifact
+          from an inbound gitlab webhook.
+          Available tags:
+            'gitlab_webhook' Create an Artifact with webhook data,
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: gitlab_webhook
+        labels:
+          - automation
+          - gitlab
+          - webhook
+        verbosity: 1
+        use_fact_cache: true
+        survey_enabled: false
