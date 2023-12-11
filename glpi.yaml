@@ -1,0 +1,93 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# Documentation: https://nofusscomputing.com/projects/ansible/playbooks
+#
+# image: nofusscomputing/ansible-ee >= 0.3.0
+#
+#
+- name: GLPI
+  hosts: localhost
+  become: false
+  gather_facts: false
+
+
+  roles: []
+
+
+  tasks:
+
+    - name: Fetch Ticket Template From ITIL Category
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/tickets/template-from-itil-category.yaml
+        apply:
+          tags:
+            - always
+      tags:
+        - ticket_template_from_itil_category
+
+
+  vars:
+
+    nfc_pb_glpi_host: helpdesk.nofusscomputing.com
+    nfc_pb_glpi_app_token: pLTjI1FZaaGSRXJ7RyGymKCPEq8M7TPl48w3zl65
+    nfc_pb_glpi_user_token: NDuOXNwUKjf6ah22breG5SiAZXaMsueHTTLgvYFB
+    nfc_pb_glpi_itil_category: 4
+    nfc_pb_glpi_ticket_type: request # Mandatory, string. Choice incident|request
+    # nfc_glpi_no_log_sensitive_data: true
+
+
+    nfc_pb_awx_tower_template:
+      - name: "ITSM/GLPI/Ticket/Template/From_ITIL_Category"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: true
+        description: |
+          Using the ITIL Category Fetch the ticket template id then build a default
+          template. Also Returns Mandatory fields for validation usage when creating
+          the ticket.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_itil_category: 0
+          nfc_pb_glpi_ticket_type: request
+        job_tags: ticket_template_from_itil_category
+        job_type: "run"
+        labels:
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+        credential_types:
+
+          - name: playbook/glpi/api
+            description: A Credential type for No Fuss Computings Public Playbooks glpi.yaml
+            inputs: |
+              fields:
+                - id: host
+                  type: string
+                  label: GLPI FQDN
+                  secret: false
+                - id: app_token
+                  type: string
+                  label: GLPI APP Token
+                  secret: true
+                - id: user_token
+                  type: string
+                  label: GLPI User Token
+                  secret: true
+              required:
+                - host
+                - app_token
+                - user_token
+            injectors: >
+              extra_vars:
+                nfc_pb_glpi_host: '{{ host }}'
+                nfc_pb_glpi_app_token: '{{ app_token }}'
+                nfc_pb_glpi_user_token: '{{ user_token }}'
