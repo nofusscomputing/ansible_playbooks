@@ -127,20 +127,18 @@
 
 
     - name: Show Ticket Template
-      ansible.builtin.debug:
-        msg: "{{ glpi_ticket_template }}"
+      ansible.builtin.set_fact:
+          nfc_pb_glpi:
+            ticket: {
+              "template": "{{ glpi_ticket_template }}",
+              "mandatory_fields": "{{ glpi_ticket_mandatory_fields }}"
+            }
 
 
     - name: Create Artifact
       ansible.builtin.set_stats:
         data:
-          nfc_pb_glpi: {
-            "ticket":{
-              "template": "{{ glpi_ticket_template }}",
-              "mandatory_fields": "{{ glpi_ticket_mandatory_fields }}"
-            }
-
-          }
+          nfc_pb_glpi: "{{ nfc_pb_glpi }}"
         per_host: false
 
 
