@@ -63,7 +63,9 @@ This play utilizes the following variables.
 nfc_pb_glpi_host: glpi.hostname.tld      # Mandatory, string. FQDN that forms part of the url. Don't specify http|https.
 nfc_pb_glpi_app_token: ''                # Mandatory, string. application token as generated from GLPI.
 nfc_pb_glpi_user_token: ''               # Mandatory, string. user token as generated from GLPI.
-nfc_pb_glpi_ticket_create: {}            # Mandatory, dict. The ticket body in API Format.
+nfc_pb_glpi_ticket_create:               # Mandatory, dict. The ticket body in API Format.
+  name: ""                               # Mandatory, string. Title of the ticket
+  content: ""                            # Mandatory, string. The ticket description
 nfc_pb_glpi_no_log_sensitive_data: true  # Optional, boolean. used to turn `no_log` on/off for logging sensitive data
                                          # NOTE: Sensitive data will be logged. i.e. user and app token.
 ```
@@ -74,9 +76,48 @@ Prior to the play completing the following artifact/stats are set:
 {
   "nfc_pb_glpi": {
     "ticket":{
-      "assembled": {},  // dict. Assembled ticket in API format
+      "assembled": {},   // dict. Assembled ticket in API format
       "create": {},      // dict. contents of 'nfc_pb_glpi_ticket_create' variable
-      "items_id": []    // list. List of items to be assosiated to a tickeck on creation in API format
+      "items_id": []     // list. List of items to be assosiated to a tickeck on creation in API format
+    }
+  }
+}
+```
+
+
+## Create Ticket Task
+
+- Job tag is `ticket_task_create`
+
+!!! tip
+    Aditionally you can specify tags `ticket_template_from_itil_category` and `ticket_create`to collect the ticket template from the ITIL category which will be used to create the ticket, with the ticket task being created as the last step.
+
+This play utilizes the following variables.
+
+``` yaml
+nfc_pb_glpi_host: glpi.hostname.tld      # Mandatory, string. FQDN that forms part of the url. Don't specify http|https.
+nfc_pb_glpi_app_token: ''                # Mandatory, string. application token as generated from GLPI.
+nfc_pb_glpi_user_token: ''               # Mandatory, string. user token as generated from GLPI.
+nfc_pb_glpi_ticket_task_create:          # Mandatory, dict. The ticket task body in API Format.
+  id: 1                                  # Optional, integer. if specified will update the task. NOTE: the tickets_id must be specified
+  taskcategories_id": 1                  # Mandatory, integer. task ITIL Category
+  tickets_id": 64                        # Optional, integer. Only required if not creating a ticket first. Mandatory if 'id' specified
+  content": ""                           # Mandatory, string. The content of the ticket task.
+  state: 1                               # Optional, choice. 0=Information|1=todo|2=Done. Required if 'id' set 
+  actiontime: 0                          # Optional, integer. time in seconds for task duration
+  is_private: 0                          # Optional, choice 0=public|1=private
+  users_id_tech: 0                       # Optional, integer. the user id of the person to assign the task.
+nfc_pb_glpi_no_log_sensitive_data: true  # Optional, boolean. used to turn `no_log` on/off for logging sensitive data
+                                         # NOTE: Sensitive data will be logged. i.e. user and app token.
+```
+
+Prior to the play completing the following artifact/stats are set:
+
+``` json
+{
+  "nfc_pb_glpi": {
+    "ticket":{
+      "task": {}    // dict. ticket task in API format
     }
   }
 }

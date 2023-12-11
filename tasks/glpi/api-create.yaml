@@ -31,4 +31,4 @@
 
 - name: Fact Cleanup
   ansible.builtin.set_fact:
-    glpi_api_body: null
+    glpi_api_body: ''
