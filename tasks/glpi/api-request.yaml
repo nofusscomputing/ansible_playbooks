@@ -17,3 +17,4 @@
 - name: Set fact
   ansible.builtin.set_fact:
     "{{ glpi_api_request_register | default('glpi_api_request') | string }}": "{{ glpi_api_request }}"
+  no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
