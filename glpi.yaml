@@ -46,6 +46,23 @@
       tags:
         - ticket_create
 
+
+    - name: Create GLPI Ticket Task
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/tickets/task_create.yaml
+        apply:
+          tags:
+            - always
+      tags:
+        - ticket_task_create
+      vars:
+        nfc_pb_glpi_ticket_task_create: {
+          "taskcategories_id": 1,
+          "tickets_id": 64,
+          "content": "Created Ticket via ansible during testing",
+        }
+
+
   vars:
 
     nfc_pb_awx_tower_template:
@@ -64,7 +81,46 @@
         extra_vars:
           nfc_pb_glpi_itil_category: 0
           nfc_pb_glpi_ticket_type: request
+          nfc_pb_glpi_ticket_create:
+            name: 'Ticket Title'
+            content: 'Ticket Dscription'
         job_tags: ticket_template_from_itil_category,ticket_create
+        job_type: "run"
+        labels:
+          - create
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+      - name: "ITSM/GLPI/Ticket/Task/Create"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Create a Ticket Task in GLPI.
+          Available tags:
+            'ticket_template_from_itil_category' Optional Tag to fetch ticket templete from itil category,
+            'ticket_create' Create ticket.
+            'ticket_task_create' Create a Ticket task from the created or specified ticket
+          A Tag MUST be set.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_itil_category: 0
+          nfc_pb_glpi_ticket_type: request
+          nfc_pb_glpi_ticket_create:
+            name: 'Ticket Title'
+            content: 'Ticket Dscription'
+          nfc_pb_glpi_ticket_task_create:
+            id: 0
+            taskcategories_id: 1,
+            tickets_id: 0
+            content: "Created Ticket Task via AWX"
+        job_tags: ticket_template_from_itil_category,ticket_create,ticket_task_create
         job_type: "run"
         labels:
           - create
