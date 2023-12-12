@@ -73,6 +73,7 @@ nfc_pb_glpi_ticket_create:               # Mandatory, dict. The ticket body in A
   itilcategories_id: 0                   # Mandatory*, integer. the ticket category. ONLY mandatory for create
 nfc_pb_glpi_no_log_sensitive_data: true  # Optional, boolean. used to turn `no_log` on/off for logging sensitive data
                                          # NOTE: Sensitive data will be logged. i.e. user and app token.
+nfc_pb_glpi_assign_ticket: true          # Optional, boolean. Default=true. Assign the ticket to the API user.
 ```
 
 Prior to the play completing the following artifact/stats are set:

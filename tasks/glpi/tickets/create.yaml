@@ -52,6 +52,35 @@
           }) }}"
 
 
+    - name: Add API User as ticket requester
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      vars:
+        glpi_api_create_name: Add API User as ticket requester
+        glpi_api_create_path: Ticket/{{ nfc_pb_glpi_ticket.id | int }}/Ticket_User
+        glpi_api_body: {
+          "tickets_id": "{{ nfc_pb_glpi_ticket.id | int }}",
+          "users_id": "{{ nfc_pb_glpi_session.glpiID | int }}",
+          "type": 1,
+          "use_notification": 0
+        }
+
+
+    - name: Assign ticket to API User
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      when: nfc_pb_glpi_assign_ticket | default(true) | bool
+      vars:
+        glpi_api_create_name: Assign ticket to API User
+        glpi_api_create_path: Ticket/{{ nfc_pb_glpi_ticket.id | int }}/Ticket_User
+        glpi_api_body: {
+          "tickets_id": "{{ nfc_pb_glpi_ticket.id | int }}",
+          "users_id": "{{ nfc_pb_glpi_session.glpiID | int }}",
+          "type": 2,
+          "use_notification": 0
+        }
+
+
   always:
 
 
