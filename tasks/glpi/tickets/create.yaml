@@ -61,6 +61,23 @@
       when: glpi_session_get.status | default(0) | int == 200
 
 
+    - name: Set Task Fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi:
+          ticket: {
+            "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}"
+
+          }
+      when: nfc_pb_glpi.ticket is not defined
+
+
+    - name: Set Task Fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi:
+          ticket: "{{ nfc_pb_glpi.ticket | combine(nfc_pb_glpi_ticket | from_yaml) }}"
+      when: nfc_pb_glpi.ticket is defined
+
+
     - name: Create Artifact
       ansible.builtin.set_stats:
         data:
