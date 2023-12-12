@@ -10,7 +10,7 @@
 - name: "{{ glpi_api_create_name | default('GLPI API Create') }}"
   ansible.builtin.uri:
     url: "{{ http_protocol | default('https') | string }}://{{ nfc_pb_glpi_host }}/apirest.php/{{ glpi_api_create_path }}"
-    method: "POST"
+    method: "{{ glpi_api_create_method | default('POST') }}"
     body_format: json
     body: "{\"input\": {{ glpi_api_body | from_yaml | to_json }} }"
     return_content: true

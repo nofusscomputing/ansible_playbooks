@@ -102,10 +102,10 @@ nfc_pb_glpi_app_token: ''                # Mandatory, string. application token 
 nfc_pb_glpi_user_token: ''               # Mandatory, string. user token as generated from GLPI.
 nfc_pb_glpi_ticket_task_create:          # Mandatory, dict. The ticket task body in API Format.
   id: 1                                  # Optional, integer. if specified will update the task. NOTE: the tickets_id must be specified
-  taskcategories_id: 1                  # Mandatory, integer. task ITIL Category
-  tickets_id: 64                        # Optional, integer. Only required if not creating a ticket first. Mandatory if 'id' specified
+  taskcategories_id: 1                   # Mandatory, integer. task ITIL Category (ONLY Mandatory for create)
+  tickets_id: 64                         # Optional, integer. Only required if not creating a ticket first. Mandatory if 'id' specified
   content": ""                           # Mandatory, string. The content of the ticket task.
-  state: 1                               # Optional, choice. 0=Information|1=todo|2=Done. Required if 'id' set 
+  state: 1                               # Optional, choice. 0=Information|1=todo|2=Done.
   actiontime: 0                          # Optional, integer. time in seconds for task duration
   is_private: 0                          # Optional, choice 0=public|1=private
   users_id_tech: 0                       # Optional, integer. the user id of the person to assign the task.

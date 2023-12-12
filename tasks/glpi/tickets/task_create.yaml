@@ -14,7 +14,7 @@
     - name: No Artifact Check For Ticket ID
       ansible.builtin.assert:
         that:
-          - nfc_pb_glpi_ticket_id is defined
+          - nfc_pb_glpi_ticket_task_create.tickets_id is defined
         msg: You must specify the ticket id
       when: nfc_pb_glpi.ticket.id is not defined
 
@@ -25,6 +25,7 @@
           - item in nfc_pb_glpi_ticket_task_create
         msg: "'item' must be sepcified in variable 'nfc_pb_glpi_ticket_task_create'"
       loop: "{{ fields }}"
+      when: nfc_pb_glpi_ticket_task_create.id is not defined
       vars:
         fields:
           - taskcategories_id
@@ -54,12 +55,26 @@
       when: nfc_pb_glpi_ticket_task_create.id is not defined
 
 
-    - name: Validate for task update
+    - name: Confirm state set for task Update
       ansible.builtin.assert:
         that:
           - "'state' in nfc_pb_glpi_ticket_task_create"
+          - >
+            nfc_pb_glpi_ticket_task_create.state >= 0
+              and
+            nfc_pb_glpi_ticket_task_create.state <= 2
+        msg: "'item' must be sepcified in variable 'nfc_pb_glpi_ticket_task_create'"
+      when: >
+        nfc_pb_glpi_ticket_task_create.id is defined
+          and
+        nfc_pb_glpi_ticket_task_create.state is defined
+
+
+    - name: Validate id for task update
+      ansible.builtin.assert:
+        that:
           - nfc_pb_glpi_ticket_task_create.id != 0
-        msg: "'state' and 'id' must be sepcified in variable 'nfc_pb_glpi_ticket_task_create' and not be a value of '0'"
+        msg: "'id' must not be a value of '0'"
       when: nfc_pb_glpi_ticket_task_create.id is defined
 
 
@@ -100,7 +115,23 @@
             'users_id_tech': nfc_pb_glpi_session.glpiID,
             'state': 1
           })}}"
-      when: nfc_pb_glpi_ticket_task_create.id is not defined
+      when: >
+        nfc_pb_glpi_ticket_task_create.id is not defined
+          and
+        nfc_pb_glpi.ticket.task.id is not defined
+
+
+    - name: Update GLPI Ticket Task
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      vars:
+        glpi_api_create_method: PUT
+        glpi_api_create_name: Update GLPI Ticket Task
+        glpi_api_create_path: TicketTask/{{ nfc_pb_glpi_ticket_task_create.id }}
+        glpi_api_create_register: glpi_ticket_task_create
+        glpi_api_body: "{{ nfc_pb_glpi_ticket_task_create }}"
+      when: nfc_pb_glpi_ticket_task_create.id is defined
+
 
 # ToDo: Ticket update
       # when: nfc_pb_glpi_ticket_task_create.id is defined
@@ -112,6 +143,10 @@
             'id': (glpi_ticket_task_create.json.id | int)
           }) }}"
         glpi_ticket_task_create: ''
+      when: >
+        nfc_pb_glpi_ticket_task_create.id is not defined
+          and
+        nfc_pb_glpi.ticket.task.id is not defined
 
 
     - name: Create Play fact
@@ -127,7 +162,7 @@
       ansible.builtin.set_fact:
         nfc_pb_glpi:
           ticket: 
-            task: "{{ nfc_pb_glpi_ticket_task | default({}) | from_yaml }}"
+            task: "{{ nfc_pb_glpi_ticket_task_create | from_yaml }}"
         nfc_pb_glpi_ticket_task: ''
       when: nfc_pb_glpi.ticket is not defined
 
