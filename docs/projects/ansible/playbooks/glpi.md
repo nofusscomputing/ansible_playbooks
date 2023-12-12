@@ -70,6 +70,7 @@ nfc_pb_glpi_ticket_create:               # Mandatory, dict. The ticket body in A
   content: ""                            # Mandatory, string. The ticket description. If using ticket template will be appended to existing.
   entities_id: 0                         # Mandatory, integer. entities ID for ticket to be created in.
   type: 1                                # Mandatory, choice. 1=incident|2=Request
+  itilcategories_id: 0                   # Mandatory*, integer. the ticket category. ONLY mandatory for create
 nfc_pb_glpi_no_log_sensitive_data: true  # Optional, boolean. used to turn `no_log` on/off for logging sensitive data
                                          # NOTE: Sensitive data will be logged. i.e. user and app token.
 ```

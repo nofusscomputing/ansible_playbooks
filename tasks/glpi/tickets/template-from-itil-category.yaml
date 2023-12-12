@@ -126,13 +126,15 @@
       when: glpi_ticket_fields[(field.num | string)].uid | split('.') | list | length == 3
 
 
-    - name: Show Ticket Template
+    - name: Set Task Facts
       ansible.builtin.set_fact:
-          nfc_pb_glpi:
-            ticket: {
-              "template": "{{ glpi_ticket_template }}",
-              "mandatory_fields": "{{ glpi_ticket_mandatory_fields }}"
-            }
+        nfc_pb_glpi:
+          ticket: {
+            "template": "{{ glpi_ticket_template | combine({
+                'itilcategories_id': nfc_pb_glpi_itil_category
+              }) }}",
+            "mandatory_fields": "{{ glpi_ticket_mandatory_fields }}"
+          }
 
 
     - name: Create Artifact

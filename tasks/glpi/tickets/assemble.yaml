@@ -19,7 +19,7 @@
       loop: "{{ nfc_pb_glpi.ticket.template | dict2items }}"
       loop_control:
         loop_var: field
-      when: field.value is not mapping and (field.value is string or filed.value is number)
+      when: field.value is not mapping and (field.value is string or filed.value is number or filed.value is integer)
 
 
     - name: Assemble Ticket Body
@@ -89,6 +89,7 @@
       - priority
       - urgency
       - type
+      - itilcategories_id
 
 
 - name: validate Ticket for Creation (absent fields)
