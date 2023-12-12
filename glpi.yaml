@@ -11,7 +11,7 @@
 - name: GLPI
   hosts: localhost
   become: false
-  gather_facts: true
+  gather_facts: false
 
 
   roles: []
@@ -33,7 +33,7 @@
         nfc_automation: {
           "error": 0,
           "time": {
-            "start": "{{ now() }}",
+            "start": "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}",
             "end": 0
           }
         }
@@ -46,7 +46,7 @@
       ansible.builtin.set_fact:
         nfc_task: {
           "name": "glpi",
-          "start": "{{ now() }}",
+          "start": "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}",
           "tags": "{{ ansible_run_tags }}"
         }
       tags:
@@ -103,6 +103,8 @@
             that:
               - false
             msg: The Task failed
+          tags:
+            - always
 
 
       always:
@@ -110,7 +112,7 @@
 
         - name: Fetch End time
           ansible.builtin.set_fact:
-            nfc_task_endtime: "{{ now() }}"
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
           tags:
             - always
 
@@ -142,6 +144,7 @@
 
 
   vars:
+
 
     nfc_pb_awx_tower_template:
       - name: "ITSM/GLPI/Ticket/Create"
