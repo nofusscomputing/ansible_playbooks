@@ -66,8 +66,10 @@ nfc_pb_glpi_host: glpi.hostname.tld      # Mandatory, string. FQDN that forms pa
 nfc_pb_glpi_app_token: ''                # Mandatory, string. application token as generated from GLPI.
 nfc_pb_glpi_user_token: ''               # Mandatory, string. user token as generated from GLPI.
 nfc_pb_glpi_ticket_create:               # Mandatory, dict. The ticket body in API Format.
-  name: ""                               # Mandatory, string. Title of the ticket
-  content: ""                            # Mandatory, string. The ticket description
+  name: ""                               # Mandatory, string. Title of the ticket. If using ticket template will be appended to existing.
+  content: ""                            # Mandatory, string. The ticket description. If using ticket template will be appended to existing.
+  entities_id: 0                         # Mandatory, integer. entities ID for ticket to be created in.
+  type: 1                                # Mandatory, choice. 1=incident|2=Request
 nfc_pb_glpi_no_log_sensitive_data: true  # Optional, boolean. used to turn `no_log` on/off for logging sensitive data
                                          # NOTE: Sensitive data will be logged. i.e. user and app token.
 ```
