@@ -23,8 +23,11 @@
     - name: Ensure Job Tags have been Specified
       ansible.builtin.assert:
         that:
-          - ansible_tags | default([]) | list | length | int > 0
+          - ansible_run_tags | default([]) | list | length | int > 0
         msg: This playbook requires job tags be set.
+      tags:
+        - always
+
     - name: Set Automation Facts
       ansible.builtin.set_fact:
         nfc_automation: {
