@@ -55,12 +55,6 @@
             - always
       tags:
         - ticket_task_create
-      vars:
-        nfc_pb_glpi_ticket_task_create: {
-          "taskcategories_id": 1,
-          "tickets_id": 64,
-          "content": "Created Ticket via ansible during testing",
-        }
 
 
   vars:
