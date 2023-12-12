@@ -11,7 +11,7 @@
 - name: GLPI
   hosts: localhost
   become: false
-  gather_facts: false
+  gather_facts: true
 
 
   roles: []
@@ -25,36 +25,99 @@
         that:
           - ansible_tags | default([]) | list | length | int > 0
         msg: This playbook requires job tags be set.
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_automation: {
+          "error": 0,
+          "time": {
+            "start": "{{ now() }}",
+            "end": 0
+          }
+        }
+      when: nfc_automation is not defined
+      tags:
+        - always
 
 
-    - name: Fetch Ticket Template From ITIL Category
-      ansible.builtin.include_tasks:
-        file: tasks/glpi/tickets/template-from-itil-category.yaml
-        apply:
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "glpi",
+          "start": "{{ now() }}",
+          "tags": "{{ ansible_run_tags }}"
+        }
+      tags:
+        - always
+
+
+    - name: Tasks
+      block:
+
+
+        - name: Fetch Ticket Template From ITIL Category
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/template-from-itil-category.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_template_from_itil_category
+
+
+        - name: Create GLPI Ticket
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/create.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_create
+
+
+        - name: Create GLPI Ticket Task
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/task_create.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_task_create
+
+
+      always:
+
+
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ now() }}"
           tags:
             - always
-      tags:
-        - ticket_template_from_itil_category
 
 
-    - name: Create GLPI Ticket
-      ansible.builtin.include_tasks:
-        file: tasks/glpi/tickets/create.yaml
-        apply:
+        - name: Set Automation Facts
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'end': nfc_task_endtime
+              }) }}"
           tags:
             - always
-      tags:
-        - ticket_create
 
 
-    - name: Create GLPI Ticket Task
-      ansible.builtin.include_tasks:
-        file: tasks/glpi/tickets/task_create.yaml
-        apply:
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | from_yaml ] }}"
           tags:
             - always
-      tags:
-        - ticket_task_create
+
+
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
 
 
   vars:
