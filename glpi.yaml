@@ -87,6 +87,24 @@
             - ticket_task_create
 
 
+      rescue:
+
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          tags:
+            - always
+
+
+        - name: Fail task always
+          ansible.builtin.assert:
+            that:
+              - false
+            msg: The Task failed
+
+
       always:
 
 
