@@ -6,7 +6,8 @@ template: project.html
 about: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 ---
 
-This playbook is designed to run Automations against GLPI.
+This playbook is designed to run Automations against GLPI. The intented usage is for a workflow wherein you create a ticket (optionally with template), create a ticket task with the notes/details of the automation and then close the ticket after recording time and marking the ticket task as closed.  
+If this playbook is used with AWX / Ansible Automation Platform, artifacts are set with ticket and task creation used at the start of the workflow and the closing of the ticket at the end. As artifacts are set the workflow will pass these to each node of the flow.
 
 
 ## Playbook AWX / Ansible Automation Platform Template Import
@@ -128,6 +129,13 @@ Prior to the play completing the following artifact/stats are set:
   }
 }
 ```
+
+
+## Create Ticket Task
+
+- Job tag is `ticket_close`
+
+This task is completely automagic. The artifacts from the ticket and task creation runs are used for the wizardry to close the ticket and ticket task if it exists. The Automation time is added to the ticket task as well.
 
 
 ## Playbook Definition

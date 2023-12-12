@@ -87,6 +87,16 @@
             - ticket_task_create
 
 
+        - name: Close GLPI Ticket Task
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/close.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_close
+
+
       rescue:
 
         - name: Set error fact
