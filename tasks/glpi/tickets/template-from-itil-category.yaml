@@ -74,7 +74,7 @@
     - name: Set Fact Ticket Mandatory Fields
       ansible.builtin.set_fact:
         glpi_ticket_mandatory_fields: "{{ glpi_ticket_mandatory_fields + [ (glpi_ticket_fields[(field.num | string)].field | string) ] }}"
-      loop: "{{ glpi_fetch_ticket_mandatory_fields.json }}"
+      loop: "{{ glpi_fetch_ticket_mandatory_fields.json | default([])}}"
       loop_control:
         loop_var: field
 
@@ -96,7 +96,7 @@
           {
             (glpi_ticket_fields[(field.num | string)].field | string): field.value
           }) }}"
-      loop: "{{ glpi_ticket_template_predefined_fields.json }}"
+      loop: "{{ glpi_ticket_template_predefined_fields.json | default([]) }}"
       loop_control:
         loop_var: field
       when: glpi_ticket_fields[(field.num | string)].uid | split('.') | list | length == 2
@@ -108,7 +108,7 @@
           {
             (glpi_ticket_fields[(field.num | string)].field | string): []
           }) }}"
-      loop: "{{ glpi_ticket_template_predefined_fields.json }}"
+      loop: "{{ glpi_ticket_template_predefined_fields.json | default([]) }}"
       loop_control:
         loop_var: field
       when: glpi_ticket_fields[(field.num | string)].uid | split('.') | list | length == 3
@@ -120,7 +120,7 @@
           {
             (glpi_ticket_fields[(field.num | string)].field | string): glpi_ticket_template[glpi_ticket_fields[(field.num | string)].field] + [ field.value ]
           }) }}"
-      loop: "{{ glpi_ticket_template_predefined_fields.json }}"
+      loop: "{{ glpi_ticket_template_predefined_fields.json| default([]) }}"
       loop_control:
         loop_var: field
       when: glpi_ticket_fields[(field.num | string)].uid | split('.') | list | length == 3

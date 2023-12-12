@@ -48,7 +48,7 @@
             'itemtype': (item | split('_'))[0],
             'items_id': ((item | split('_'))[1] | int)
           }] }}"
-      loop: "{{ nfc_pb_glpi.ticket.template.items_id }}"
+      loop: "{{ nfc_pb_glpi.ticket.template.items_id | default([]) }}"
 
 
 # ToDo: Add ticket assemble for ticket that doesn't use template
@@ -69,7 +69,7 @@
       - field in nfc_pb_glpi_ticket.assembled
       - nfc_pb_glpi_ticket.assembled[field] != ''
     msg: "'{{ field }}' is a mandatory item as specified in the ticket template or the value is empty"
-  loop: "{{ nfc_pb_glpi.ticket.mandatory_fields }}"
+  loop: "{{ nfc_pb_glpi.ticket.mandatory_fields | default([])}}"
   loop_control:
     loop_var: field
 
@@ -86,8 +86,6 @@
       - name
       - content
       - entities_id
-      - priority
-      - urgency
       - type
       - itilcategories_id
 
