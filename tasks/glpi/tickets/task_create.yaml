@@ -136,6 +136,15 @@
       when: nfc_pb_glpi_ticket_task_create.users_id_tech is not defined
 
 
+    - name: Add Task State and Creation User
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_task_assemble: "{{ nfc_pb_glpi_ticket_task_assemble | combine({
+            'users_id': nfc_pb_glpi_session.glpiID,
+            'state': 1
+            })}}"
+      when: nfc_pb_glpi_ticket_task_create.users_id_tech is not defined
+
+
     - name: Create GLPI Ticket Task
       ansible.builtin.include_tasks:
         file: tasks/glpi/api-create.yaml
@@ -143,10 +152,7 @@
         glpi_api_create_name: Create GLPI Ticket Task
         glpi_api_create_path: Ticket/{{ nfc_pb_glpi_ticket_task_assemble.tickets_id }}/TicketTask
         glpi_api_create_register: glpi_ticket_task_create
-        glpi_api_body: "{{ nfc_pb_glpi_ticket_task_assemble | combine({
-            'users_id': nfc_pb_glpi_session.glpiID,
-            'state': 1
-          })}}"
+        glpi_api_body: "{{ nfc_pb_glpi_ticket_task_assemble }}"
       when: >
         nfc_pb_glpi_ticket_task_assemble.id is not defined
           and
