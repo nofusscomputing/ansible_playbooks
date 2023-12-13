@@ -11,7 +11,7 @@
 - name: GLPI
   hosts: localhost
   become: false
-  gather_facts: false
+  gather_facts: true
 
 
   roles: []
