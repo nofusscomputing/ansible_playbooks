@@ -195,6 +195,7 @@
         ask_inventory_on_launch: true
         ask_tags_on_launch: false
         ask_variables_on_launch: false
+        concurrent_jobs_enabled: true
         description: |
           Close a Ticket in GLPI.
           NOTE: Requires first that the ticket creation job has already run.
@@ -215,6 +216,7 @@
         ask_inventory_on_launch: true
         ask_tags_on_launch: true
         ask_variables_on_launch: true
+        concurrent_jobs_enabled: true
         description: |
           Create a Ticket in GLPI.
           Available tags:
@@ -245,6 +247,7 @@
         ask_inventory_on_launch: true
         ask_tags_on_launch: true
         ask_variables_on_launch: true
+        concurrent_jobs_enabled: true
         description: |
           Create a Ticket Task in GLPI.
           Available tags:
@@ -281,6 +284,7 @@
         ask_inventory_on_launch: true
         ask_tags_on_launch: false
         ask_variables_on_launch: true
+        concurrent_jobs_enabled: true
         description: |
           Create a Ticket Task in GLPI.
           The always tag must be specified for this task to run.
@@ -305,6 +309,7 @@
         ask_inventory_on_launch: true
         ask_tags_on_launch: false
         ask_variables_on_launch: true
+        concurrent_jobs_enabled: true
         description: |
           Using the ITIL Category Fetch the ticket template id then build a default
           template. Also Returns Mandatory fields for validation usage when creating
