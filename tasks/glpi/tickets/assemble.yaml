@@ -47,11 +47,37 @@
         field.key not in nfc_pb_glpi.ticket.template
 
 
-    - name: Assemple Ticket title and description
+    - name: Assemple Ticket title
       ansible.builtin.set_fact:
         nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
             'name': ( nfc_pb_glpi.ticket.template.name | default('') | string + nfc_pb_glpi_ticket_create.name | default('')| string),
-            'content': ( nfc_pb_glpi.ticket.template.content | default('') | string + nfc_pb_glpi_ticket_create.content | default('')| string)
+          }) }}"
+        nfc_pb_glpi_ticket_description: "{{ nfc_pb_glpi_ticket_create.content | default('') | string }}"
+
+
+    - name: Add Automation details to Ticket description
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_description: >-
+          &#60;h3&#62;Automation Details&#60;/h3&#62;\r\n&#60;div&#62;\r\n&#60;ul&#62;\r\n
+          &#60;li&#62;Job Name: {{ tower_workflow_job_name | default('') }} (id: {{ tower_workflow_job_id | default('') }})&#60;/li&#62;
+          \r\n&#60;li&#62;Job Launch Type: {{ tower_job_launch_type | default('') }}&#60;/li&#62;
+          \r\n&#60;li&#62;Project SCM Branch: {{ tower_project_scm_branch | default('') }}@{{ tower_project_revision | default('') }}&#60;/li&#62;
+          \r\n&#60;li&#62;Job SCM Branch: {{ tower_job_scm_branch | default('') }}&#60;/li&#62;
+          \r\n&#60;li&#62;Launched by: {{ tower_user_name | default('') }}&#60;/li&#62;
+          \r\n&#60;li&#62;Schedule Name: {{ tower_schedule_name | default('') }} (id: {{ tower_schedule_id | default('') }})&#60;/li&#62;
+          \r\n&#60;li&#62;Inventory: {{ tower_inventory_name | default('') }} (id: {{ tower_inventory_id | default('') }})&#60;/li&#62;
+          \r\n&#60;/ul&#62;\r\n&#60;h3&#62;Additional Information&#60;/h3&#62;\r\n&#60;p&#62;{{ nfc_pb_glpi_ticket_create.content | default('')}}&#60;/p&#62;
+          \r\n&#60;/div&#62;
+      when: >
+        awx_job_id is defined
+          or
+        tower_job_id is defined
+
+
+    - name: Assemple Ticket description
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
+            'content': ( nfc_pb_glpi.ticket.template.content | default('') | string + nfc_pb_glpi_ticket_description | string)
           }) }}"
 
 
