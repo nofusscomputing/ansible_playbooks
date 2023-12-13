@@ -19,7 +19,10 @@
       loop: "{{ nfc_pb_glpi.ticket.template | dict2items }}"
       loop_control:
         loop_var: field
-      when: field.value is not mapping and (field.value is string or filed.value is number or filed.value is integer)
+      when: >
+        field.value is string
+          or
+        filed.value is number
 
 
     - name: Assemble Ticket Body
