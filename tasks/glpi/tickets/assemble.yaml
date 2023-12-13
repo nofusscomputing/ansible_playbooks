@@ -47,11 +47,32 @@
         field.key not in nfc_pb_glpi.ticket.template
 
 
-    - name: Assemple Ticket title and description
+    - name: Assemple Ticket title
       ansible.builtin.set_fact:
         nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
             'name': ( nfc_pb_glpi.ticket.template.name | default('') | string + nfc_pb_glpi_ticket_create.name | default('')| string),
-            'content': ( nfc_pb_glpi.ticket.template.content | default('') | string + nfc_pb_glpi_ticket_create.content | default('')| string)
+          }) }}"
+        nfc_pb_glpi_ticket_description: "{{ nfc_pb_glpi_ticket_create.content | default('') | string }}"
+
+
+    - name: Add Automation details to Ticket description
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_description: |
+          \nAutomation Details:
+          - Job Name: {{ awx_workflow_job_name }} (id: {{ awx_workflow_job_id }})
+          - Job Launch Type: {{ awx_job_launch_type }}
+          - Project SCM Branch: {{ awx_project_scm_branch }}@{{ awx_project_revision}}
+          - Job SCM Branch: {{ awx_job_scm_branch }}
+          - Launched by: {{ awx_user_name }}
+          - Schedule Name: {{ awx_schedule_name }} (id: {{ awx_schedule_id }}) - Inventory: {{ awx_inventory_name }} (id: {{ awx_inventory_id }})
+          \n {{ nfc_pb_glpi_ticket_create.content }}
+      when: awx_workflow_job_name is defined
+
+
+    - name: Assemple Ticket description
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
+            'content': ( nfc_pb_glpi.ticket.template.content | default('') | string + nfc_pb_glpi_ticket_description | string)
           }) }}"
 
 
