@@ -47,6 +47,14 @@
           - date_creation
 
 
+    - name: Validation Assigned user ID.
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_ticket_task_create.users_id_tech | int != 0
+        msg: "'users_id_tech' must not have a value of '0'"
+      when: nfc_pb_glpi_ticket_task_create.users_id_tech is defined
+
+
     - name: Confirm no state set for task creation
       ansible.builtin.assert:
         that:
@@ -112,6 +120,22 @@
         msg: The Ticket Task requires a ticket ID and it must not be a value of '0'.
 
 
+    - name: Assign task to user
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_task_assemble: "{{ nfc_pb_glpi_ticket_task_assemble | combine({
+              'users_id_tech': (nfc_pb_glpi_ticket_task_create.users_id_tech),
+            })}}"
+      when: nfc_pb_glpi_ticket_task_create.users_id_tech is defined
+
+
+    - name: Assign task to API user
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_task_assemble: "{{ nfc_pb_glpi_ticket_task_assemble | combine({
+              'users_id_tech': nfc_pb_glpi_session.glpiID,
+            })}}"
+      when: nfc_pb_glpi_ticket_task_create.users_id_tech is not defined
+
+
     - name: Create GLPI Ticket Task
       ansible.builtin.include_tasks:
         file: tasks/glpi/api-create.yaml
@@ -121,7 +145,6 @@
         glpi_api_create_register: glpi_ticket_task_create
         glpi_api_body: "{{ nfc_pb_glpi_ticket_task_assemble | combine({
             'users_id': nfc_pb_glpi_session.glpiID,
-            'users_id_tech': nfc_pb_glpi_session.glpiID,
             'state': 1
           })}}"
       when: >
