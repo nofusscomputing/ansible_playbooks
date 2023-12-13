@@ -28,6 +28,14 @@
       tags:
         - always
 
+
+    - name: Validate User for ticket assignment on error
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_ticket_assign_error_user | int > 0
+      when: nfc_pb_glpi_ticket_assign_error_user is defined
+
+
     - name: Set Automation Facts
       ansible.builtin.set_fact:
         nfc_automation: {
@@ -99,6 +107,7 @@
 
       rescue:
 
+
         - name: Set error fact
           ansible.builtin.set_fact:
             nfc_automation: "{{ nfc_automation | combine({
@@ -118,6 +127,30 @@
 
 
       always:
+
+
+        - name: Assign ticket to specified user due to error
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/api-create.yaml
+          vars:
+            glpi_api_create_name: Assign ticket to specified User due to error
+            glpi_api_create_path: Ticket/{{ nfc_pb_glpi.ticket.id | int }}/Ticket_User
+            glpi_api_body: {
+              "tickets_id": "{{ nfc_pb_glpi.ticket.id | int }}",
+              "users_id": "{{ nfc_pb_glpi.ticket.error_user }}",
+              "type": 2,
+              "use_notification": 1
+            }
+          tags:
+            - always
+          when: >
+            (
+              nfc_automation.error | int == 1
+            )
+              and
+            nfc_pb_glpi.ticket.error_user is defined
+              and
+            nfc_pb_glpi.ticket.id is defined
 
 
         - name: Fetch End time
@@ -222,6 +255,30 @@
           - template
         survey_enabled: false
         use_fact_cache: false
+        verbosity: 2
+      - name: "ITSM/GLPI/Ticket/Assign/Error"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: true
+        description: |
+          Create a Ticket Task in GLPI.
+          The always tag must be specified for this task to run.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_ticket_assign_error_user: 0
+        job_tags: always
+        job_type: "run"
+        labels:
+          - assign
+          - error
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: true
         verbosity: 2
       - name: "ITSM/GLPI/Ticket/Template/From_ITIL_Category"
         ask_credential_on_launch: true
