@@ -51,6 +51,13 @@
       loop: "{{ nfc_pb_glpi.ticket.template.items_id | default([]) }}"
 
 
+    - name: Assemple Ticket request type
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
+            'requesttypes_id': 4
+          }) }}"
+      when: nfc_pb_glpi_ticket_create.requesttypes_id is not defined
+
 # ToDo: Add ticket assemble for ticket that doesn't use template
 
 - name: Assemble Ticket Fact
@@ -88,6 +95,7 @@
       - entities_id
       - type
       - itilcategories_id
+      - requesttypes_id
 
 
 - name: validate Ticket for Creation (absent fields)
