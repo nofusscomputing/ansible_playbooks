@@ -14,15 +14,15 @@ If this playbook is used with AWX / Ansible Automation Platform, artifacts are s
 
 This playbook includes the [AWX feature](awx.md) where it imports the playbook as job templates in to AWX / Ansible Automation Platform. The following job templates that will be created:
 
-- **ITSM/GLPI/Ticket/Assign/Error** Assigns the ticket to the specified user on error.
+- **ITIL/GLPI/Ticket/Assign/Error** Assigns the ticket to the specified user on error.
 
-- **ITSM/GLPI/Ticket/Close** Close a ticket in GLPI
+- **ITIL/GLPI/Ticket/Close** Close a ticket in GLPI
 
-- **ITSM/GLPI/Ticket/Create** Create a ticket in GLPI
+- **ITIL/GLPI/Ticket/Create** Create a ticket in GLPI
 
-- **ITSM/GLPI/Ticket/Task/Create** Create a ticket task
+- **ITIL/GLPI/Ticket/Task/Create** Create a ticket task
 
-- **ITSM/GLPI/Ticket/Template/From_ITIL_Category** Provide an ITIL Category and this play will fetch and generate the ticket template.
+- **ITIL/GLPI/Ticket/Template/From_ITIL_Category** Provide an ITIL Category and this play will fetch and generate the ticket template.
 
 On import to AWX / Ansible Automation Platform a credential type will also be created, `playbook/glpi/api` that can be used to supply the required secrets and glpi FQDN.
 
