@@ -190,6 +190,26 @@
 
 
     nfc_pb_awx_tower_template:
+      - name: "ITSM/GLPI/Ticket/Close"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: false
+        description: |
+          Close a Ticket in GLPI.
+          NOTE: Requires first that the ticket creation job has already run.
+        execution_environment: "No Fuss Computing EE"
+        job_tags: ticket_close
+        job_type: "run"
+        labels:
+          - close
+          - glpi
+          - itil
+          - itsm
+          - ticket
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
       - name: "ITSM/GLPI/Ticket/Create"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true

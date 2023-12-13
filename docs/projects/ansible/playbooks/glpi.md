@@ -16,6 +16,8 @@ This playbook includes the [AWX feature](awx.md) where it imports the playbook a
 
 - **ITSM/GLPI/Ticket/Assign/Error** Assigns the ticket to the specified user on error.
 
+- **ITSM/GLPI/Ticket/Close** Close a ticket in GLPI
+
 - **ITSM/GLPI/Ticket/Create** Create a ticket in GLPI
 
 - **ITSM/GLPI/Ticket/Task/Create** Create a ticket task
