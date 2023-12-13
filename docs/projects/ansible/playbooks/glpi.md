@@ -75,6 +75,7 @@ nfc_pb_glpi_ticket_create:               # Mandatory, dict. The ticket body in A
 nfc_pb_glpi_no_log_sensitive_data: true  # Optional, boolean. used to turn `no_log` on/off for logging sensitive data
                                          # NOTE: Sensitive data will be logged. i.e. user and app token.
 nfc_pb_glpi_assign_ticket: true          # Optional, boolean. Default=true. Assign the ticket to the API user.
+nfc_pb_glpi_ticket_assign_error_user: 0  # Optional, integer. Default= Not specified. Assign the ticket to the specified user on error.
 ```
 
 Prior to the play completing the following artifact/stats are set:
@@ -90,6 +91,11 @@ Prior to the play completing the following artifact/stats are set:
   }
 }
 ```
+
+If there is an error during the play and artifact variable `nfc_automation.error` is updated to integer `1`, when this playbook next runs, on the proviso that there is an existing ticket, the ticket will be assigned to the user in variable `nfc_pb_glpi_ticket_assign_error_user`.
+
+!!! tip
+    Using the ticket assignment on error as a node within an AWX / Ansible Automation Platform workflow can be done by simply specifying `job_tags: always` and variable `nfc_pb_glpi_ticket_assign_error_user: {glpi_user_id}`. This node could then be used as a path from any node on error to notify the user.
 
 
 ## Create Ticket Task
@@ -109,7 +115,7 @@ nfc_pb_glpi_ticket_task_create:          # Mandatory, dict. The ticket task body
   id: 1                                  # Optional, integer. if specified will update the task. NOTE: the tickets_id must be specified
   taskcategories_id: 1                   # Mandatory, integer. task ITIL Category (ONLY Mandatory for create)
   tickets_id: 64                         # Optional, integer. Only required if not creating a ticket first. Mandatory if 'id' specified
-  content": ""                           # Mandatory, string. The content of the ticket task.
+  content: ""                           # Mandatory, string. The content of the ticket task.
   state: 1                               # Optional, choice. 0=Information|1=todo|2=Done.
   actiontime: 0                          # Optional, integer. time in seconds for task duration
   is_private: 0                          # Optional, choice 0=public|1=private
