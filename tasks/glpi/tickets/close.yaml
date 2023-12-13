@@ -1,0 +1,92 @@
+---
+
+- name: Always End Session
+  block:
+
+    - name: Validation Artifacts must exist.
+      ansible.builtin.assert:
+        that:
+          - item | bool
+        msg: "Artifact not found."
+      loop: "{{ validate }}"
+      vars:
+        validate:
+          - "{{ nfc_pb_glpi is defined }}"
+          - "{{ nfc_pb_glpi.ticket is defined }}"
+
+
+    - name: Start Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-create.yaml
+      when: nfc_pb_glpi_session | default('') == ''
+
+
+    - name: Mark Task as done
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      vars:
+        glpi_api_create_method: PATCH
+        glpi_api_create_name: Mark Task as done
+        glpi_api_create_path: TicketTask/{{ nfc_pb_glpi.ticket.task.id }}
+        glpi_api_create_register: glpi_ticket_task_close
+        glpi_api_body: {
+          "id": "{{ nfc_pb_glpi.ticket.task.id | int }}",
+          "state": 2,
+          "actiontime": "{{ (
+            (
+              ('%Y-%m-%dT%H:%M:%S %z' | strftime | to_datetime('%Y-%m-%dT%H:%M:%S %z')) - nfc_automation.time.start | to_datetime('%Y-%m-%dT%H:%M:%S %z')
+            ).total_seconds()) | int }}"
+        }
+      when: >
+        nfc_pb_glpi.ticket.task.id is defined
+          and
+        nfc_pb_glpi.ticket.task.state | default(0) | int != 2
+
+
+    - name: Close GLPI Ticket
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      vars:
+        glpi_api_create_method: PATCH
+        glpi_api_create_name: Close GLPI Ticket
+        glpi_api_create_path: Ticket/{{ nfc_pb_glpi.ticket.id }}
+        glpi_api_create_register: glpi_ticket_create
+        glpi_api_body:
+          id: "{{ nfc_pb_glpi.ticket.id | int }}"
+          status: 6
+
+
+  always:
+
+
+    - name: End Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-end.yaml
+      when: glpi_session_get.status | default(0) | int == 200
+
+
+    # - name: Set Task Fact
+    #   ansible.builtin.set_fact:
+    #     nfc_pb_glpi:
+    #       ticket: {
+    #         "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}"
+
+    #       }
+    #   when: nfc_pb_glpi.ticket is not defined
+
+
+    # - name: Set Task Fact
+    #   ansible.builtin.set_fact:
+    #     nfc_pb_glpi:
+    #       ticket: "{{ nfc_pb_glpi.ticket | combine(nfc_pb_glpi_ticket | from_yaml) }}"
+    #   when: nfc_pb_glpi.ticket is defined
+
+
+    # - name: Create Artifact
+    #   ansible.builtin.set_stats:
+    #     data:
+    #       nfc_pb_glpi: {
+    #         "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}"
+
+    #       }
+    #     per_host: false

@@ -1,0 +1,333 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# Documentation: https://nofusscomputing.com/projects/ansible/playbooks
+#
+# image: nofusscomputing/ansible-ee >= 0.3.0
+#
+#
+- name: GLPI
+  hosts: localhost
+  become: false
+  gather_facts: false
+
+
+  roles: []
+
+
+  tasks:
+
+
+    - name: Ensure Job Tags have been Specified
+      ansible.builtin.assert:
+        that:
+          - ansible_run_tags | default([]) | list | length | int > 0
+        msg: This playbook requires job tags be set.
+      tags:
+        - always
+
+
+    - name: Validate User for ticket assignment on error
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_ticket_assign_error_user | int > 0
+      when: nfc_pb_glpi_ticket_assign_error_user is defined
+
+
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_automation: {
+          "error": 0,
+          "time": {
+            "start": "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}",
+            "end": 0
+          }
+        }
+      when: nfc_automation is not defined
+      tags:
+        - always
+
+
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "glpi",
+          "start": "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}",
+          "tags": "{{ ansible_run_tags }}"
+        }
+      tags:
+        - always
+
+
+    - name: Tasks
+      block:
+
+
+        - name: Fetch Ticket Template From ITIL Category
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/template-from-itil-category.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_template_from_itil_category
+
+
+        - name: Create GLPI Ticket
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/create.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_create
+
+
+        - name: Create GLPI Ticket Task
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/task_create.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_task_create
+
+
+        - name: Close GLPI Ticket Task
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/tickets/close.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - ticket_close
+
+
+      rescue:
+
+
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          tags:
+            - always
+
+
+        - name: Fail task always
+          ansible.builtin.assert:
+            that:
+              - false
+            msg: The Task failed
+          tags:
+            - always
+
+
+      always:
+
+
+        - name: Assign ticket to specified user due to error
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/api-create.yaml
+          vars:
+            glpi_api_create_name: Assign ticket to specified User due to error
+            glpi_api_create_path: Ticket/{{ nfc_pb_glpi.ticket.id | int }}/Ticket_User
+            glpi_api_body: {
+              "tickets_id": "{{ nfc_pb_glpi.ticket.id | int }}",
+              "users_id": "{{ nfc_pb_glpi.ticket.error_user }}",
+              "type": 2,
+              "use_notification": 1
+            }
+          tags:
+            - always
+          when: >
+            (
+              nfc_automation.error | int == 1
+            )
+              and
+            nfc_pb_glpi.ticket.error_user is defined
+              and
+            nfc_pb_glpi.ticket.id is defined
+
+
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
+          tags:
+            - always
+
+
+        - name: Set Automation Facts
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'end': nfc_task_endtime
+              }) }}"
+          tags:
+            - always
+
+
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | from_yaml ] }}"
+          tags:
+            - always
+
+
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
+
+
+  vars:
+
+
+    nfc_pb_awx_tower_template:
+      - name: "ITSM/GLPI/Ticket/Create"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Create a Ticket in GLPI.
+          Available tags:
+            'ticket_template_from_itil_category' Optional Tag to fetch ticket templete from itil category,
+            'ticket_create' Create ticket.
+          A Tag MUST be set.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_itil_category: 0
+          nfc_pb_glpi_ticket_type: request
+          nfc_pb_glpi_ticket_create:
+            name: 'Ticket Title'
+            content: 'Ticket Dscription'
+        job_tags: ticket_template_from_itil_category,ticket_create
+        job_type: "run"
+        labels:
+          - create
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+      - name: "ITSM/GLPI/Ticket/Task/Create"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Create a Ticket Task in GLPI.
+          Available tags:
+            'ticket_template_from_itil_category' Optional Tag to fetch ticket templete from itil category,
+            'ticket_create' Create ticket.
+            'ticket_task_create' Create a Ticket task from the created or specified ticket
+          A Tag MUST be set.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_itil_category: 0
+          nfc_pb_glpi_ticket_type: request
+          nfc_pb_glpi_ticket_create:
+            name: 'Ticket Title'
+            content: 'Ticket Dscription'
+          nfc_pb_glpi_ticket_task_create:
+            id: 0
+            taskcategories_id: 1,
+            tickets_id: 0
+            content: "Created Ticket Task via AWX"
+        job_tags: ticket_template_from_itil_category,ticket_create,ticket_task_create
+        job_type: "run"
+        labels:
+          - create
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+      - name: "ITSM/GLPI/Ticket/Assign/Error"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: true
+        description: |
+          Create a Ticket Task in GLPI.
+          The always tag must be specified for this task to run.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_ticket_assign_error_user: 0
+        job_tags: always
+        job_type: "run"
+        labels:
+          - assign
+          - error
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: true
+        verbosity: 2
+      - name: "ITSM/GLPI/Ticket/Template/From_ITIL_Category"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: true
+        description: |
+          Using the ITIL Category Fetch the ticket template id then build a default
+          template. Also Returns Mandatory fields for validation usage when creating
+          the ticket.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_itil_category: 0
+          nfc_pb_glpi_ticket_type: request
+        job_tags: ticket_template_from_itil_category
+        job_type: "run"
+        labels:
+          - glpi
+          - itil
+          - itsm
+          - ticket
+          - template
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+        credential_types:
+
+          - name: playbook/glpi/api
+            description: A Credential type for No Fuss Computings Public Playbooks glpi.yaml
+            inputs: |
+              fields:
+                - id: host
+                  type: string
+                  label: GLPI FQDN
+                  secret: false
+                - id: app_token
+                  type: string
+                  label: GLPI APP Token
+                  secret: true
+                - id: user_token
+                  type: string
+                  label: GLPI User Token
+                  secret: true
+              required:
+                - host
+                - app_token
+                - user_token
+            injectors: >
+              extra_vars:
+                nfc_pb_glpi_host: '{{ host }}'
+                nfc_pb_glpi_app_token: '{{ app_token }}'
+                nfc_pb_glpi_user_token: '{{ user_token }}'

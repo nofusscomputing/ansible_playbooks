@@ -1,0 +1,34 @@
+---
+
+- name: Validation 'glpi_api_ticket_body' must exist.
+  ansible.builtin.assert:
+    that:
+      - glpi_api_body is defined
+    msg: "'glpi_api_body' must be defined."
+
+
+- name: "{{ glpi_api_create_name | default('GLPI API Create') }}"
+  ansible.builtin.uri:
+    url: "{{ http_protocol | default('https') | string }}://{{ nfc_pb_glpi_host }}/apirest.php/{{ glpi_api_create_path }}"
+    method: "{{ glpi_api_create_method | default('POST') }}"
+    body_format: json
+    body: "{\"input\": {{ glpi_api_body | from_yaml | to_json }} }"
+    return_content: true
+    status_code: [200, 201]
+    headers:
+      App-Token: "{{ nfc_pb_glpi_app_token }}"
+      Session-Token: "{{ nfc_pb_glpi_session.valid_id }}"
+    validate_certs: "{{ nfc_pb_glpi_validate_certs | default(true) | bool }}"
+  no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
+  register: glpi_api_create
+
+
+- name: Set fact
+  ansible.builtin.set_fact:
+    "{{ glpi_api_create_register | default('glpi_api_create') | string }}": "{{ glpi_api_create }}"
+  no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
+  when: glpi_api_create_register | default('') != ''
+
+- name: Fact Cleanup
+  ansible.builtin.set_fact:
+    glpi_api_body: ''
