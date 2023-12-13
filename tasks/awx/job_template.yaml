@@ -49,6 +49,7 @@
         controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
         controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
 
+        concurrent_jobs_enabled: "{{ nfc_pb_awx_job_template.concurrent_jobs_enabled | default(false) | bool }}"
         execution_environment: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
         extra_vars: "{{ nfc_pb_awx_job_template.extra_vars | default(omit) }}"
         forks: "{{ nfc_pb_awx_job_template.forks| default(1) }}"
