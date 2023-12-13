@@ -94,7 +94,8 @@
       ansible.builtin.set_fact:
         nfc_pb_glpi:
           ticket: {
-            "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}"
+            "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}",
+            "error_user": "{{ nfc_pb_glpi_ticket_assign_error_user | default(0) | int }}"
 
           }
       when: nfc_pb_glpi.ticket is not defined
