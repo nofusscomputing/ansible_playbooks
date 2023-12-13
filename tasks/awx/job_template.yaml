@@ -49,8 +49,8 @@
         controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
         controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
 
-        execution_environment: "{{ nfc_pb_awx_job_template.extra_vars | default(omit) }}"
-        extra_vars: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
+        execution_environment: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
+        extra_vars: "{{ nfc_pb_awx_job_template.extra_vars | default(omit) }}"
         forks: "{{ nfc_pb_awx_job_template.forks| default(1) }}"
         job_type: "{{ nfc_pb_awx_job_template.job_type | default('run') }}"
         job_tags: "{{ nfc_pb_awx_job_template.job_tags | default(omit) }}"
