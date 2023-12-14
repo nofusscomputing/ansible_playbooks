@@ -189,20 +189,35 @@
 
     - name: Create Play fact
       ansible.builtin.set_fact:
-        nfc_pb_glpi:
-          ticket: "{{ nfc_pb_glpi.ticket | combine({
+        ticket: "{{ nfc_pb_glpi.ticket | combine({
             'task': (nfc_pb_glpi_ticket_task | default({}) | from_yaml)
-            })}}"
+          })}}"
       when: nfc_pb_glpi.ticket is defined
 
 
     - name: Create Play fact
       ansible.builtin.set_fact:
-        nfc_pb_glpi:
-          ticket: 
-            task: "{{ nfc_pb_glpi_ticket_task_assemble | from_yaml }}"
+        ticket:
+          task: "{{ nfc_pb_glpi_ticket_task_assemble | from_yaml }}"
         nfc_pb_glpi_ticket_task: ''
       when: nfc_pb_glpi.ticket is not defined
+
+
+    - name: Create Play fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi:
+          ticket: "{{ nfc_pb_glpi }}"
+      when: nfc_pb_glpi is not defined
+
+
+    - name: Create Play fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine({
+            'ticket': ticket
+          })}}"
+      when: nfc_pb_glpi is defined
+
+
 
 
   always:

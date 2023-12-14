@@ -128,13 +128,38 @@
 
     - name: Set Task Facts
       ansible.builtin.set_fact:
+        ticket:
+          template: "{{ glpi_ticket_template | combine({
+              'itilcategories_id': nfc_pb_glpi_itil_category
+            }) }}"
+          mandatory_fields: glpi_ticket_mandatory_fields
+      when: nfc_pb_glpi.ticket is not defined
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        ticket: "{{ nfc_pb_glpi.ticket | combine({
+          'template': glpi_ticket_template | combine({
+              'itilcategories_id': nfc_pb_glpi_itil_category
+            }),
+          'mandatory_fields': glpi_ticket_mandatory_fields
+          }) }}"
+      when: nfc_pb_glpi.ticket is defined
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
         nfc_pb_glpi:
-          ticket: {
-            "template": "{{ glpi_ticket_template | combine({
-                'itilcategories_id': nfc_pb_glpi_itil_category
-              }) }}",
-            "mandatory_fields": "{{ glpi_ticket_mandatory_fields }}"
-          }
+          ticket: "{{ ticket }}"
+      when: nfc_pb_glpi is not defined
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine({
+          'ticket': ticket
+          }) }}"
+      when: nfc_pb_glpi is defined
 
 
     - name: Create Artifact

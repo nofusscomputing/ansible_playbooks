@@ -1,0 +1,63 @@
+---
+
+- name: Delete GLPI Plugin FormCreator Form
+  block:
+
+
+    - name: Ensure that the form data exists
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_plugin_formcreator_delete_id | int > 0
+        msg: "var 'nfc_pb_glpi_plugin_formcreator_delete_id' must be a value above '0'"
+      when: nfc_pb_glpi_plugin_formcreator_delete_id is defined
+
+
+    - name: Ensure that the form data exists
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi.plugins.form_creator is defined
+        msg: No Form data found
+      when: >
+        nfc_pb_glpi.plugins is defined
+          and
+        nfc_pb_glpi_plugin_formcreator_delete_id is not defined
+
+
+    - name: Ensure Answer ID Exists
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi.plugins.form_creator.answer_id is defined
+          - nfc_pb_glpi.plugins.form_creator.answer_id | int > 0
+        msg: answer_id not found or had a falue of '1'.
+
+
+    - name: Start Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-create.yaml
+      when: nfc_pb_glpi_session | default('') == ''
+
+
+    - name: Delete Form
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      vars:
+        glpi_api_request_method: DELETE
+        glpi_api_request_name: Delete Form
+        glpi_api_request_path: "PluginFormcreatorFormAnswer/{{ nfc_pb_glpi_plugin_formcreator_delete_id(nfc_pb_glpi.plugins.form_creator.answer_id) }}"
+        glpi_api_request_register: glpi_plugin_formcreator_form_deleted
+
+
+    - name: Confirm Deleted
+      ansible.builtin.assert:
+        that:
+          - glpi_plugin_formcreator_form_deleted.json[0][{{ nfc_pb_glpi_plugin_formcreator_delete_id(nfc_pb_glpi.plugins.form_creator.answer_id) }}] | bool
+          - glpi_plugin_formcreator_form_deleted.status | int == 200
+        msg: Form failed to Delete.
+
+
+  always:
+
+    - name: End Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-end.yaml
+      when: glpi_session_get.status | default(0) | int == 200

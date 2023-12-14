@@ -65,6 +65,16 @@
       block:
 
 
+        - name: "[Plugin] FormCreator to JSON"
+          ansible.builtin.include_tasks:
+            file: tasks/glpi/plugin-formcreator-to-json.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - plugin_form_fetch_json
+
+
         - name: Fetch Ticket Template From ITIL Category
           ansible.builtin.include_tasks:
             file: tasks/glpi/tickets/template-from-itil-category.yaml
@@ -190,6 +200,57 @@
 
 
     nfc_pb_awx_tower_template:
+      - name: "ITIL/GLPI/Plugin/FormCreator/Delete/Form_Answer"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: true
+        concurrent_jobs_enabled: true
+        description: |
+          Delete A Form Creator Form Answer.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_plugin_formcreator_delete_id: 0
+        job_tags: plugin_form_delete_answer
+        job_type: "run"
+        labels:
+          - delete
+          - forms
+          - glpi
+          - itsm
+          - plugin
+          - service_catalog
+          - ticket
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+
+      - name: "ITIL/GLPI/Plugin/FormCreator/to_JSON_Object"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: false
+        concurrent_jobs_enabled: true
+        description: |
+          Fetch Form Creator Form and create JSON Object.
+          Optionaly add to ticket task body as string.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_form_to_ticket: false
+          nfc_pb_glpi_ticket_task_category: 0
+        job_tags: ticket_template_from_itil_category,ticket_create,ticket_task_create
+        job_type: "run"
+        labels:
+          - forms
+          - glpi
+          - itsm
+          - plugin
+          - service_catalog
+          - ticket
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+
       - name: "ITIL/GLPI/Ticket/Close"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true
@@ -211,6 +272,7 @@
         survey_enabled: false
         use_fact_cache: false
         verbosity: 2
+
       - name: "ITIL/GLPI/Ticket/Create"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true
@@ -242,6 +304,7 @@
         survey_enabled: false
         use_fact_cache: false
         verbosity: 2
+
       - name: "ITIL/GLPI/Ticket/Task/Create"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true
@@ -267,7 +330,7 @@
             taskcategories_id: 1,
             tickets_id: 0
             content: "Created Ticket Task via AWX"
-        job_tags: ticket_template_from_itil_category,ticket_create,ticket_task_create
+        job_tags: ticket_task_create
         job_type: "run"
         labels:
           - create
@@ -279,6 +342,7 @@
         survey_enabled: false
         use_fact_cache: false
         verbosity: 2
+
       - name: "ITIL/GLPI/Ticket/Assign/Error"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true
@@ -304,6 +368,7 @@
         survey_enabled: false
         use_fact_cache: true
         verbosity: 2
+
       - name: "ITIL/GLPI/Ticket/Template/From_ITIL_Category"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true

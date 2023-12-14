@@ -1,0 +1,24 @@
+---
+
+- name: Fetch Form Question
+  ansible.builtin.include_tasks:
+    file: tasks/glpi/api-request.yaml
+  loop: "{{ glpi_plugin_formcreator_form_completed.json }}"
+  loop_control:
+    loop_var: completed_form
+  vars:
+    glpi_api_request_name: Fetch Form Question
+    glpi_api_request_path: PluginFormcreatorQuestion/{{ form_answer.plugin_formcreator_questions_id }}
+    glpi_api_request_register: glpi_plugin_formcreator_form_question
+
+
+- name: Add Question to List
+  ansible.builtin.set_fact:
+    form_questions: "{{ form_questions | combine({
+      form_answer.plugin_formcreator_questions_id: glpi_plugin_formcreator_form_question.json
+      }) }}"
+
+
+- name: Clear Task File vars "Fetch Form Question"
+  ansible.builtin.set_fact:
+    glpi_plugin_formcreator_form_question: ''

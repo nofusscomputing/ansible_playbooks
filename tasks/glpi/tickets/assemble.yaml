@@ -51,8 +51,17 @@
       ansible.builtin.set_fact:
         nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
             'name': ( nfc_pb_glpi.ticket.template.name | default('') | string + nfc_pb_glpi_ticket_create.name | default('')| string),
+            'completename': ( nfc_pb_glpi.ticket.template.name | default('') | string + nfc_pb_glpi_ticket_create.name | default('')| string)
           }) }}"
         nfc_pb_glpi_ticket_description: "{{ nfc_pb_glpi_ticket_create.content | default('') | string }}"
+
+
+    - name: Set Validation required
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_ticket_assembled: "{{ nfc_pb_glpi_ticket_assembled | combine({
+            'validation_percent': 100 | int
+          }) }}"
+      when: nfc_pb_glpi.ticket.approval is defined
 
 
     - name: Add Automation details to Ticket description

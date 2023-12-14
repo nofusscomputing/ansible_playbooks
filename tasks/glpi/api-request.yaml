@@ -3,7 +3,7 @@
 - name: "{{ glpi_api_request_name | default('GLPI API Request') }}"
   ansible.builtin.uri:
     url: "{{ http_protocol | default('https') | string }}://{{ nfc_pb_glpi_host }}/apirest.php/{{ glpi_api_request_path }}"
-    method: "GET"
+    method: "{{ glpi_api_request_method | default('GET') }}"
     return_content: true
     status_code: [200, 201]
     headers:

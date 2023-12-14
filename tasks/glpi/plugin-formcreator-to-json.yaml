@@ -1,0 +1,272 @@
+---
+
+- name: Fetch GLPI Plugin ForCreator Forms and return as JSON
+  block:
+
+
+    - name: Validation 'nfc_pb_glpi_ticket_task_category' must exist.
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_ticket_task_category is defined
+          - nfc_pb_glpi_ticket_task_category | int > 0
+        msg: "'nfc_pb_glpi_ticket_task_create' must be defined and not be a value of '0'."
+      when: nfc_pb_glpi_form_to_ticket | default(false) | bool
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        form_questions: {}
+        nfc_pb_glpi_plugin_form: {}
+
+
+    - name: Start Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-create.yaml
+      when: nfc_pb_glpi_session | default('') == ''
+
+
+    - name: Fetch Completed Form
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      vars:
+        glpi_api_request_name: Fetch Completed Forms
+        glpi_api_request_path: PluginFormcreatorFormAnswer?range=0-0&sort=id&order=ASC
+        glpi_api_request_register: glpi_plugin_formcreator_form_completed
+
+
+    - name: Fetch Form Answers
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      loop: "{{ glpi_plugin_formcreator_form_completed.json }}"
+      loop_control:
+        loop_var: completed_form
+      vars:
+        glpi_api_request_name: Fetch Form Answers
+        glpi_api_request_path: PluginFormcreatorFormAnswer/{{ completed_form.id }}/PluginFormcreatorAnswer
+        glpi_api_request_register: glpi_plugin_formcreator_form_answers
+
+
+    - name: Fetch Form Questions
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/plugin-formcreator-fetch-questions.yaml
+      loop: "{{ glpi_plugin_formcreator_form_answers.json }}"
+      loop_control:
+        loop_var: form_answer
+
+
+    - name: DEBUG
+      ansible.builtin.debug:
+        msg:
+          - "{{ glpi_plugin_formcreator_form_answers.json }}"
+          - "{{ form_questions }}"
+
+
+    - name: DEBUG
+      ansible.builtin.debug:
+        msg:
+          - "{{ glpi_plugin_formcreator_form_answers.json | length }}"
+          - "{{ form_questions | length }}"
+
+
+    - name: Create JSON Object with form Data
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'id': glpi_plugin_formcreator_form_completed.json[0].plugin_formcreator_forms_id,
+            'answer_id': glpi_plugin_formcreator_form_completed.json[0].id,
+            'requester_id': glpi_plugin_formcreator_form_completed.json[0].requester_id,
+            'name': glpi_plugin_formcreator_form_completed.json[0].name,
+            'ticket_entity':glpi_plugin_formcreator_form_completed.json[0].entities_id
+          })}}"
+
+
+    - name: Create JSON Object with form Data
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+          'questions': (nfc_pb_glpi_plugin_form.questions | default([])) + [{
+              'question_id': form_answer.plugin_formcreator_questions_id,
+              'answer': form_answer.answer,
+              'question': form_questions[form_answer.plugin_formcreator_questions_id]['name'] | lower | replace(' ', '_'),
+              'field_type': form_questions[form_answer.plugin_formcreator_questions_id]['fieldtype'],
+              'description': form_questions[form_answer.plugin_formcreator_questions_id]['description']
+            }]}) }}"
+      loop: "{{ glpi_plugin_formcreator_form_answers.json }}"
+      loop_control:
+        loop_var: form_answer
+
+
+    - name: Check form for 'approver_id' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'approver_id': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'approver_id'
+
+
+    - name: Check form for 'entity_approval' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'entity_approval': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: >
+        form_question.question == 'entity_approval'
+          and
+        nfc_pb_glpi_plugin_form.approver_id == 0
+
+
+    - name: Check form for 'approval_required' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'approval_required': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'approval_required'
+
+
+    - name: Check form for 'entity_id' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'entity': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'entity'
+
+
+    - name: Check form for 'ticket_category' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'ticket_category': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'ticket_category'
+
+
+    - name: Check form for 'ticket_title' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'ticket_title': form_question.answer | string,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'ticket_title'
+
+
+    - name: Check form for 'ticket_type' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'ticket_type': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'ticket_type'
+
+    - name: Create Play fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi:
+          plugins: "{{ nfc_pb_glpi.plugin | combine({
+            'form_creator': nfc_pb_glpi_plugin_form
+            })}}"
+      when: nfc_pb_glpi.plugin is defined
+
+
+    - name: Create Play fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi:
+          plugins:
+            form_creator: "{{ nfc_pb_glpi_plugin_form }}"
+      when: nfc_pb_glpi.plugin is not defined
+
+
+    - name: DEBUG
+      ansible.builtin.debug:
+        msg:
+          - "{{ nfc_pb_glpi_plugin_form }}"
+
+
+    - name: Create Variables to generate form
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_itil_category: "{{ nfc_pb_glpi.plugins.form_creator.ticket_category | int }}"
+        nfc_pb_glpi_ticket_create:
+          name: "{{ nfc_pb_glpi.plugins.form_creator.ticket_title | default('') | string }}"
+          content: ""
+          entities_id: "{{ nfc_pb_glpi.plugins.form_creator.ticket_entity| int }}"
+          type: 2
+        nfc_pb_glpi_ticket_task_create:
+          taskcategories_id: "{{ nfc_pb_glpi_ticket_task_category }}"
+          content: "{{ nfc_pb_glpi.plugins.form_creator | string }}"
+        nfc_pb_glpi_ticket_type: request
+      when: nfc_pb_glpi_form_to_ticket | default(false) | bool
+
+
+    - name: Fetch Entity Approver from Profile and Entity id
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      vars:
+        glpi_api_request_name: Fetch Entity Approver from Profile and Entity id
+        glpi_api_request_path: Profile_User?searchText[profiles_id]={{ nfc_pb_glpi.plugins.form_creator.entity_approval }}&searchText[entities_id]={{ nfc_pb_glpi.plugins.form_creator.entity }}
+        glpi_api_request_register: glpi_user_profile
+      when: >
+        nfc_pb_glpi.plugins.form_creator.approval_required | default(false) | bool
+          and
+        nfc_pb_glpi_plugin_form.approver_id == 0
+
+
+    - name: Add Ticket Approval Details
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine({
+            'ticket': {
+              'approval': {
+                'comment_submission': ('As the person listed as responsible, this request requires your approval.' | string),
+                'users_id_validate': glpi_user_profile.json[0].users_id | int
+              }
+            }
+          }) }}"
+        glpi_user_profile: ''
+      when: >
+        nfc_pb_glpi.plugins.form_creator.approval_required | default(false) | bool
+          and
+        nfc_pb_glpi_plugin_form.approver_id == 0
+
+
+    - name: Add Ticket Approval Details
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine({
+            'ticket': {
+              'approval': {
+                'comment_submission': ('As the person listed as responsible, this request requires your approval.' | string),
+                'users_id_validate': nfc_pb_glpi.plugins.form_creator.approver_id | int
+              }
+            }
+          }) }}"
+      when: >
+        nfc_pb_glpi.plugins.form_creator.approval_required | default(false) | bool
+          and
+        nfc_pb_glpi_plugin_form.approver_id != 0
+
+
+  always:
+
+    - name: End Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-end.yaml
+      when: glpi_session_get.status | default(0) | int == 200
+
+
+    - name: Create Artifact
+      ansible.builtin.set_stats:
+        data:
+          nfc_pb_glpi: "{{ nfc_pb_glpi | default({}) }}"
+        per_host: false
