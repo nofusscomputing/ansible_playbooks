@@ -165,7 +165,7 @@
       ansible.builtin.set_fact:
         nfc_pb_glpi_itil_category: "{{ nfc_pb_glpi.plugins.form_creator.ticket_category | int }}"
         nfc_pb_glpi_ticket_create:
-          name: "{{ nfc_pb_glpi.plugins.form_creator.ticket_title | string }}"
+          name: "{{ nfc_pb_glpi.plugins.form_creator.ticket_title | default('') | string }}"
           content: ""
           entities_id: "{{ nfc_pb_glpi.plugins.form_creator.entity_id | int }}"
           type: 2
