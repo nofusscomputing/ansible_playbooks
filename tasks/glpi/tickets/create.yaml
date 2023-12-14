@@ -92,27 +92,37 @@
 
     - name: Set Task Fact
       ansible.builtin.set_fact:
-        nfc_pb_glpi:
-          ticket: {
-            "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}",
-            "error_user": "{{ nfc_pb_glpi_ticket_assign_error_user | default(0) | int }}"
+        ticket:
+          ticket: "{{ nfc_pb_glpi_ticket | from_yaml }}"
+          error_user: "{{ nfc_pb_glpi_ticket_assign_error_user | default(0) | int }}"
 
-          }
       when: nfc_pb_glpi.ticket is not defined
 
 
     - name: Set Task Fact
       ansible.builtin.set_fact:
-        nfc_pb_glpi:
+        ticket:
           ticket: "{{ nfc_pb_glpi.ticket | combine(nfc_pb_glpi_ticket | from_yaml) }}"
+          error_user: "{{ nfc_pb_glpi_ticket_assign_error_user | default(0) | int }}"
       when: nfc_pb_glpi.ticket is defined
+
+
+    - name: Set Task Fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ ticket }}"
+        ticket: null
+      when: nfc_pb_glpi is not defined
+
+
+    - name: Set Task Fact
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine(ticket) }}"
+        ticket: null
+      when: nfc_pb_glpi is defined
 
 
     - name: Create Artifact
       ansible.builtin.set_stats:
         data:
-          nfc_pb_glpi: {
-            "ticket": "{{ nfc_pb_glpi_ticket | from_yaml }}"
-
-          }
+          nfc_pb_glpi: "{{ nfc_pb_glpi }}"
         per_host: false
