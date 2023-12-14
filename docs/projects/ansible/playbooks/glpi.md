@@ -71,8 +71,6 @@ Prior to the play completing the following artifact/stats are set:
   "nfc_pb_glpi_ticket_type": "request"
 }
 
-
-
 ```
 
 
