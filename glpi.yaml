@@ -200,6 +200,31 @@
 
 
     nfc_pb_awx_tower_template:
+      - name: "ITSM/GLPI/Plugin/FormCreator/Delete/Form_Answer"
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_tags_on_launch: false
+        ask_variables_on_launch: true
+        concurrent_jobs_enabled: true
+        description: |
+          Delete A Form Creator Form Answer.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_glpi_plugin_formcreator_delete_id: 0
+        job_tags: plugin_form_delete_answer
+        job_type: "run"
+        labels:
+          - delete
+          - forms
+          - glpi
+          - itsm
+          - plugin
+          - service_catalog
+          - ticket
+        survey_enabled: false
+        use_fact_cache: false
+        verbosity: 2
+
       - name: "ITSM/GLPI/Plugin/FormCreator/to_JSON_Object"
         ask_credential_on_launch: true
         ask_inventory_on_launch: true
