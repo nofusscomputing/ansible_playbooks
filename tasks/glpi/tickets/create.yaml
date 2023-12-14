@@ -81,6 +81,18 @@
         }
 
 
+    - name: Send Request Approval
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-create.yaml
+      when: nfc_pb_glpi.ticket.approval is defined
+      vars:
+        glpi_api_create_name: Send Request Approval
+        glpi_api_create_path: Ticket/{{ nfc_pb_glpi_ticket.id | int }}/TicketValidation
+        glpi_api_body: "{{ nfc_pb_glpi.ticket.approval | combine({
+            'tickets_id': nfc_pb_glpi_ticket.id | int
+          }) }}"
+
+
   always:
 
 

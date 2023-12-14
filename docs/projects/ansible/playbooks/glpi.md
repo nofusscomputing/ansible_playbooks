@@ -55,6 +55,26 @@ Within the playbook, this task runs first. This is by design so that a ticket fo
     
     Specifying the variables for the below tasks for creating a ticket and ticket task, the details from the form will not be used.
 
+Prior to the play completing the following artifact/stats are set:
+
+``` json
+{
+  "nfc_pb_glpi": {
+    "ticket":{
+      "approval": {},         // dict. generated if the form has approval configured.
+    }
+  },
+  // The variables below this line are only created if variable 'nfc_pb_glpi_form_to_ticket=true'
+  "nfc_pb_glpi_itil_category": 0,
+  "nfc_pb_glpi_ticket_create": {},
+  "nfc_pb_glpi_ticket_task_create": {},
+  "nfc_pb_glpi_ticket_type": "request"
+}
+
+
+
+```
+
 
 ## Ticket Template From ITIL Category
 
