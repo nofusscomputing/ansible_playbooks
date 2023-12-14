@@ -75,8 +75,7 @@
             'answer_id': glpi_plugin_formcreator_form_completed.json[0].id,
             'requester_id': glpi_plugin_formcreator_form_completed.json[0].requester_id,
             'name': glpi_plugin_formcreator_form_completed.json[0].name,
-            'ticket_entity':glpi_plugin_formcreator_form_completed.json[0].entities_id,
-            'entity_id': glpi_plugin_formcreator_form_completed.json[0].entities_id
+            'ticket_entity':glpi_plugin_formcreator_form_completed.json[0].entities_id
           })}}"
 
 
@@ -95,6 +94,31 @@
         loop_var: form_answer
 
 
+    - name: Check form for 'approver_id' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'approver_id': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'approver_id'
+
+
+    - name: Check form for 'entity_approval' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'entity_approval': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: >
+        form_question.question == 'entity_approval'
+          and
+        nfc_pb_glpi_plugin_form.approver_id == 0
+
+
     - name: Check form for 'approval_required' and add to JSON Object
       ansible.builtin.set_fact:
         nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
@@ -104,6 +128,17 @@
       loop_control:
         loop_var: form_question
       when: form_question.question == 'approval_required'
+
+
+    - name: Check form for 'entity_id' and add to JSON Object
+      ansible.builtin.set_fact:
+        nfc_pb_glpi_plugin_form: "{{ nfc_pb_glpi_plugin_form | combine({
+            'entity': form_question.answer | int,
+          })}}"
+      loop: "{{ nfc_pb_glpi_plugin_form.questions }}"
+      loop_control:
+        loop_var: form_question
+      when: form_question.question == 'entity'
 
 
     - name: Check form for 'ticket_category' and add to JSON Object
@@ -167,13 +202,59 @@
         nfc_pb_glpi_ticket_create:
           name: "{{ nfc_pb_glpi.plugins.form_creator.ticket_title | default('') | string }}"
           content: ""
-          entities_id: "{{ nfc_pb_glpi.plugins.form_creator.entity_id | int }}"
+          entities_id: "{{ nfc_pb_glpi.plugins.form_creator.ticket_entity| int }}"
           type: 2
         nfc_pb_glpi_ticket_task_create:
           taskcategories_id: "{{ nfc_pb_glpi_ticket_task_category }}"
           content: "{{ nfc_pb_glpi.plugins.form_creator | string }}"
         nfc_pb_glpi_ticket_type: request
       when: nfc_pb_glpi_form_to_ticket | default(false) | bool
+
+
+    - name: Fetch Entity Approver from Profile and Entity id
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      vars:
+        glpi_api_request_name: Fetch Entity Approver from Profile and Entity id
+        glpi_api_request_path: Profile_User?searchText[profiles_id]={{ nfc_pb_glpi.plugins.form_creator.entity_approval }}&searchText[entities_id]={{ nfc_pb_glpi.plugins.form_creator.entity }}
+        glpi_api_request_register: glpi_user_profile
+      when: >
+        nfc_pb_glpi.plugins.form_creator.approval_required | default(false) | bool
+          and
+        nfc_pb_glpi_plugin_form.approver_id == 0
+
+
+    - name: Add Ticket Approval Details
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine({
+            'ticket': {
+              'approval': {
+                'comment_submission': ('As the person listed as responsible, this request requires your approval.' | string),
+                'users_id_validate': glpi_user_profile.json[0].users_id | int
+              }
+            }
+          }) }}"
+        glpi_user_profile: ''
+      when: >
+        nfc_pb_glpi.plugins.form_creator.approval_required | default(false) | bool
+          and
+        nfc_pb_glpi_plugin_form.approver_id == 0
+
+
+    - name: Add Ticket Approval Details
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine({
+            'ticket': {
+              'approval': {
+                'comment_submission': ('As the person listed as responsible, this request requires your approval.' | string),
+                'users_id_validate': nfc_pb_glpi.plugins.form_creator.approver_id | int
+              }
+            }
+          }) }}"
+      when: >
+        nfc_pb_glpi.plugins.form_creator.approval_required | default(false) | bool
+          and
+        nfc_pb_glpi_plugin_form.approver_id != 0
 
 
   always:
