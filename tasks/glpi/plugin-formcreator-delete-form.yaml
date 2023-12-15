@@ -43,14 +43,14 @@
       vars:
         glpi_api_request_method: DELETE
         glpi_api_request_name: Delete Form
-        glpi_api_request_path: "PluginFormcreatorFormAnswer/{{ nfc_pb_glpi_plugin_formcreator_delete_id(nfc_pb_glpi.plugins.form_creator.answer_id) }}"
+        glpi_api_request_path: "PluginFormcreatorFormAnswer/{{ nfc_pb_glpi_plugin_formcreator_delete_id | default(nfc_pb_glpi.plugins.form_creator.answer_id) }}"
         glpi_api_request_register: glpi_plugin_formcreator_form_deleted
 
 
     - name: Confirm Deleted
       ansible.builtin.assert:
         that:
-          - glpi_plugin_formcreator_form_deleted.json[0][{{ nfc_pb_glpi_plugin_formcreator_delete_id(nfc_pb_glpi.plugins.form_creator.answer_id) }}] | bool
+          - glpi_plugin_formcreator_form_deleted.json[0][{{ nfc_pb_glpi_plugin_formcreator_delete_id | default(nfc_pb_glpi.plugins.form_creator.answer_id) }}] | bool
           - glpi_plugin_formcreator_form_deleted.status | int == 200
         msg: Form failed to Delete.
 
