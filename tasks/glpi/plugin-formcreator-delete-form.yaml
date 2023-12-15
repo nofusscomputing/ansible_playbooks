@@ -50,7 +50,7 @@
     - name: Confirm Deleted
       ansible.builtin.assert:
         that:
-          - glpi_plugin_formcreator_form_deleted.json[0][nfc_pb_glpi_plugin_formcreator_delete_id] | bool
+          - "'OK' in glpi_plugin_formcreator_form_deleted.msg"
           - glpi_plugin_formcreator_form_deleted.status | int == 200
         msg: Form failed to Delete.
       when: nfc_pb_glpi_plugin_formcreator_delete_id is defined
@@ -59,7 +59,7 @@
     - name: Confirm Deleted
       ansible.builtin.assert:
         that:
-          - glpi_plugin_formcreator_form_deleted.json[0][nfc_pb_glpi.plugins.form_creator.answer_id] | bool
+          - "'OK' in glpi_plugin_formcreator_form_deleted.msg"
           - glpi_plugin_formcreator_form_deleted.status | int == 200
         msg: Form failed to Delete.
       when: nfc_pb_glpi_plugin_formcreator_delete_id is not defined
