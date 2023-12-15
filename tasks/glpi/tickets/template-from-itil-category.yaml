@@ -132,7 +132,7 @@
           template: "{{ glpi_ticket_template | combine({
               'itilcategories_id': nfc_pb_glpi_itil_category
             }) }}"
-          mandatory_fields: glpi_ticket_mandatory_fields
+          mandatory_fields: "{{ glpi_ticket_mandatory_fields }}"
       when: nfc_pb_glpi.ticket is not defined
 
 
