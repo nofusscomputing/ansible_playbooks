@@ -29,7 +29,6 @@
     - name: "DEBUG {{ glpi_api_request_name | default('GLPI API request') }}"
       ansible.builtin.debug:
         msg:
-          body: "{\"input\": {{ glpi_api_body | from_yaml | to_json }} }"
           elapsed: "{{ glpi_api_request.elapsed | default('-') | string }}"
           method: "{{ glpi_api_request_method | default('POST') }}"
           msg: "{{ glpi_api_request.msg | default('-') | string }}"
