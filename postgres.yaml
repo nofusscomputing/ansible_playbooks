@@ -21,146 +21,357 @@
   hosts: localhost
   gather_facts: true
 
-  tasks:
 
-# Dependencies:
-#   ansible-galaxy collection install community.postgresql
-#   apt install postgresql-common postgresql-client
-#   pip install psycopg2
+  pre_tasks:
 
 
-    # - name: Check for Tags
-    #   ansible.builtin.assert:
-    #     that:
-    #       - "'backup' in {{ ansible_run_tags }} or 'restore' in {{ ansible_run_tags }}"
-    #     fail_msg: "You must specify an ansible tag. available 'backup/restore'"
-    #   tags:
-    #     - always
-    - name: Backup PostgresDB
-      ansible.builtin.include_tasks:
-        file: tasks/backup-postgres.yaml
-        apply:
-          tags:
-            - restore
-      when: backup.postgresdb.databases | default([]) | length | int > 0
-      tags:
-        - backup
-
-    - name: Check Variables
-      ansible.builtin.assert:
-        that:
-          - postgresDB_directory_backup | default('') != ''
-          - postgresDB_host | default('') != ''
-          - postgresDB_user | default('') != ''
-          - postgresDB_password | default('') != ''
-          - postgresDB_database_name | default('') != ''
-        fail_msg: "You must specify variables 'postgresDB_directory_backup/postgresDB_host/postgresDB_user/postgresDB_password/postgresDB_database_name'"
-      tags:
-        - restore
-
-
-    - name: Check Restore Variables
-      ansible.builtin.assert:
-        that:
-          - postgresDB_filename_restore | default('') != ''
-        fail_msg: "You must specify variable 'postgresDB_filename_restore'"
-      tags:
-        - restore
-
-
-    - name: Dependency Versions
-      ansible.builtin.command:
-        cmd: "{{ item.cmd }}"
-      changed_when: false
-      failed_when: false
-      loop: "{{ check_versions }}"
+      # Play and task set time
+    - name: Set Start Time
+      ansible.builtin.set_fact:
+        nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+      when: nfc_automation is not defined
       tags:
         - always
-      vars:
-        check_versions:
-          - cmd: "pip show psycopg2"
-          - cmd: "pg_dump --version"
 
 
-    - name: Set Backup Facts
+    # Setup dictionary 'nfc_automation'
+    - name: Set Automation Facts
       ansible.builtin.set_fact:
-        postgresDB_filename_backup: recovery.sql
+        nfc_automation: {
+          "error": 0,
+          "time": {
+            "start": "{{ nfc_task_starttime | string }}",
+            "end": 0
+          }
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+      when: nfc_automation is not defined
       tags:
-        - restore
+        - always
 
 
-    - name: Backup database
+    # Setup dictionary 'nfc_task'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "{{ ansible_play_name | lower | string }}",
+          "roles": "{{ ansible_play_role_names | string }}",
+          "skip_tags": "{{ ansible_skip_tags | list }}",
+          "start": "{{ nfc_task_starttime | string }}",
+          "tags": "{{ ansible_run_tags | list }}"
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
       tags:
-        - restore
+        - always
+
+
+    - name: Block - pre_tasks
       block:
 
 
-        - name: Dump an existing database to a file
-          community.postgresql.postgresql_db:
-            name: "{{ postgresDB_database_name }}"
-            state: dump
-            target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
-            login_host: "{{ postgresDB_host }}"
-            login_user: "{{ postgresDB_user }}"
-            login_password: "{{ postgresDB_password }}"
+        ############################
 
-
-        - name: Backup File Details
-          ansible.builtin.stat:
-            name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
 
       rescue:
 
-        - name: Remove Failed Backup
-          ansible.builtin.file:
-            name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
-            state: absent
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          tags:
+            - always
 
-        - name: Fail Play
-          ansible.builtin.assert:
-            that:
-              - false
-            fail_msg: Backup of Postgres database '{{ postgresDB_database_name }}' Failed!
-
-
-    - name: Restore database
-      tags:
-        - restore
-      block:
-
-        - name: Drop DB
-          community.postgresql.postgresql_db:
-            name: "{{ postgresDB_database_name }}"
-            state: absent
-            force: true
-            login_host: "{{ postgresDB_host }}"
-            login_user: "{{ postgresDB_user }}"
-            login_password: "{{ postgresDB_password }}"
-
-
-        - name: Create DB
-          community.postgresql.postgresql_db:
-            name: "{{ postgresDB_database_name }}"
-            state: present
-            login_host: "{{ postgresDB_host }}"
-            login_user: "{{ postgresDB_user }}"
-            login_password: "{{ postgresDB_password }}"
-
-        - name: Restore an existing database to a file
-          community.postgresql.postgresql_db:
-            name: "{{ postgresDB_database_name }}"
-            state: restore
-            target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_restore }}"
-            login_host: "{{ postgresDB_host }}"
-            login_user: "{{ postgresDB_user }}"
-            login_password: "{{ postgresDB_password }}"
 
       always:
 
-        - name: Remove the restore dump
-          ansible.builtin.file:
-            name: "{{ postgresDB_directory_backup }}/restore.sql"
-            state: absent
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+    # Don't use the 'roles' section.
+  roles: []
+    # if the included role(s) do not contain a rescue block, the playbook may stop
+    # executing in this section (roles) with the post_tasks not running. This will
+    # cause the artifacts to be incomplete. It's recommended to include your roles
+    # in section(s) 'pre_tasks', 'tasks' or 'post_tasks' and from within a block with
+   # rescue so that the playbook can complete and ensure that all artifacts are set.
+
+
+  tasks:
+
+
+    - name: Block - tasks
+      block:
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error eccured, follow error path to fail play
+
+
+        - name: Backup PostgresDB
+          ansible.builtin.include_tasks:
+            file: tasks/backup-postgres.yaml
+            apply:
+              tags:
+                - restore
+          when: backup.postgresdb.databases | default([]) | length | int > 0
+          tags:
+            - backup
+
+        - name: Check Variables
+          ansible.builtin.assert:
+            that:
+              - postgresDB_directory_backup | default('') != ''
+              - postgresDB_host | default('') != ''
+              - postgresDB_user | default('') != ''
+              - postgresDB_password | default('') != ''
+              - postgresDB_database_name | default('') != ''
+            fail_msg: "You must specify variables 'postgresDB_directory_backup/postgresDB_host/postgresDB_user/postgresDB_password/postgresDB_database_name'"
+          tags:
+            - restore
+
+
+        - name: Check Restore Variables
+          ansible.builtin.assert:
+            that:
+              - postgresDB_filename_restore | default('') != ''
+            fail_msg: "You must specify variable 'postgresDB_filename_restore'"
+          tags:
+            - restore
+
+
+        - name: Dependency Versions
+          ansible.builtin.command:
+            cmd: "{{ item.cmd }}"
+          changed_when: false
+          failed_when: false
+          loop: "{{ check_versions }}"
+          tags:
+            - always
+          vars:
+            check_versions:
+              - cmd: "pip show psycopg2"
+              - cmd: "pg_dump --version"
+
+
+        - name: Set Backup Facts
+          ansible.builtin.set_fact:
+            postgresDB_filename_backup: recovery.sql
+          tags:
+            - restore
+
+
+        - name: Backup database
+          tags:
+            - restore
+          block:
+
+
+            - name: Dump an existing database to a file
+              community.postgresql.postgresql_db:
+                name: "{{ postgresDB_database_name }}"
+                state: dump
+                target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+                login_host: "{{ postgresDB_host }}"
+                login_user: "{{ postgresDB_user }}"
+                login_password: "{{ postgresDB_password }}"
+
+
+            - name: Backup File Details
+              ansible.builtin.stat:
+                name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+
+          rescue:
+
+            - name: Remove Failed Backup
+              ansible.builtin.file:
+                name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+                state: absent
+
+            - name: Fail Play
+              ansible.builtin.assert:
+                that:
+                  - false
+                fail_msg: Backup of Postgres database '{{ postgresDB_database_name }}' Failed!
+
+
+        - name: Restore database
+          tags:
+            - restore
+          block:
+
+            - name: Drop DB
+              community.postgresql.postgresql_db:
+                name: "{{ postgresDB_database_name }}"
+                state: absent
+                force: true
+                login_host: "{{ postgresDB_host }}"
+                login_user: "{{ postgresDB_user }}"
+                login_password: "{{ postgresDB_password }}"
+
+
+            - name: Create DB
+              community.postgresql.postgresql_db:
+                name: "{{ postgresDB_database_name }}"
+                state: present
+                login_host: "{{ postgresDB_host }}"
+                login_user: "{{ postgresDB_user }}"
+                login_password: "{{ postgresDB_password }}"
+
+            - name: Restore an existing database to a file
+              community.postgresql.postgresql_db:
+                name: "{{ postgresDB_database_name }}"
+                state: restore
+                target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_restore }}"
+                login_host: "{{ postgresDB_host }}"
+                login_user: "{{ postgresDB_user }}"
+                login_password: "{{ postgresDB_password }}"
+
+          always:
+
+            - name: Remove the restore dump
+              ansible.builtin.file:
+                name: "{{ postgresDB_directory_backup }}/restore.sql"
+                state: absent
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  post_tasks:
+
+    - name: Tasks post_task
+      block:
+
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, follow error path to fail play
+          tags:
+            - always
+
+
+        ########################################################################
+        #
+        # Your tasks here
+        #
+        ########################################################################
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Task and automation end time.
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          tags:
+            - always
+
+
+          # Set task end time
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | combine({
+                'end': nfc_task_endtime | string
+              }) ] }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          tags:
+            - always
+
+
+          # Set Automation end time.
+          # every playbook must set this variable so that the end time
+          # is equal to the fail time or the end of a group of playbooks.
+        - name: Set automation end time
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'time': nfc_automation.time | combine({
+                  'end': nfc_task_endtime | string
+                })
+              }) }}"
+            nfc_task_endtime: null
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          tags:
+            - always
+
+
+          # Set the artifacts as a fact for subsequent playbook useage
+          # Note: variable 'per_host' must be 'false' so that the artifacts
+          # work within AWX / Ansible Automation Platform.
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
+
+
+          # Final error check to fail the entire play run on error 
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
 
 
   vars:
