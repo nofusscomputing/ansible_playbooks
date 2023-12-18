@@ -1,0 +1,6 @@
+---
+
+- src: https://gitlab.com/nofusscomputing/projects/ansible/ansible_test.git
+  scm: git
+  version: genesis
+  name: nfc_test
