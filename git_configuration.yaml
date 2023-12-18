@@ -110,6 +110,8 @@
         - name: Configure git from Code
           ansible.builtin.include_role:
             name: git_configuration
+          tags:
+            - always
 
 
       rescue:
