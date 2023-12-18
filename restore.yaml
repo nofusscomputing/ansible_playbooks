@@ -70,7 +70,8 @@
         - name: Common tasks
           ansible.builtin.include_role:
             name: nfc_common
-          become: true
+            apply:
+              become: true
           vars:
             common_gather_facts: true
           when: task_nfc_common_required | default(false) | bool
