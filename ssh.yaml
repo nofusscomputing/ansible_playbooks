@@ -79,7 +79,8 @@
         - name: Common tasks
           ansible.builtin.include_role:
             name: nfc_common
-          become: true
+            apply:
+              become: true
           vars:
             common_gather_facts: true
 
@@ -131,11 +132,15 @@
             that:
               - nfc_automation.error | int == 0
             msg: Error eccured, follow error path to fail play
+          tags:
+            - always
 
 
         - name: SSH Install
           ansible.builtin.include_role:
             name: nfc_ssh
+          tags:
+            - always
 
 
       rescue:

@@ -57,6 +57,8 @@
         - name: Trace
           ansible.builtin.debug:
             msg: "this task exists as you can't have an empty block"
+          tags:
+            - always
 
 
       rescue:
@@ -106,11 +108,15 @@
             that:
               - nfc_automation.error | int == 0
             msg: Error eccured, follow error path to fail play
+          tags:
+            - always
 
 
         - name: Configure AWX
           ansible.builtin.include_tasks:
             file: tasks/awx/settings.yaml
+          tags:
+            - always
 
 
         - name: Credential Types
@@ -119,6 +125,8 @@
           loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_credential_type
+          tags:
+            - always
 
 
         - name: Instances
@@ -127,6 +135,8 @@
           loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_instance
+          tags:
+            - always
 
 
         - name: Instance Groups
@@ -135,6 +145,8 @@
           loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_instance_group
+          tags:
+            - always
 
 
         - name: Organizations
@@ -143,6 +155,8 @@
           loop: "{{ my_awx_config.organizations | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_organization
+          tags:
+            - always
 
 
       rescue:
