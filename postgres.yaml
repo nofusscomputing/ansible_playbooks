@@ -30,7 +30,6 @@
       ansible.builtin.set_fact:
         nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
       no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
-      when: nfc_automation is not defined
       tags:
         - always
 
