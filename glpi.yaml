@@ -76,6 +76,8 @@
             that:
               - nfc_pb_glpi_ticket_assign_error_user | int > 0
           when: nfc_pb_glpi_ticket_assign_error_user is defined
+          tags:
+            - always
 
 
       rescue:
@@ -125,6 +127,8 @@
             that:
               - nfc_automation.error | int == 0
             msg: Error eccured, follow error path to fail play
+          tags:
+            - always
 
 
         - name: "[Plugin] FormCreator to JSON"

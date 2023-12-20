@@ -67,6 +67,8 @@
             name: nfc_common
             apply:
               become: true
+          tags:
+            - always
           vars:
             common_gather_facts: true
 
@@ -118,6 +120,8 @@
             that:
               - nfc_automation.error | int == 0
             msg: Error eccured, follow error path to fail play
+          tags:
+            - always
 
 
         ########################################################################

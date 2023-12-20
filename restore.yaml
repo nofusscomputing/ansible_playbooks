@@ -124,6 +124,8 @@
             that:
               - nfc_automation.error | int == 0
             msg: Error eccured, follow error path to fail play
+          tags:
+            - always
 
 
         - name: Restore Files
