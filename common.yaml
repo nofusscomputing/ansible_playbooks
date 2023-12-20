@@ -21,7 +21,7 @@
     - name: Set Start Time
       ansible.builtin.set_fact:
         nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
-      no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
       when: nfc_automation is not defined
       tags:
         - always
@@ -37,7 +37,7 @@
             "end": 0
           }
         }
-      no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
       when: nfc_automation is not defined
       tags:
         - always
@@ -47,13 +47,13 @@
     - name: Set Automation Facts
       ansible.builtin.set_fact:
         nfc_task: {
-          "name": "{{ ansible_play_name | lower | string }}",
-          "roles": "{{ ansible_play_role_names | string }}",
-          "skip_tags": "{{ ansible_skip_tags | list }}",
+          "name": "{{ ansible_play_name | default('') | lower | string }}",
+          "roles": "{{ ansible_play_role_names | default('') | string }}",
+          "skip_tags": "{{ ansible_skip_tags | default([])| list }}",
           "start": "{{ nfc_task_starttime | string }}",
-          "tags": "{{ ansible_run_tags | list }}"
+          "tags": "{{ ansible_run_tags | default([]) | list }}"
         }
-      no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
       tags:
         - always
 
@@ -81,7 +81,7 @@
             nfc_automation: "{{ nfc_automation | combine({
                 'error': 1
               }) }}"
-          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
           tags:
             - always
 
@@ -139,7 +139,7 @@
             nfc_automation: "{{ nfc_automation | combine({
                 'error': 1
               }) }}"
-          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
           tags:
             - always
 
@@ -189,7 +189,7 @@
             nfc_automation: "{{ nfc_automation | combine({
                 'error': 1
               }) }}"
-          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
           tags:
             - always
 
@@ -201,7 +201,7 @@
         - name: Fetch End time
           ansible.builtin.set_fact:
             nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
-          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
           tags:
             - always
 
@@ -212,7 +212,7 @@
             nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | combine({
                 'end': nfc_task_endtime | string
               }) ] }}"
-          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
           tags:
             - always
 
@@ -228,7 +228,7 @@
                 })
               }) }}"
             nfc_task_endtime: null
-          no_log: "{{ nfc_pb_no_log_setup_facts | default(true) | bool }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
           tags:
             - always
 
