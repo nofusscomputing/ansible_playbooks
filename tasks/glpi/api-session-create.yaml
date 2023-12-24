@@ -5,20 +5,41 @@
     file: tasks/glpi/api-required-fields-validation.yaml
 
 
-- name: Fetch API Session Token
-  ansible.builtin.uri:
-    url: "{{ http_protocol | default('https') | string }}://{{ nfc_pb_glpi_host }}/apirest.php/initSession?get_full_session=true"
-    method: GET
-    return_content: true
-    status_code: 200
-    headers:
-      App-Token: "{{ nfc_pb_glpi_app_token }}"
-      Authorization: "user_token {{ nfc_pb_glpi_user_token }}"
-    validate_certs: "{{ nfc_pb_glpi_validate_certs | default(true) | bool }}"
-  register: glpi_session_get
-  no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
-  tags:
-    - always
+- name: Try Catch
+  block:
+
+
+    - name: Fetch API Session Token
+      ansible.builtin.uri:
+        url: "{{ http_protocol | default('https') | string }}://{{ nfc_pb_glpi_host }}/apirest.php/initSession?get_full_session=true"
+        method: GET
+        return_content: true
+        status_code: 200
+        headers:
+          App-Token: "{{ nfc_pb_glpi_app_token }}"
+          Authorization: "user_token {{ nfc_pb_glpi_user_token }}"
+        validate_certs: "{{ nfc_pb_glpi_validate_certs | default(true) | bool }}"
+      register: glpi_session_get
+      no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
+      tags:
+        - always
+
+
+  rescue:
+
+
+    - name: TRACE Show Error MSG
+      ansible.builtin.debug:
+        msg:
+          - "Error Message: {{ glpi_session_get.msg }}"
+          - "Status: {{ glpi_session_get.status }}"
+
+
+    - name: Fail Task
+      ansible.builtin.assert:
+        that:
+          - false
+        msg: Task failed, force play failure
 
 
 - name: Session fact
