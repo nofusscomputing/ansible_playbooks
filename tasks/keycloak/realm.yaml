@@ -88,3 +88,10 @@
     verify_email: "{{ keycloak_realm.verify_email | default(true) }}" # type: bool
     wait_increment_seconds: "{{ keycloak_realm.wait_increment_seconds | default(omit) }}" # type: int
 
+
+- name: User Federation
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/federation.yaml
+  loop: "{{ keycloak_realm.federation }}"
+  loop_control:
+    loop_var: keycloak_federation
