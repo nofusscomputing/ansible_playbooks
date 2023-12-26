@@ -9,7 +9,7 @@
     validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) }}"
 
     state: "{{ keycloak_federation.state | default('present') }}" # type: str choices: - present - absent
-    realm: "{{ keycloak_realm.id }}" # type: str
+    realm: "{{ keycloak_realm.realm }}" # type: str
     id: "{{ keycloak_federation.id }}" # type: str
     name: "{{ keycloak_federation.name }}" # type: str
     provider_id: "{{ keycloak_federation.provider_id | default('ldap') }}" # type: str choices: - ldap - kerberos - sssd
