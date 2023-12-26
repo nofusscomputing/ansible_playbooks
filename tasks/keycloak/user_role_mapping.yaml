@@ -1,0 +1,79 @@
+---
+
+- name: User Mapping Configuration
+  community.general.keycloak_user_rolemapping:
+    auth_keycloak_url: "{{ nfc_pb_keycloak_auth_keycloak_url }}"
+    auth_realm: "{{ nfc_pb_keycloak_auth_realm }}"
+    auth_username: "{{ nfc_pb_keycloak_auth_username }}"
+    auth_password: "{{ nfc_pb_keycloak_auth_password }}"
+    validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) }}"
+
+    state: "{{ keycloak_user_rolemapping.state | default('present') }}"
+        # description:
+        #     - State of the user_rolemapping.
+        #     - On V(present), the user_rolemapping will be created if it does not yet exist, or updated with the parameters you provide.
+        #     - On V(absent), the user_rolemapping will be removed if it exists.
+        # default: 'present'
+        # type: str
+        # choices:
+        #     - present
+        #     - absent
+
+    realm: "{{ keycloak_realm.realm }}"
+        # type: str
+        # description:
+        #     - They Keycloak realm under which this role_representation resides.
+        # default: 'master'
+
+    target_username: "{{ keycloak_user_rolemapping.target_username | default(omit) }}"
+        # type: str
+        # description:
+        #     - Username of the user roles are mapped to.
+        #     - This parameter is not required (can be replaced by uid for less API call).
+
+    uid: "{{ keycloak_user_rolemapping.uid | default(omit) }}"
+        # type: str
+        # description:
+        #     - ID of the user to be mapped.
+        #     - This parameter is not required for updating or deleting the rolemapping but
+        #       providing it will reduce the number of API calls required.
+
+    service_account_user_client_id: "{{ keycloak_user_rolemapping.service_account_user_client_id | default(omit) }}"
+        # type: str
+        # description:
+        #     - Client ID of the service-account-user to be mapped.
+        #     - This parameter is not required for updating or deleting the rolemapping but
+        #       providing it will reduce the number of API calls required.
+
+    client_id: "{{ keycloak_client.client_id | default(omit) }}"
+        # type: str
+        # description:
+        #     - Name of the client to be mapped (different than O(cid)).
+        #     - This parameter is required if O(cid) is not provided (can be replaced by O(cid)
+        #       to reduce the number of API calls that must be made).
+
+    cid: "{{ keycloak_user_rolemapping.cid | default(omit) }}"
+        # type: str
+        # description:
+        #     - ID of the client to be mapped.
+        #     - This parameter is not required for updating or deleting the rolemapping but
+        #       providing it will reduce the number of API calls required.
+
+    roles: "{{ keycloak_user_rolemapping.roles | default(omit) }}"
+        # description:
+        #     - Roles to be mapped to the user.
+        # type: list
+        # elements: dict
+        # suboptions:
+        #     name:
+        #         type: str
+        #         description:
+        #             - Name of the role representation.
+        #             - This parameter is required only when creating or updating the role_representation.
+        #     id:
+        #         type: str
+        #         description:
+        #             - The unique identifier for this role_representation.
+        #             - This parameter is not required for updating or deleting a role_representation but
+        #               providing it will reduce the number of API calls required.
+  diff: true
