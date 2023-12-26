@@ -251,3 +251,54 @@
           tags:
             - always
 
+
+  vars:
+
+    nfc_pb_awx_tower_template:
+
+      - name: "configure/keycloak/from_inventory"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        description: Configure Keycloak from Inventory
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        labels:
+          - configure
+          - keycloak
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        credential_types:
+          - name: playbook/keycloak/api
+            description: Creates ~/gitconfig with credentials that enable git operations on a private repository
+            inputs: |
+              fields:
+                - id: username
+                  type: string
+                  label: Username
+                - id: password
+                  type: string
+                  label: Password
+                  secret: true
+                - id: url
+                  type: string
+                  label: Keycloak URL
+                  help_text: Ensure that `https://` is prefixed to url
+                - id: auth_realm
+                  type: string
+                  label: Relam to authenticate against
+                - id: validate_certs
+                  type: string
+                  label: Validate Keycloak Certificate
+              required:
+                - username
+                - password
+                - url
+            injectors: >
+              extra_vars:
+                nfc_pb_keycloak_auth_keycloak_url: "{{ url }}"
+                nfc_pb_keycloak_auth_realm: "{{ auth_realm }}"
+                nfc_pb_keycloak_auth_username: "{{ username }}"
+                nfc_pb_keycloak_auth_password: "{{ password }}"
+                nfc_pb_keycloak_validate_certs: "{{ validate_certs | default(true) | bool }}"
