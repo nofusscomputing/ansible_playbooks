@@ -450,9 +450,18 @@
         #               client and signed by its key, base64-encoded.
   diff: true
 
+
 - name: Client Roles
   ansible.builtin.include_tasks:
     file: tasks/keycloak/role.yaml
   loop: "{{ keycloak_client.roles | default([]) }}"
   loop_control:
     loop_var: keycloak_role
+
+
+- name: Client Role Mappings
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/client_role_mapping.yaml
+  loop: "{{ keycloak_client.role_mapping | default([]) }}"
+  loop_control:
+    loop_var: keycloak_client_rolemapping
