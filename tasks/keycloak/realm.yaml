@@ -87,11 +87,19 @@
     user_managed_access_allowed: "{{ keycloak_realm.user_managed_access_allowed | default(false) }}" # type: bool
     verify_email: "{{ keycloak_realm.verify_email | default(true) }}" # type: bool
     wait_increment_seconds: "{{ keycloak_realm.wait_increment_seconds | default(omit) }}" # type: int
+  diff: true
 
 
 - name: User Federation
   ansible.builtin.include_tasks:
     file: tasks/keycloak/federation.yaml
-  loop: "{{ keycloak_realm.federation }}"
+  loop: "{{ keycloak_realm.federation | default([]) }}"
   loop_control:
     loop_var: keycloak_federation
+
+- name: Relam Clients
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/client.yaml
+  loop: "{{ keycloak_realm.clients | default([]) }}"
+  loop_control:
+    loop_var: keycloak_client
