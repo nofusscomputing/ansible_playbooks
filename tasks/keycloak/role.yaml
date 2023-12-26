@@ -1,0 +1,87 @@
+---
+
+- name: Role Configuration
+  community.general.keycloak_role:
+    auth_keycloak_url: "{{ nfc_pb_keycloak_auth_keycloak_url }}"
+    auth_realm: "{{ nfc_pb_keycloak_auth_realm }}"
+    auth_username: "{{ nfc_pb_keycloak_auth_username }}"
+    auth_password: "{{ nfc_pb_keycloak_auth_password }}"
+    validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) }}"
+
+    state: "{{ keycloak_role.state | default('present')}}"
+        # description:
+        #     - State of the role.
+        #     - On V(present), the role will be created if it does not yet exist, or updated with the parameters you provide.
+        #     - On V(absent), the role will be removed if it exists.
+        # default: 'present'
+        # type: str
+        # choices:
+        #     - present
+        #     - absent
+
+    name: "{{ keycloak_role.name }}"
+        # type: str
+        # required: true
+        # description:
+        #     - Name of the role.
+        #     - This parameter is required.
+
+    description: "{{ keycloak_role.description | default(omit) }}"
+        # type: str
+        # description:
+        #     - The role description.
+
+    realm: "{{ keycloak_realm.realm }}"
+        # type: str
+        # description:
+        #     - The Keycloak realm under which this role resides.
+        # default: 'master'
+
+    client_id: "{{ keycloak_client.client_id | default(omit) }}"
+        # type: str
+        # description:
+        #     - If the role is a client role, the client id under which it resides.
+        #     - If this parameter is absent, the role is considered a realm role.
+
+    attributes: "{{ keycloak_role.attributes | default(omit) }}"
+        # type: dict
+        # description:
+        #     - A dict of key/value pairs to set as custom attributes for the role.
+        #     - Values may be single values (e.g. a string) or a list of strings.
+    composite: "{{ keycloak_role.composite | default(false) | bool }}"
+        # description:
+        #     - If V(true), the role is a composition of other realm and/or client role.
+        # default: false
+        # type: bool
+        # version_added: 7.1.0
+    composites: "{{ keycloak_role.composites | default(omit) }}"
+        # description:
+        #     - List of roles to include to the composite realm role.
+        #     - If the composite role is a client role, the C(clientId) (not ID of the client) must be specified.
+        # default: []
+        # type: list
+        # elements: dict
+        # version_added: 7.1.0
+        # suboptions:
+        #     name:
+        #         description:
+        #             - Name of the role. This can be the name of a REALM role or a client role.
+        #         type: str
+        #         required: true
+        #     client_id:
+        #         description:
+        #             - Client ID if the role is a client role. Do not include this option for a REALM role.
+        #             - Use the client ID you can see in the Keycloak console, not the technical ID of the client.
+        #         type: str
+        #         required: false
+        #         aliases:
+        #             - clientId
+        #     state:
+        #         description:
+        #             - Create the composite if present, remove it if absent.
+        #         type: str
+        #         choices:
+        #             - present
+        #             - absent
+        #         default: present
+  diff: true
