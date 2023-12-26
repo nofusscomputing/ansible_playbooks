@@ -97,6 +97,14 @@
   loop_control:
     loop_var: keycloak_federation
 
+
+- name: Relam Roles
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/role.yaml
+  loop: "{{ keycloak_realm.roles | default([]) }}"
+  loop_control:
+    loop_var: keycloak_role
+
 - name: Relam Clients
   ansible.builtin.include_tasks:
     file: tasks/keycloak/client.yaml
