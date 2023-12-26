@@ -46,7 +46,7 @@
     enabled: "{{ keycloak_realm.enabled | default(true) }}" # type: bool
     enabled_event_types: "{{ keycloak_realm.enabled_event_types | default(omit) }}" # type: list elements: str
     events_enabled: "{{ keycloak_realm.events_enabled | default(true) }}" # type: bool
-    events_expiration: "{{ keycloak_realm.events_expiration | default((60 * 60* 24 * 90) | int) | int }}" # type: int
+    events_expiration: "{{ keycloak_realm.events_expiration | default((60 * 60 * 24 * 90) | int) | int }}" # type: int
     events_listeners: "{{ keycloak_realm.events_listeners | default(omit) }}" # type: list elements: str
     failure_factor: "{{ keycloak_realm.failure_factor | default(omit) }}" # type: int
     internationalization_enabled: "{{ keycloak_realm.internationalization_enabled | default(false) }}" # type: bool
@@ -105,7 +105,7 @@
   loop_control:
     loop_var: keycloak_role
 
-- name: Relam Clients
+- name: Realm Clients
   ansible.builtin.include_tasks:
     file: tasks/keycloak/client.yaml
   loop: "{{ keycloak_realm.clients | default([]) }}"

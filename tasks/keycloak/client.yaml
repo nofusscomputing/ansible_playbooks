@@ -110,14 +110,14 @@
         # type: list
         # elements: str
 
-    web_origins: "{{ keycloak_client.web_origins  | default(omit)}}"
+    web_origins: "{{ keycloak_client.web_origins | default(omit) }}"
         # description:
         #     - List of allowed CORS origins.
         #       This is 'webOrigins' in the Keycloak REST API.
         # type: list
         # elements: str
 
-    not_before: "{{ keycloak_client.not_before  | default(omit)}}"
+    not_before: "{{ keycloak_client.not_before | default(omit) }}"
         # description:
         #     - Revoke any tokens issued before this date for this client (this is a UNIX timestamp).
         #       This is 'notBefore' in the Keycloak REST API.
@@ -125,7 +125,7 @@
         # aliases:
         #     - notBefore
 
-    bearer_only: "{{ keycloak_client.bearer_only  | default(omit)}}"
+    bearer_only: "{{ keycloak_client.bearer_only | default(omit) }}"
         # description:
         #     - The access type of this client is bearer-only.
         #       This is 'bearerOnly' in the Keycloak REST API.
@@ -186,7 +186,7 @@
         # type: str
         # choices: ['openid-connect', 'saml']
 
-    full_scope_allowed: "{{ keycloak_client.full_scope_allowed  | default(omit) }}"
+    full_scope_allowed: "{{ keycloak_client.full_scope_allowed | default(omit) }}"
         # description:
         #     - Is the "Full Scope Allowed" feature set for this client or not.
         #       This is 'fullScopeAllowed' in the Keycloak REST API.

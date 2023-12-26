@@ -8,7 +8,7 @@
     auth_password: "{{ nfc_pb_keycloak_auth_password }}"
     validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) }}"
 
-    state: "{{ keycloak_role.state | default('present')}}"
+    state: "{{ keycloak_role.state | default('present') }}"
         # description:
         #     - State of the role.
         #     - On V(present), the role will be created if it does not yet exist, or updated with the parameters you provide.
