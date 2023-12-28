@@ -183,7 +183,7 @@
 
         - name: Backup database
           tags:
-            - restore
+            - restore-backup
           block:
 
 
