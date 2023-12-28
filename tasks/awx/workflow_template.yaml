@@ -2,6 +2,12 @@
 
 - name: Workflow
   awx.awx.workflow_job_template:
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
+
     name: "{{ workflow_job_template.name }}"
       # description:
       #   - Name of this workflow job template.
