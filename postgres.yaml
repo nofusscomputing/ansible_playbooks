@@ -260,6 +260,18 @@
                 name: "{{ postgresDB_directory_backup }}/restore.sql"
                 state: absent
 
+
+        - name: Create Postgres User
+          ansible.builtin.include_tasks:
+            file: tasks/postgres/create_user.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - never
+            - create_user
+
+
       rescue:
 
 
@@ -410,8 +422,6 @@
           - backup
           - restore
           - postgres
-        # credentials:
-        #   - "Local"
         verbosity: 2
         use_fact_cache: true
         survey_enabled: true
@@ -482,3 +492,62 @@
                 postgresDB_user: "{{ username }}"
                 postgresDB_hostpassword: "{{ password }}"
                 postgresDB_host: "{{ host }}"
+
+
+      - name: "postgres/user/create"
+        ask_tags_on_launch: false
+        description: |
+          Playbook to create PostgreSQL User
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: create_user
+        labels:
+          - create
+          - postgres
+          - user
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey_spec: |
+          {
+            "name": "",
+            "description": "",
+            "spec": [
+                {
+                    "max": 1024,
+                    "min": 3,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresql_user_name",
+                    "new_question": true,
+                    "question_name": "Database Name",
+                    "question_description": "User to create"
+                },
+                {
+                    "max": 1024,
+                    "min": 6,
+                    "type": "password",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresql_user_password",
+                    "new_question": false,
+                    "question_name": "Postgres Password",
+                    "question_description": "Password for user to create"
+                },
+                {
+                    "max": 1024,
+                    "min": 2,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresql_user_priv",
+                    "new_question": true,
+                    "question_name": "Database",
+                    "question_description": "Privileges to grant user"
+                }
+            ]
+          }
