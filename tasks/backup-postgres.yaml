@@ -11,10 +11,10 @@
 #
 - name: Fetch Inventory Details
   ansible.builtin.set_fact:
-    postgresDB_host: "{{ backup.postgresdb.host | default('') }}"
-    postgresDB_user: "{{ backup.postgresdb.user | default('') }}"
-    postgresDB_password: "{{ backup.postgresdb.password | default('') }}"
-    postgresDB_directory_backup: "{{ backup.directory | default('/backup') }}"
+    postgresdb_host: "{{ backup.postgresdb.host | default('') }}"
+    postgresdb_user: "{{ backup.postgresdb.user | default('') }}"
+    postgresdb_password: "{{ backup.postgresdb.password | default('') }}"
+    postgresdb_directory_backup: "{{ backup.directory | default('/backup') }}"
     # ansible_connection_original: "{{ ansible_connection }}"
     # ansible_connection: "{{ backup.postgresdb.connection | default(ansible_connection) }}"
   no_log: true
@@ -23,12 +23,12 @@
 - name: Check Variables (manual)
   ansible.builtin.assert:
     that:
-      - postgresDB_directory_backup | default('/backup') != ''
-      - postgresDB_host | default('') != ''
-      - postgresDB_user | default('') != ''
-      - postgresDB_password | default('') != ''
-      - postgresDB_database_name | default('') != ''
-    fail_msg: "You must specify variables 'postgresDB_directory_backup/postgresDB_host/postgresDB_user/postgresDB_password/postgresDB_database_name'"
+      - postgresdb_directory_backup | default('/backup') != ''
+      - postgresdb_host | default('') != ''
+      - postgresdb_user | default('') != ''
+      - postgresdb_password | default('') != ''
+      - postgresdb_database_name | default('') != ''
+    fail_msg: "You must specify variables 'postgresdb_directory_backup/postgresdb_host/postgresdb_user/postgresdb_password/postgresdb_database_name'"
   when:
     (
       backup.postgresdb.host | default('') == ''
@@ -42,12 +42,12 @@
 - name: Check Variables (Inventory)
   ansible.builtin.assert:
     that:
-      - postgresDB_directory_backup | default('/backup') != ''
-      - postgresDB_host | default('') != ''
-      - postgresDB_user | default('') != ''
-      - postgresDB_password | default('') != ''
+      - postgresdb_directory_backup | default('/backup') != ''
+      - postgresdb_host | default('') != ''
+      - postgresdb_user | default('') != ''
+      - postgresdb_password | default('') != ''
       - postgres.databases | default([]) | length | int > 0
-    fail_msg: "You must specify variables 'postgresDB_directory_backup/postgres.host/postgres.user/postgres.password/postgres.databases'"
+    fail_msg: "You must specify variables 'postgresdb_directory_backup/postgres.host/postgres.user/postgres.password/postgres.databases'"
   when:
     (
       backup.postgres.host | default('') != ''
