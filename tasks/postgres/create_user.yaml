@@ -49,7 +49,7 @@
       # - Note that if the provided password string is already in MD5-hashed
       #   format, then it is used as-is, regardless of I(encrypted) option.
       # type: str
-    db: "{{ postgresql_user.db }}"
+    db: "{{ postgresql_user.db  | default(omit) }}"
       # description:
       # - Name of database to connect to and where user's permissions are granted.
       # type: str
