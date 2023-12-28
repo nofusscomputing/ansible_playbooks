@@ -1,5 +1,19 @@
 ---
 
+- name: Create Labels
+  awx.awx.label:
+    controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+    controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+    controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+    controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+    validate_certs: "{{ validate_certs | default(true) }}"
+
+    name: "{{ item }}"
+    organization: "{{ nfc_pb_awx_organization.name }}"
+    state: present
+  loop: "{{ workflow_job_template.labels | default([]) }}"
+
+
 - name: Workflow
   awx.awx.workflow_job_template:
     controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
