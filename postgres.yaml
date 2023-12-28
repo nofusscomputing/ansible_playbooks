@@ -17,7 +17,7 @@
 #     Restore a database from file
 #
 
-- name: PostgresDB Backup/Restore
+- name: PostgresDB
   hosts: localhost
   gather_facts: true
 
@@ -538,19 +538,19 @@
                     "required": true,
                     "variable": "postgresql_user_name",
                     "new_question": true,
-                    "question_name": "Database Name",
+                    "question_name": "User Name",
                     "question_description": "User to create"
                 },
                 {
                     "max": 1024,
-                    "min": 6,
+                    "min": 3,
                     "type": "password",
                     "choices": "",
                     "default": "",
                     "required": true,
                     "variable": "postgresql_user_password",
                     "new_question": false,
-                    "question_name": "Postgres Password",
+                    "question_name": "User Password",
                     "question_description": "Password for user to create"
                 },
                 {
@@ -559,10 +559,10 @@
                     "type": "text",
                     "choices": "",
                     "default": "",
-                    "required": true,
+                    "required": false,
                     "variable": "postgresql_user_priv",
                     "new_question": true,
-                    "question_name": "Database",
+                    "question_name": "User Privileges",
                     "question_description": "Privileges to grant user"
                 }
             ]
