@@ -264,7 +264,7 @@
 
     nfc_pb_awx_tower_template:
 
-      - name: "configure/keycloak/from_inventory"
+      - name: "Keycloak/Configure/From Inventory"
         ask_tags_on_launch: false
         ask_inventory_on_launch: true
         ask_credential_on_launch: true

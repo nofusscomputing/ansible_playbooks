@@ -1,0 +1,123 @@
+---
+
+- name: Client Configuration
+  community.general.keycloak_clientscope:
+    auth_keycloak_url: "{{ nfc_pb_keycloak_auth_keycloak_url }}"
+    auth_realm: "{{ nfc_pb_keycloak_auth_realm }}"
+    auth_username: "{{ nfc_pb_keycloak_auth_username }}"
+    auth_password: "{{ nfc_pb_keycloak_auth_password }}"
+    validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) }}"
+
+    state: "{{ keycloak_clientscope.state | default('present') }}"
+        # description:
+        #     - State of the client_scope.
+        #     - On V(present), the client_scope will be created if it does not yet exist, or updated with the parameters you provide.
+        #     - On V(absent), the client_scope will be removed if it exists.
+        # default: 'present'
+        # type: str
+        # choices:
+        #     - present
+        #     - absent
+
+    name: "{{ keycloak_clientscope.name }}"
+        # type: str
+        # description:
+        #     - Name of the client_scope.
+        #     - This parameter is required only when creating or updating the client_scope.
+
+    realm: "{{ keycloak_realm.realm }}"
+        # type: str
+        # description:
+        #     - They Keycloak realm under which this client_scope resides.
+        # default: 'master'
+
+    id: "{{ keycloak_clientscope.id | default(omit) }}"
+        # type: str
+        # description:
+        #     - The unique identifier for this client_scope.
+        #     - This parameter is not required for updating or deleting a client_scope but
+        #       providing it will reduce the number of API calls required.
+
+    description: "{{ keycloak_clientscope.description | default(omit) }}"
+        # type: str
+        # description:
+        #     - Description for this client_scope.
+        #     - This parameter is not required for updating or deleting a client_scope.
+
+    protocol: "{{ keycloak_clientscope.protocol }}"
+        # description:
+        #     - Type of client.
+        # choices: ['openid-connect', 'saml', 'wsfed']
+        # type: str
+
+    protocol_mappers: "{{ keycloak_clientscope.protocol_mappers }}"
+        # description:
+        #     - A list of dicts defining protocol mappers for this client.
+        #     - This is 'protocolMappers' in the Keycloak REST API.
+        # type: list
+        # elements: dict
+        # suboptions:
+        #     protocol:
+        #         description:
+        #             - This specifies for which protocol this protocol mapper.
+        #             - is active.
+        #         choices: ['openid-connect', 'saml', 'wsfed']
+        #         type: str
+
+        #     protocolMapper:
+        #         description:
+        #             - "The Keycloak-internal name of the type of this protocol-mapper. While an exhaustive list is
+        #               impossible to provide since this may be extended through SPIs by the user of Keycloak,
+        #               by default Keycloak as of 3.4 ships with at least:"
+        #             - V(docker-v2-allow-all-mapper)
+        #             - V(oidc-address-mapper)
+        #             - V(oidc-full-name-mapper)
+        #             - V(oidc-group-membership-mapper)
+        #             - V(oidc-hardcoded-claim-mapper)
+        #             - V(oidc-hardcoded-role-mapper)
+        #             - V(oidc-role-name-mapper)
+        #             - V(oidc-script-based-protocol-mapper)
+        #             - V(oidc-sha256-pairwise-sub-mapper)
+        #             - V(oidc-usermodel-attribute-mapper)
+        #             - V(oidc-usermodel-client-role-mapper)
+        #             - V(oidc-usermodel-property-mapper)
+        #             - V(oidc-usermodel-realm-role-mapper)
+        #             - V(oidc-usersessionmodel-note-mapper)
+        #             - V(saml-group-membership-mapper)
+        #             - V(saml-hardcode-attribute-mapper)
+        #             - V(saml-hardcode-role-mapper)
+        #             - V(saml-role-list-mapper)
+        #             - V(saml-role-name-mapper)
+        #             - V(saml-user-attribute-mapper)
+        #             - V(saml-user-property-mapper)
+        #             - V(saml-user-session-note-mapper)
+        #             - An exhaustive list of available mappers on your installation can be obtained on
+        #               the admin console by going to Server Info -> Providers and looking under
+        #               'protocol-mapper'.
+        #         type: str
+
+        #     name:
+        #         description:
+        #             - The name of this protocol mapper.
+        #         type: str
+
+        #     id:
+        #         description:
+        #             - Usually a UUID specifying the internal ID of this protocol mapper instance.
+        #         type: str
+
+        #     config:
+        #         description:
+        #             - Dict specifying the configuration options for the protocol mapper; the
+        #               contents differ depending on the value of O(protocol_mappers[].protocolMapper) and are not documented
+        #               other than by the source of the mappers and its parent class(es). An example is given
+        #               below. It is easiest to obtain valid config values by dumping an already-existing
+        #               protocol mapper configuration through check-mode in the RV(existing) return value.
+        #         type: dict
+
+    attributes: "{{ keycloak_clientscope.attributes | default(omit) }}"
+        # type: dict
+        # description:
+        #     - A dict of key/value pairs to set as custom attributes for the client_scope.
+        #     - Values may be single values (for example a string) or a list of strings.
+  diff: true
