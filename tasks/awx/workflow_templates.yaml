@@ -1,0 +1,17 @@
+---
+
+- name: Create fact from Playbook
+  ansible.builtin.set_fact:
+    workflow_job_template: "{{ lookup('file', item.root + nfc_pb_awx_workflow_filename) | from_yaml }}"
+  failed_when: false
+  ignore_errors: true
+
+
+- name: Add Workflow templates
+  ansible.builtin.include_tasks:
+    file: tasks/awx/workflow_template.yaml
+
+
+- name: Clear facts
+  ansible.builtin.set_fact:
+    workflow_job_template: null

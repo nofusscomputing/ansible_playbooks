@@ -95,12 +95,26 @@
         nfc_pb_awx_branch: nfc_pb_awx_project.scm_branch
 
 
+    - name: Add Workflow templates
+      ansible.builtin.include_tasks:
+        file: tasks/awx/workflow_templates.yaml
+      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.workflow_path | default('workflow/')) | default([]) }}"
+      when: >
+        item.state == 'file'
+          and
+        '.yaml' in item.path|basename
+      vars:
+        nfc_pb_awx_workflow_filename: "{{ item.path }}"
+        nfc_pb_awx_workflow_dir: "{{ item.root }}"
+
+
     - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
       loop: "{{ nfc_pb_awx_project.rbac.project | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_rbac
+
 
   always:
 
