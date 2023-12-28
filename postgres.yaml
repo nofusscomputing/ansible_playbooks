@@ -416,42 +416,6 @@
             "spec": [
                 {
                     "max": 1024,
-                    "min": 5,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresDB_host",
-                    "new_question": false,
-                    "question_name": "Host",
-                    "question_description": "IP or Hostname of the PostgreSQL Server"
-                },
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresDB_user",
-                    "new_question": true,
-                    "question_name": "Postgres User",
-                    "question_description": "User with Access to the database to backup"
-                },
-                {
-                    "max": 1024,
-                    "min": 6,
-                    "type": "password",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresDB_password",
-                    "new_question": false,
-                    "question_name": "Postgres Password",
-                    "question_description": "Password for user accessing the database to backup"
-                },
-                {
-                    "max": 1024,
                     "min": 2,
                     "type": "text",
                     "choices": "",
@@ -488,3 +452,27 @@
                 }
             ]
           }
+        credential_types:
+          - name: playbook/postgres/Login
+            description: Credentials to login to a PostgreSQL Server
+            inputs: |
+              fields:
+                - id: username
+                  type: string
+                  label: Username
+                - id: password
+                  type: string
+                  label: Password
+                  secret: true
+                - id: host
+                  type: string
+                  label: Keycloak URL
+              required:
+                - username
+                - password
+                - host
+            injectors: >
+              extra_vars:
+                postgresDB_user: "{{ username }}"
+                postgresDB_hostpassword: "{{ password }}"
+                postgresDB_host: "{{ host }}"
