@@ -32,7 +32,7 @@
       #   - Name of the role to set as owner of the database.
       # type: str
       # default: ''
-    template: "{{ postgresql_db | default(omit) }}"
+    template: "{{ postgresql_db.template | default(omit) }}"
       # description:
       #   - Template used to create the database.
       # type: str
