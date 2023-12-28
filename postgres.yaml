@@ -136,6 +136,7 @@
                 - restore
           when: backup.postgresdb.databases | default([]) | length | int > 0
           tags:
+            - never
             - backup
 
         - name: Check Variables
@@ -148,6 +149,7 @@
               - postgresDB_database_name | default('') != ''
             fail_msg: "You must specify variables 'postgresDB_directory_backup/postgresDB_host/postgresDB_user/postgresDB_password/postgresDB_database_name'"
           tags:
+            - never
             - restore
 
 
@@ -157,6 +159,7 @@
               - postgresDB_filename_restore | default('') != ''
             fail_msg: "You must specify variable 'postgresDB_filename_restore'"
           tags:
+            - never
             - restore
 
 
@@ -178,11 +181,13 @@
           ansible.builtin.set_fact:
             postgresDB_filename_backup: recovery.sql
           tags:
+            - never
             - restore
 
 
         - name: Backup database
           tags:
+            - never
             - restore-backup
           block:
 
@@ -217,6 +222,7 @@
 
         - name: Restore database
           tags:
+            - never
             - restore
           block:
 
