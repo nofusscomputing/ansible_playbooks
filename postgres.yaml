@@ -275,6 +275,17 @@
             - create_user
 
 
+        - name: Create Postgres Database
+          ansible.builtin.include_tasks:
+            file: tasks/postgres/create_database.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - never
+            - create_database
+
+
       rescue:
 
 
@@ -423,6 +434,7 @@
         job_tags: backup, restore
         labels:
           - backup
+          - database
           - restore
           - postgres
         verbosity: 2
@@ -506,6 +518,7 @@
         job_tags: create_user
         labels:
           - create
+          - database
           - postgres
           - user
         verbosity: 2
@@ -551,6 +564,41 @@
                     "new_question": true,
                     "question_name": "Database",
                     "question_description": "Privileges to grant user"
+                }
+            ]
+          }
+
+
+      - name: "postgres/database/create"
+        ask_tags_on_launch: false
+        description: |
+          Playbook to create PostgreSQL Database
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: create_database
+        labels:
+          - create
+          - database
+          - postgres
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey_spec: |
+          {
+            "name": "",
+            "description": "",
+            "spec": [
+                {
+                    "max": 1024,
+                    "min": 3,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresql_db_name",
+                    "new_question": true,
+                    "question_name": "Database Name",
+                    "question_description": "Database name to create"
                 }
             ]
           }

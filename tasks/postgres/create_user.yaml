@@ -1,5 +1,29 @@
 ---
 
+- name: Confirm required variables exist
+  ansible.builtin.assert:
+    that:
+      - postgresql_user_name is defined
+      - postgresql_user_password is defined
+    msg: To Create a user, username and password must be defined
+  when: >
+    postgresql_user.name is not defined
+      and
+    postgresql_user.password is not defined
+
+
+- name: Create Variable
+  ansible.builtin.set_fact:
+    postgresql_db: "{{ postgresql_db | default({}) | combine({
+        'name': postgresql_db_name,
+        'password': postgresql_user_password
+      }) }}"
+  when: >
+    postgresql_user.name is not defined
+      and
+    postgresql_user.password is not defined
+
+
 - name: Create Postgres User
   community.postgresql.postgresql_user:
     login_host: "{{ postgresdb_host }}"
