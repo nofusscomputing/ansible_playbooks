@@ -254,6 +254,14 @@
 
   vars:
 
+    ansible_connection: local
+
+    nfc_pb_keycloak_auth_keycloak_url: https://keycloak.local
+    nfc_pb_keycloak_auth_realm: master
+    nfc_pb_keycloak_auth_username: admin
+    nfc_pb_keycloak_auth_password: admin
+    nfc_pb_keycloak_validate_certs: false
+
     nfc_pb_awx_tower_template:
 
       - name: "configure/keycloak/from_inventory"
@@ -271,7 +279,7 @@
         survey_enabled: true
         credential_types:
           - name: playbook/keycloak/api
-            description: Creates ~/gitconfig with credentials that enable git operations on a private repository
+            description: Creates The variables required to log in to a keycloak instance
             inputs: |
               fields:
                 - id: username
@@ -301,4 +309,4 @@
                 nfc_pb_keycloak_auth_realm: "{{ auth_realm }}"
                 nfc_pb_keycloak_auth_username: "{{ username }}"
                 nfc_pb_keycloak_auth_password: "{{ password }}"
-                nfc_pb_keycloak_validate_certs: "{{ validate_certs | default(true) | bool }}"
+                nfc_pb_keycloak_validate_certs: "{{ validate_certs | default(true) }}"
