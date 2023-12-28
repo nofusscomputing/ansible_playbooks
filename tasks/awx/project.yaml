@@ -98,7 +98,7 @@
     - name: Search for Workflow templates
       ansible.builtin.include_tasks:
         file: tasks/awx/workflow_templates.yaml
-      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.workflow_path, wantlist=true ) }}"
+      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.workflow_path, wantlist=true ) | default([]) }}"
       when: >
         item.state == 'file'
           and
