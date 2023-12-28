@@ -69,10 +69,13 @@
       block:
 
 
-        ############################
-        - name: Trace
-          ansible.builtin.debug:
-            msg: "this task exists as you can't have an empty block"
+        - name: Check for login credentials
+          ansible.builtin.assert:
+            that:
+              - postgresdb_host is defined
+              - postgresdb_user is defined
+              - postgresdb_password is defined
+            msg: You must specify login credentials
           tags:
             - always
 
