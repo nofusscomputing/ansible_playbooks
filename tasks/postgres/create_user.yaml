@@ -14,8 +14,8 @@
 
 - name: Create Variable
   ansible.builtin.set_fact:
-    postgresql_db: "{{ postgresql_db | default({}) | combine({
-        'name': postgresql_db_name,
+    postgresql_user: "{{ postgresql_user | default({}) | combine({
+        'name': postgresql_user_name,
         'password': postgresql_user_password
       }) }}"
   when: >
