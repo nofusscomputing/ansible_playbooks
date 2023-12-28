@@ -95,14 +95,16 @@
         nfc_pb_awx_branch: nfc_pb_awx_project.scm_branch
 
 
-    - name: Add Workflow templates
+    - name: Search for Workflow templates
       ansible.builtin.include_tasks:
         file: tasks/awx/workflow_templates.yaml
-      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.workflow_path | default('workflow/')) | default([]) }}"
+      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.workflow_path, wantlist=true ) }}"
       when: >
         item.state == 'file'
           and
         '.yaml' in item.path|basename
+          and
+        nfc_pb_awx_project.workflow_path is defined
       vars:
         nfc_pb_awx_workflow_filename: "{{ item.path }}"
         nfc_pb_awx_workflow_dir: "{{ item.root }}"
