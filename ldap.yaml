@@ -1,0 +1,329 @@
+---
+- name: LDAP
+  hosts: localhost
+  become: false
+  gather_facts: true
+
+
+  pre_tasks:
+
+
+      # Play and task set time
+    - name: Set Start Time
+      ansible.builtin.set_fact:
+        nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_automation'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_automation: {
+          "error": 0,
+          "time": {
+            "start": "{{ nfc_task_starttime | string }}",
+            "end": 0
+          }
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      when: nfc_automation is not defined
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_task'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "{{ ansible_play_name | default('') | lower | string }}",
+          "roles": "{{ ansible_play_role_names | default('') | string }}",
+          "skip_tags": "{{ ansible_skip_tags | default([])| list }}",
+          "start": "{{ nfc_task_starttime | string }}",
+          "tags": "{{ ansible_run_tags | default([]) | list }}"
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    - name: Block - pre_tasks
+      block:
+
+
+        ################################################
+        - name: Trace
+          ansible.builtin.debug:
+            msg: "this task exists as you can't have an empty block"
+          tags:
+            - always
+
+
+      rescue:
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+    # Don't use the 'roles' section.
+  roles: []
+    # if the included role(s) do not contain a rescue block, the playbook may stop
+    # executing in this section (roles) with the post_tasks not running. This will
+    # cause the artifacts to be incomplete. It's recommended to include your roles
+    # in section(s) 'pre_tasks', 'tasks' or 'post_tasks' and from within a block with
+   # rescue so that the playbook can complete and ensure that all artifacts are set.
+
+
+  tasks:
+
+
+    - name: Block - tasks
+      block:
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error eccured, follow error path to fail play
+          tags:
+            - always
+
+################################################################################################
+        # - name: Configure AWX
+        #   ansible.builtin.include_tasks:
+        #     file: tasks/awx/settings.yaml
+        #   tags:
+        #     - always
+
+          # need pip install python-ldap
+        - name: LDAP configuration
+          community.general.ldap_entry:
+            server_uri: "{{ nfc_pb_ldap_uri }}"
+            bind_dn: "{{ nfc_pb_ldap_bind_dn }}"
+            bind_pw: "{{ nfc_pb_ldap_bind_pw }}"
+
+            state: "{{ object.state | default('present') }}"
+
+            dn: "{{ object.dn }}"
+            objectClass: "{{ object.objectclass }}"
+
+            attributes: "{{ object.attributes }}"
+
+          loop: "{{ ldap_configuration }}"
+          loop_control:
+            loop_var: object
+          become: true
+
+
+        - name: Set up Attributes
+          community.general.ldap_attrs:
+            server_uri: "{{ nfc_pb_ldap_uri }}"
+            bind_dn: "{{ nfc_pb_ldap_bind_dn }}"
+            bind_pw: "{{ nfc_pb_ldap_bind_pw }}"
+
+            state: "exact"
+
+            dn: "{{ object.dn }}"
+
+            attributes: "{{ object.attributes | combine({ 'objectClass': object.objectclass | from_yaml }) }}"
+
+          loop: "{{ ldap_configuration }}"
+          loop_control:
+            loop_var: object
+          become: true
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  post_tasks:
+
+    - name: Tasks post_task
+      block:
+
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, follow error path to fail play
+          tags:
+            - always
+
+
+        ########################################################################
+        #
+        # Your tasks here
+        #
+        ########################################################################
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Task and automation end time.
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set task end time
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | combine({
+                'end': nfc_task_endtime | string
+              }) ] }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set Automation end time.
+          # every playbook must set this variable so that the end time
+          # is equal to the fail time or the end of a group of playbooks.
+        - name: Set automation end time
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'time': nfc_automation.time | combine({
+                  'end': nfc_task_endtime | string
+                })
+              }) }}"
+            nfc_task_endtime: null
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set the artifacts as a fact for subsequent playbook useage
+          # Note: variable 'per_host' must be 'false' so that the artifacts
+          # work within AWX / Ansible Automation Platform.
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
+
+
+          # Final error check to fail the entire play run on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_automation.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  vars:
+
+    ansible_connection: local
+
+    nfc_pb_awx_tower_template:
+
+      - name: "LDAP/Configure/From Inventory"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        description: Configure LDAP from Inventory
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        labels:
+          - configure
+          - ldap
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: false
+        credential_types:
+          - name: playbook/LDAP/Server
+            description: LDAP Playbook LDAP credentials and host.
+            inputs: |
+              fields:
+                - id: username
+                  type: string
+                  label: BIND DN
+                - id: uri
+                  type: string
+                  label: LDAP URI
+                  help_text: Ensure that `ldap://` is prefixed to uri
+                - id: password
+                  type: string
+                  label: Password
+                  secret: true
+              required:
+                - username
+                - uri
+                - password
+            injectors: >
+              extra_vars:
+                tower:
+                  filename:
+                    nfc_pb_ldap_uri: "{{ uri }}"
+                    nfc_pb_ldap_bind_dn: "{{ username }}"
+                    nfc_pb_ldap_bind_pw: "{{ password }}"
