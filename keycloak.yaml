@@ -256,12 +256,6 @@
 
     ansible_connection: local
 
-    nfc_pb_keycloak_auth_keycloak_url: https://keycloak.local
-    nfc_pb_keycloak_auth_realm: master
-    nfc_pb_keycloak_auth_username: admin
-    nfc_pb_keycloak_auth_password: admin
-    nfc_pb_keycloak_validate_certs: false
-
     nfc_pb_awx_tower_template:
 
       - name: "Keycloak/Configure/From Inventory"
