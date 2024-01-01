@@ -17,7 +17,7 @@
 #     Restore a database from file
 #
 
-- name: PostgresDB Backup/Restore
+- name: PostgresDB
   hosts: localhost
   gather_facts: true
 
@@ -69,10 +69,13 @@
       block:
 
 
-        ############################
-        - name: Trace
-          ansible.builtin.debug:
-            msg: "this task exists as you can't have an empty block"
+        - name: Check for login credentials
+          ansible.builtin.assert:
+            that:
+              - postgresdb_host is defined
+              - postgresdb_user is defined
+              - postgresdb_password is defined
+            msg: You must specify login credentials
           tags:
             - always
 
@@ -136,27 +139,30 @@
                 - restore
           when: backup.postgresdb.databases | default([]) | length | int > 0
           tags:
+            - never
             - backup
 
         - name: Check Variables
           ansible.builtin.assert:
             that:
-              - postgresDB_directory_backup | default('') != ''
-              - postgresDB_host | default('') != ''
-              - postgresDB_user | default('') != ''
-              - postgresDB_password | default('') != ''
-              - postgresDB_database_name | default('') != ''
-            fail_msg: "You must specify variables 'postgresDB_directory_backup/postgresDB_host/postgresDB_user/postgresDB_password/postgresDB_database_name'"
+              - postgresdb_directory_backup | default('') != ''
+              - postgresdb_host | default('') != ''
+              - postgresdb_user | default('') != ''
+              - postgresdb_password | default('') != ''
+              - postgresdb_database_name | default('') != ''
+            fail_msg: "You must specify variables 'postgresdb_directory_backup/postgresdb_host/postgresdb_user/postgresdb_password/postgresdb_database_name'"
           tags:
+            - never
             - restore
 
 
         - name: Check Restore Variables
           ansible.builtin.assert:
             that:
-              - postgresDB_filename_restore | default('') != ''
-            fail_msg: "You must specify variable 'postgresDB_filename_restore'"
+              - postgresdb_filename_restore | default('') != ''
+            fail_msg: "You must specify variable 'postgresdb_filename_restore'"
           tags:
+            - never
             - restore
 
 
@@ -176,83 +182,109 @@
 
         - name: Set Backup Facts
           ansible.builtin.set_fact:
-            postgresDB_filename_backup: recovery.sql
+            postgresdb_filename_backup: recovery.sql
           tags:
+            - never
             - restore
 
 
         - name: Backup database
           tags:
-            - restore
+            - never
+            - restore-backup
           block:
 
 
             - name: Dump an existing database to a file
               community.postgresql.postgresql_db:
-                name: "{{ postgresDB_database_name }}"
+                name: "{{ postgresdb_database_name }}"
                 state: dump
-                target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
-                login_host: "{{ postgresDB_host }}"
-                login_user: "{{ postgresDB_user }}"
-                login_password: "{{ postgresDB_password }}"
+                target: "{{ postgresdb_directory_backup }}/{{ postgresdb_filename_backup }}"
+                login_host: "{{ postgresdb_host }}"
+                login_user: "{{ postgresdb_user }}"
+                login_password: "{{ postgresdb_password }}"
 
 
             - name: Backup File Details
               ansible.builtin.stat:
-                name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+                name: "{{ postgresdb_directory_backup }}/{{ postgresdb_filename_backup }}"
 
           rescue:
 
             - name: Remove Failed Backup
               ansible.builtin.file:
-                name: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_backup }}"
+                name: "{{ postgresdb_directory_backup }}/{{ postgresdb_filename_backup }}"
                 state: absent
 
             - name: Fail Play
               ansible.builtin.assert:
                 that:
                   - false
-                fail_msg: Backup of Postgres database '{{ postgresDB_database_name }}' Failed!
+                fail_msg: Backup of Postgres database '{{ postgresdb_database_name }}' Failed!
 
 
         - name: Restore database
           tags:
+            - never
             - restore
           block:
 
             - name: Drop DB
               community.postgresql.postgresql_db:
-                name: "{{ postgresDB_database_name }}"
+                name: "{{ postgresdb_database_name }}"
                 state: absent
                 force: true
-                login_host: "{{ postgresDB_host }}"
-                login_user: "{{ postgresDB_user }}"
-                login_password: "{{ postgresDB_password }}"
+                login_host: "{{ postgresdb_host }}"
+                login_user: "{{ postgresdb_user }}"
+                login_password: "{{ postgresdb_password }}"
 
 
             - name: Create DB
               community.postgresql.postgresql_db:
-                name: "{{ postgresDB_database_name }}"
+                name: "{{ postgresdb_database_name }}"
                 state: present
-                login_host: "{{ postgresDB_host }}"
-                login_user: "{{ postgresDB_user }}"
-                login_password: "{{ postgresDB_password }}"
+                login_host: "{{ postgresdb_host }}"
+                login_user: "{{ postgresdb_user }}"
+                login_password: "{{ postgresdb_password }}"
 
             - name: Restore an existing database to a file
               community.postgresql.postgresql_db:
-                name: "{{ postgresDB_database_name }}"
+                name: "{{ postgresdb_database_name }}"
                 state: restore
-                target: "{{ postgresDB_directory_backup }}/{{ postgresDB_filename_restore }}"
-                login_host: "{{ postgresDB_host }}"
-                login_user: "{{ postgresDB_user }}"
-                login_password: "{{ postgresDB_password }}"
+                target: "{{ postgresdb_directory_backup }}/{{ postgresdb_filename_restore }}"
+                login_host: "{{ postgresdb_host }}"
+                login_user: "{{ postgresdb_user }}"
+                login_password: "{{ postgresdb_password }}"
 
           always:
 
             - name: Remove the restore dump
               ansible.builtin.file:
-                name: "{{ postgresDB_directory_backup }}/restore.sql"
+                name: "{{ postgresdb_directory_backup }}/restore.sql"
                 state: absent
+
+
+        - name: Create Postgres User
+          ansible.builtin.include_tasks:
+            file: tasks/postgres/create_user.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - never
+            - create_user
+
+
+        - name: Create Postgres Database
+          ansible.builtin.include_tasks:
+            file: tasks/postgres/create_database.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - never
+            - create_database
+
 
       rescue:
 
@@ -382,12 +414,12 @@
 
   vars:
     ansible_connection: local          # String, Default 'local' DONT change.
-    postgresDB_directory_backup: ""    # String, Required
-    postgresDB_host: ""                # String, Required
-    postgresDB_user: ""                # String, Required
-    postgresDB_password: ""            # String, Required
-    postgresDB_database_name: ""       # String, Required
-    postgresDB_filename_restore: ""    # String, Required for Restore ONLY
+    postgresdb_directory_backup: ""    # String, Required
+    postgresdb_host: ""                # String, Required
+    postgresdb_user: ""                # String, Required
+    postgresdb_password: ""            # String, Required
+    postgresdb_database_name: ""       # String, Required
+    postgresdb_filename_restore: ""    # String, Required for Restore ONLY
 
     nfc_pb_awx_tower_template:
       - name: "PostgresDB"
@@ -402,10 +434,9 @@
         job_tags: backup, restore
         labels:
           - backup
+          - database
           - restore
           - postgres
-        # credentials:
-        #   - "Local"
         verbosity: 2
         use_fact_cache: true
         survey_enabled: true
@@ -416,48 +447,12 @@
             "spec": [
                 {
                     "max": 1024,
-                    "min": 5,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresDB_host",
-                    "new_question": false,
-                    "question_name": "Host",
-                    "question_description": "IP or Hostname of the PostgreSQL Server"
-                },
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresDB_user",
-                    "new_question": true,
-                    "question_name": "Postgres User",
-                    "question_description": "User with Access to the database to backup"
-                },
-                {
-                    "max": 1024,
-                    "min": 6,
-                    "type": "password",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresDB_password",
-                    "new_question": false,
-                    "question_name": "Postgres Password",
-                    "question_description": "Password for user accessing the database to backup"
-                },
-                {
-                    "max": 1024,
                     "min": 2,
                     "type": "text",
                     "choices": "",
                     "default": "",
                     "required": true,
-                    "variable": "postgresDB_database_name",
+                    "variable": "postgresdb_database_name",
                     "new_question": true,
                     "question_name": "Database",
                     "question_description": "Database name to backup/restore"
@@ -469,7 +464,7 @@
                     "choices": "",
                     "default": "/backup",
                     "required": true,
-                    "variable": "postgresDB_directory_backup",
+                    "variable": "postgresdb_directory_backup",
                     "new_question": true,
                     "question_name": "Backup Directory",
                     "question_description": "Directory to store Backup in"
@@ -481,10 +476,129 @@
                     "choices": "",
                     "default": "",
                     "required": false,
-                    "variable": "postgresDB_filename_restore",
+                    "variable": "postgresdb_filename_restore",
                     "new_question": true,
                     "question_name": "Restore Filename",
                     "question_description": "(Only required for Restore) Name of the SQL dump file to restore"
+                }
+            ]
+          }
+        credential_types:
+          - name: playbook/postgres/Login
+            description: Credentials to login to a PostgreSQL Server
+            inputs: |
+              fields:
+                - id: username
+                  type: string
+                  label: Username
+                - id: password
+                  type: string
+                  label: Password
+                  secret: true
+                - id: host
+                  type: string
+                  label: Keycloak URL
+              required:
+                - username
+                - password
+                - host
+            injectors: >
+              extra_vars:
+                postgresdb_user: "{{ username }}"
+                postgresdb_password: "{{ password }}"
+                postgresdb_host: "{{ host }}"
+
+
+      - name: "postgres/user/create"
+        ask_tags_on_launch: false
+        description: |
+          Playbook to create PostgreSQL User
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: create_user
+        labels:
+          - create
+          - database
+          - postgres
+          - user
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey_spec: |
+          {
+            "name": "",
+            "description": "",
+            "spec": [
+                {
+                    "max": 1024,
+                    "min": 3,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresql_user_name",
+                    "new_question": true,
+                    "question_name": "User Name",
+                    "question_description": "User to create"
+                },
+                {
+                    "max": 1024,
+                    "min": 3,
+                    "type": "password",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresql_user_password",
+                    "new_question": false,
+                    "question_name": "User Password",
+                    "question_description": "Password for user to create"
+                },
+                {
+                    "max": 1024,
+                    "min": 2,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": false,
+                    "variable": "postgresql_user_priv",
+                    "new_question": true,
+                    "question_name": "User Privileges",
+                    "question_description": "Privileges to grant user"
+                }
+            ]
+          }
+
+
+      - name: "postgres/database/create"
+        ask_tags_on_launch: false
+        description: |
+          Playbook to create PostgreSQL Database
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: create_database
+        labels:
+          - create
+          - database
+          - postgres
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey_spec: |
+          {
+            "name": "",
+            "description": "",
+            "spec": [
+                {
+                    "max": 1024,
+                    "min": 3,
+                    "type": "text",
+                    "choices": "",
+                    "default": "",
+                    "required": true,
+                    "variable": "postgresql_db_name",
+                    "new_question": true,
+                    "question_name": "Database Name",
+                    "question_description": "Database name to create"
                 }
             ]
           }

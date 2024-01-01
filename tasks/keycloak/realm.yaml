@@ -1,0 +1,129 @@
+---
+
+- name: Realm Configuration
+  community.general.keycloak_realm:
+    # auth_client_id: admin-cli
+    auth_keycloak_url: "{{ nfc_pb_keycloak_auth_keycloak_url }}"
+    auth_realm: "{{ nfc_pb_keycloak_auth_realm }}"
+    auth_username: "{{ nfc_pb_keycloak_auth_username }}"
+    auth_password: "{{ nfc_pb_keycloak_auth_password }}"
+    validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) }}"
+
+    state: "{{ keycloak_realm.state | default('present') }}" # choices: ['present', 'absent'] type: str
+
+    id: "{{ keycloak_realm.id }}" # type: str
+    realm: "{{ keycloak_realm.realm }}" # type: str
+    access_code_lifespan: "{{ keycloak_realm.access_code_lifespan | default(omit) }}" # type: int
+    access_code_lifespan_login: "{{ keycloak_realm.access_code_lifespan_login | default(omit) }}" # type: int
+    access_code_lifespan_user_action: "{{ keycloak_realm.access_code_lifespan_user_action | default(omit) }}" # type: int
+    access_token_lifespan: "{{ keycloak_realm.access_token_lifespan | default(omit) }}" # type: int
+    access_token_lifespan_for_implicit_flow: "{{ keycloak_realm.access_token_lifespan_for_implicit_flow | default(omit) }}" # type: int
+    account_theme: "{{ keycloak_realm.account_theme | default(omit) }}" # type: str
+    action_token_generated_by_admin_lifespan: "{{ keycloak_realm.action_token_generated_by_admin_lifespan | default(omit) }}" # type: int
+    action_token_generated_by_user_lifespan: "{{ keycloak_realm.action_token_generated_by_user_lifespan | default(omit) }}" # type: int
+    admin_events_details_enabled: "{{ keycloak_realm.admin_events_details_enabled | default(true) }}" # type: bool
+    admin_events_enabled: "{{ keycloak_realm.admin_events_enabled | default(true) }}" # type: bool
+    admin_theme: "{{ keycloak_realm.admin_theme | default(omit) }}" # type: str
+    attributes: "{{ keycloak_realm.attributes | default(omit) }}" # type: dict
+    browser_flow: "{{ keycloak_realm.browser_flow | default(omit) }}" # type: str
+    browser_security_headers: "{{ keycloak_realm.browser_security_headers | default(omit) }}" # type: dict
+    brute_force_protected: "{{ keycloak_realm.brute_force_protected | default(true) }}" # type: bool
+    client_authentication_flow: "{{ keycloak_realm.client_authentication_flow | default(omit) }}" # type: str
+    client_scope_mappings: "{{ keycloak_realm.client_scope_mappings | default(omit) }}" # type: dict
+    default_default_client_scopes: "{{ keycloak_realm.default_default_client_scopes | default(omit) }}" # type: list elements: str
+    default_groups: "{{ keycloak_realm.default_groups | default(omit) }}" # type: list elements: str
+    default_locale: "{{ keycloak_realm.default_locale | default(omit) }}" # type: str
+    default_optional_client_scopes: "{{ keycloak_realm.default_optional_client_scopes | default(omit) }}" # type: list elements: str
+    default_roles: "{{ keycloak_realm.default_roles | default(omit) }}" # type: list elements: str
+    default_signature_algorithm: "{{ keycloak_realm.default_signature_algorithm | default(omit) }}" # type: str
+    direct_grant_flow: "{{ keycloak_realm.direct_grant_flow | default(omit) }}" # type: str
+    display_name: "{{ keycloak_realm.display_name | default(omit) }}" # type: str
+    display_name_html: "{{ keycloak_realm.display_name_html | default(omit) }}" # type: str
+    docker_authentication_flow: "{{ keycloak_realm.docker_authentication_flow | default(omit) }}" # type: str
+    duplicate_emails_allowed: "{{ keycloak_realm.duplicate_emails_allowed | default(false) }}" # type: bool
+    edit_username_allowed: "{{ keycloak_realm.edit_username_allowed | default(false) }}" # type: bool
+    email_theme: "{{ keycloak_realm.email_theme | default(omit) }}" # type: str
+    enabled: "{{ keycloak_realm.enabled | default(true) }}" # type: bool
+    enabled_event_types: "{{ keycloak_realm.enabled_event_types | default(omit) }}" # type: list elements: str
+    events_enabled: "{{ keycloak_realm.events_enabled | default(true) }}" # type: bool
+    events_expiration: "{{ keycloak_realm.events_expiration | default((60 * 60 * 24 * 90) | int) | int }}" # type: int
+    events_listeners: "{{ keycloak_realm.events_listeners | default(omit) }}" # type: list elements: str
+    failure_factor: "{{ keycloak_realm.failure_factor | default(omit) }}" # type: int
+    internationalization_enabled: "{{ keycloak_realm.internationalization_enabled | default(false) }}" # type: bool
+    login_theme: "{{ keycloak_realm.login_theme | default(omit) }}" # type: str
+    login_with_email_allowed: "{{ keycloak_realm.login_with_email_allowed | default(false) }}" # type: bool
+    max_delta_time_seconds: "{{ keycloak_realm.max_delta_time_seconds | default(omit) }}" # type: int
+    max_failure_wait_seconds: "{{ keycloak_realm.max_failure_wait_seconds | default(omit) }}" # type: int
+    minimum_quick_login_wait_seconds: "{{ keycloak_realm.minimum_quick_login_wait_seconds | default(omit) }}" # type: int
+    not_before: "{{ keycloak_realm.not_before | default(omit) }}" # type: int
+    offline_session_idle_timeout: "{{ keycloak_realm.offline_session_idle_timeout | default(omit) }}" # type: int
+    offline_session_max_lifespan: "{{ keycloak_realm.offline_session_max_lifespan | default(omit) }}" # type: int
+    offline_session_max_lifespan_enabled: "{{ keycloak_realm.offline_session_max_lifespan_enabled | default(omit) }}" # type: bool
+    otp_policy_algorithm: "{{ keycloak_realm.otp_policy_algorithm | default(omit) }}" # type: str
+    otp_policy_digits: "{{ keycloak_realm.otp_policy_digits | default(omit) }}" # type: int
+    otp_policy_initial_counter: "{{ keycloak_realm.otp_policy_initial_counter | default(omit) }}" # type: int
+    otp_policy_look_ahead_window: "{{ keycloak_realm.otp_policy_look_ahead_window | default(omit) }}" # type: int
+    otp_policy_period: "{{ keycloak_realm.otp_policy_period | default(omit) }}" # type: int
+    otp_policy_type: "{{ keycloak_realm.otp_policy_type | default(omit) }}" # type: str
+    otp_supported_applications: "{{ keycloak_realm.otp_supported_applications | default(omit) }}" # type: list elements: str
+    password_policy: "{{ keycloak_realm.password_policy | default(omit) }}" # type: str
+    permanent_lockout: "{{ keycloak_realm.permanent_lockout | default(true) }}" # type: bool
+    quick_login_check_milli_seconds: "{{ keycloak_realm.quick_login_check_milli_seconds | default(omit) }}" # type: int
+    refresh_token_max_reuse: "{{ keycloak_realm.refresh_token_max_reuse | default(omit) }}" # type: int
+    registration_allowed: "{{ keycloak_realm.registration_allowed | default(false) }}" # type: bool
+    registration_email_as_username: "{{ keycloak_realm.registration_email_as_username | default(false) }}" # type: bool
+    registration_flow: "{{ keycloak_realm.registration_flow | default(omit) }}" # type: str
+    remember_me: "{{ keycloak_realm.remember_me | default(false) }}" # type: bool
+    reset_credentials_flow: "{{ keycloak_realm.reset_credentials_flow | default(omit) }}" # type: str
+    reset_password_allowed: "{{ keycloak_realm.reset_password_allowed | default(false) }}" # type: bool
+    revoke_refresh_token: "{{ keycloak_realm.revoke_refresh_token | default(omit) }}" # type: bool
+    smtp_server: "{{ keycloak_realm.smtp_server | default(omit) }}" # type: dict
+    ssl_required: "{{ keycloak_realm.ssl_required | default('all') }}" # choices: ['all', 'external', 'none'] type: str
+    sso_session_idle_timeout: "{{ keycloak_realm.sso_session_idle_timeout | default(omit) }}" # type: int
+    sso_session_idle_timeout_remember_me: "{{ keycloak_realm.sso_session_idle_timeout_remember_me | default(omit) }}" # type: int
+    sso_session_max_lifespan: "{{ keycloak_realm.sso_session_max_lifespan | default(omit) }}" # type: int
+    sso_session_max_lifespan_remember_me: "{{ keycloak_realm.sso_session_max_lifespan_remember_me | default(omit) }}" # type: int
+    supported_locales: "{{ keycloak_realm.supported_locales | default(omit) }}" # type: list elements: str
+    user_managed_access_allowed: "{{ keycloak_realm.user_managed_access_allowed | default(false) }}" # type: bool
+    verify_email: "{{ keycloak_realm.verify_email | default(true) }}" # type: bool
+    wait_increment_seconds: "{{ keycloak_realm.wait_increment_seconds | default(omit) }}" # type: int
+  diff: true
+
+
+- name: User Federation
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/federation.yaml
+  loop: "{{ keycloak_realm.federation | default([]) }}"
+  loop_control:
+    loop_var: keycloak_federation
+
+
+- name: Realm Roles
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/role.yaml
+  loop: "{{ keycloak_realm.roles | default([]) }}"
+  loop_control:
+    loop_var: keycloak_role
+
+- name: Realm Clients
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/client.yaml
+  loop: "{{ keycloak_realm.clients | default([]) }}"
+  loop_control:
+    loop_var: keycloak_client
+
+
+- name: Client Scopes
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/client_scope.yaml
+  loop: "{{ keycloak_realm.client_scopes | default([]) }}"
+  loop_control:
+    loop_var: keycloak_clientscope
+
+
+- name: User Role Mappings
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/user_role_mapping.yaml
+  loop: "{{ keycloak_realm.user_role_mapping | default([]) }}"
+  loop_control:
+    loop_var: keycloak_user_rolemapping

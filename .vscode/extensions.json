@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "redhat.ansible",
+        "wolfmah.ansible-vault-inline",
+        "samuelcolvin.jinjahtml",
+        "gitlab.gitlab-workflow",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "jebbs.markdown-extended",
+        "redhat.vscode-yaml",
+        "compilenix.vscode-zonefile"
+    ]
+}

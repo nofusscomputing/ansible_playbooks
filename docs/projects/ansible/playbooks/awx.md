@@ -24,6 +24,8 @@ Items supported for configuration:
 
 - Job Templates from playbooks
 
+- Workflow Templates from code
+
 !!! note Info
     This playbook adds items ONLY. maybe in the future it will remove items no longer within the project. Merge requests welcome.
 

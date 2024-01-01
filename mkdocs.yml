@@ -35,7 +35,7 @@ nav:
 
       - projects/ansible/playbooks/glpi.md
 
-      - projects/ansible/playbooks/kubernetes.md
+      - projects/ansible/playbooks/keycloak.md
 
       - projects/ansible/playbooks/mariadb.md
 
