@@ -23,6 +23,8 @@ Available Playbooks:
 
 1. [glpi.yaml](glpi.md)
 
+1. [keycloak.yaml](keycloak.md)
+
 1. [mariadb.yaml](mariadb.md)
 
 1. [postgresdb.yaml](postgresdb.md)
