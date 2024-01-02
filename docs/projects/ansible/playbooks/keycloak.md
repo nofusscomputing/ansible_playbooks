@@ -15,12 +15,14 @@ This playbook includes the [AWX feature](awx.md) where it imports the playbook a
 
 - **Keycloak/Configure/From Inventory** Configure a Keycloak instance from inventory.
 
+- **Keycloak/Realm/SAML/Fetch/Public Certificate** Fetch the Public Certificate from the specified realm.
+
 On import to AWX / Ansible Automation Platform a credential type will also be created, `playbook/keycloak/api` that can be used to supply the required secrets and Keycloak host.
 
 
 ## Configure Keycloak from Inventory
 
-- Job tag not required
+- Job tag `configure`
 
 This task configures a keycloak instance from config stored within your inventory.
 
@@ -38,8 +40,31 @@ keycloak_configuration: []                                 # Mandatory, list. Ke
 Prior to the play completing the following artifact/stats are set:
 
 ``` json
+{}
+
+```
+
+
+## Fetch SAML Certificate
+
+- Job tag `saml_certificate`
+
+This task fetches the SAML public certificate from the specified keycloak realm.
+
+Global variables
+
+``` yaml
+nfc_pb_keycloak_url: https://keycloak.local      # Mandatory, string. hostname and protocol.
+nfc_pb_keycloak_realm: myrealmname               # Mandatory, string. name of the realm to fetch certificate from
+nfc_pb_keycloak_validate_certs: true             # Optional, boolean. validate ssl certificate
+
+```
+
+Prior to the play completing the following artifact/stats are set:
+
+``` json
 {
-  
+  "nfc_pb_keycloak_saml_certificate": "public_cert_string"
 }
 
 ```
