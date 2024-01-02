@@ -8,9 +8,9 @@
   register: nfc_pb_keycloak_saml_certificate
 
 
-- name: build fact part-1
+- name: Build fact part-1
   ansible.builtin.set_fact:
-  nfc_pb_keycloak_saml_certificate: "{{ keycloak_saml_descriptor.content | ansible.utils.from_xml('xmltodict') }}"
+    nfc_pb_keycloak_saml_certificate: "{{ keycloak_saml_descriptor.content | ansible.utils.from_xml('xmltodict') }}"
 
 - name: Create Certificate Fact
   ansible.builtin.set_fact:
