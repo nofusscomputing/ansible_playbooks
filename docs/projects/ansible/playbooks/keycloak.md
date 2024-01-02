@@ -38,8 +38,31 @@ keycloak_configuration: []                                 # Mandatory, list. Ke
 Prior to the play completing the following artifact/stats are set:
 
 ``` json
+{}
+
+```
+
+
+## Fetch SAML Certificate
+
+- Job tag `saml_certificate`
+
+This task fetches the SAML public certificate from the specified keycloak realm.
+
+Global variables
+
+``` yaml
+nfc_pb_keycloak_url: https://keycloak.local      # Mandatory, string. hostname and protocol.
+nfc_pb_keycloak_realm: myrealmname               # Mandatory, string. name of the realm to fetch certificate from
+nfc_pb_keycloak_validate_certs: true             # Optional, boolean. validate ssl certificate
+
+```
+
+Prior to the play completing the following artifact/stats are set:
+
+``` json
 {
-  
+  "nfc_pb_keycloak_saml_certificate": "public_cert_string"
 }
 
 ```

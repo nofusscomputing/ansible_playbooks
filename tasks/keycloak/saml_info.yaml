@@ -1,0 +1,25 @@
+---
+
+- name: Fetch SAML Public Certificate
+  ansible.builtin.uri:
+    url: "{{ nfc_pb_keycloak_url }}/realms/{{ nfc_pb_keycloak_realm }}/protocol/saml/descriptor"
+    return_content: true
+    validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) | bool }}"
+  register: nfc_pb_keycloak_saml_certificate
+
+
+- name: build fact part-1
+  ansible.builtin.set_fact:
+  nfc_pb_keycloak_saml_certificate: "{{ keycloak_saml_descriptor.content | ansible.utils.from_xml('xmltodict') }}"
+
+- name: Create Certificate Fact
+  ansible.builtin.set_fact:
+    nfc_pb_keycloak_saml_certificate: "{{ nfc_pb_keycloak_saml_certificate['md:EntityDescriptor']
+        ['md:IDPSSODescriptor']['md:KeyDescriptor']['ds:KeyInfo']['ds:X509Data']['ds:X509Certificate'] }}"
+
+- name: Set artifact
+  ansible.builtin.set_stats:
+    data:
+      nfc_pb_keycloak_saml_certificate: "{{ nfc_pb_keycloak_saml_certificate }}"
+    per_host: false
+    aggregate: true
