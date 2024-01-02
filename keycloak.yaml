@@ -129,6 +129,14 @@
             - configure
 
 
+        - name: Fetch SAML Public Certificate
+          ansible.builtin.include_tasks:
+            file: tasks/keycloak/saml_info.yaml
+          tags:
+            - never
+            - saml_certificate
+
+
       rescue:
 
 
@@ -308,3 +316,26 @@
                 nfc_pb_keycloak_auth_username: "{{ username }}"
                 nfc_pb_keycloak_auth_password: "{{ password }}"
                 nfc_pb_keycloak_validate_certs: "{{ validate_certs | default(true) }}"
+
+
+      - name: "Keycloak/Realm/SAML/Fetch/Public Certificate"
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_limit_on_launch: false
+        ask_variables_on_launch: true
+        description: Fetch SAML public from a keycloak instance
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_keycloak_url: https://keycloak.local
+          nfc_pb_keycloak_realm: nofusscomputing
+          nfc_pb_keycloak_validate_certs: true
+        job_type: "run"
+        job_tags: saml_certificate
+        labels:
+          - certificate
+          - fetch
+          - keycloak
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
