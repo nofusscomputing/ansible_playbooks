@@ -121,6 +121,9 @@
         - name: Realm Configuration
           ansible.builtin.include_tasks:
             file: tasks/keycloak/realm.yaml
+            apply:
+              tags:
+                - always
           loop: "{{ keycloak_configuration }}"
           loop_control:
             loop_var: keycloak_realm
@@ -132,6 +135,9 @@
         - name: Fetch SAML Public Certificate
           ansible.builtin.include_tasks:
             file: tasks/keycloak/saml_info.yaml
+            apply:
+              tags:
+                - always
           tags:
             - never
             - saml_certificate
