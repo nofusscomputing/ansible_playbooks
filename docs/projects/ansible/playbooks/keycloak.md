@@ -15,6 +15,8 @@ This playbook includes the [AWX feature](awx.md) where it imports the playbook a
 
 - **Keycloak/Configure/From Inventory** Configure a Keycloak instance from inventory.
 
+- **Keycloak/Realm/SAML/Fetch/Public Certificate** Fetch the Public Certificate from the specified realm.
+
 On import to AWX / Ansible Automation Platform a credential type will also be created, `playbook/keycloak/api` that can be used to supply the required secrets and Keycloak host.
 
 
