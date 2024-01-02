@@ -124,6 +124,9 @@
           loop: "{{ keycloak_configuration }}"
           loop_control:
             loop_var: keycloak_realm
+          tags:
+            - never
+            - configure
 
 
       rescue:
@@ -265,6 +268,7 @@
         description: Configure Keycloak from Inventory
         execution_environment: "No Fuss Computing EE"
         job_type: "run"
+        job_tags: configure
         labels:
           - configure
           - keycloak

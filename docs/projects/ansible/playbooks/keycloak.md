@@ -20,7 +20,7 @@ On import to AWX / Ansible Automation Platform a credential type will also be cr
 
 ## Configure Keycloak from Inventory
 
-- Job tag not required
+- Job tag `configure`
 
 This task configures a keycloak instance from config stored within your inventory.
 
