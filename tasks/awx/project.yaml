@@ -66,6 +66,8 @@
         recursive: false
       when: >
         nfc_pb_awx_project.playbook_path is defined
+          or
+        nfc_pb_awx_project.workflow_path is defined
 
 
       # ansible.builtin.git.track_submodules=true does not work so this task exists 
