@@ -30,7 +30,6 @@
     - name: Set Automation Facts
       ansible.builtin.set_fact:
         nfc_automation: {
-          "error": 0,
           "time": {
             "start": "{{ nfc_task_starttime | string }}",
             "end": 0
@@ -47,6 +46,7 @@
       ansible.builtin.set_fact:
         nfc_task: {
           "name": "{{ ansible_play_name | default('') | lower | string }}",
+          "error": 0,
           "roles": "{{ ansible_play_role_names | default('') | string }}",
           "skip_tags": "{{ ansible_skip_tags | default([])| list }}",
           "start": "{{ nfc_task_starttime | string }}",
@@ -84,7 +84,7 @@
           # there was an error, set error object
         - name: Set error fact
           ansible.builtin.set_fact:
-            nfc_automation: "{{ nfc_automation | combine({
+            nfc_task: "{{ nfc_task | combine({
                 'error': 1
               }) }}"
           no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
@@ -99,7 +99,7 @@
         - name: Error Check
           ansible.builtin.assert:
             that:
-              - nfc_automation.error | int == 0
+              - nfc_task.error | int == 0
             msg: Error occured, Fail the play run
           tags:
             - always
@@ -124,7 +124,7 @@
         - name: Error Check
           ansible.builtin.assert:
             that:
-              - nfc_automation.error | int == 0
+              - nfc_task.error | int == 0
             msg: Error eccured, follow error path to fail play
           tags:
             - always
@@ -195,7 +195,7 @@
           # there was an error, set error object
         - name: Set error fact
           ansible.builtin.set_fact:
-            nfc_automation: "{{ nfc_automation | combine({
+            nfc_task: "{{ nfc_task | combine({
                 'error': 1
               }) }}"
           no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
@@ -210,7 +210,7 @@
         - name: Error Check
           ansible.builtin.assert:
             that:
-              - nfc_automation.error | int == 0
+              - nfc_task.error | int == 0
             msg: Error occured, Fail the play run
           tags:
             - always
@@ -226,7 +226,7 @@
         - name: Error Check
           ansible.builtin.assert:
             that:
-              - nfc_automation.error | int == 0
+              - nfc_task.error | int == 0
             msg: Error occured, follow error path to fail play
           tags:
             - always
@@ -245,7 +245,7 @@
           # there was an error, set error object
         - name: Set error fact
           ansible.builtin.set_fact:
-            nfc_automation: "{{ nfc_automation | combine({
+            nfc_task: "{{ nfc_task | combine({
                 'error': 1
               }) }}"
           no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
@@ -321,7 +321,7 @@
             - always
           when: >
             (
-              nfc_automation.error | int == 1
+              nfc_task.error | int == 1
             )
               and
             nfc_pb_glpi.ticket.error_user is defined
@@ -333,7 +333,7 @@
         - name: Error Check
           ansible.builtin.assert:
             that:
-              - nfc_automation.error | int == 0
+              - nfc_task.error | int == 0
             msg: Error occured, Fail the play run
           tags:
             - always
