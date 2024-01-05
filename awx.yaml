@@ -2,7 +2,7 @@
 - name: AWX / Tower Setup
   hosts: all
   become: false
-  gather_facts: true
+  gather_facts: false
 
 
   pre_tasks:
