@@ -73,7 +73,7 @@
 
     - name: Set Project Directory Variable - CLI Initiated
       ansible.builtin.set_fact:
-        project_dir: "{{ inventory_dir }}/.."
+        project_dir: "{{ inventory_dir | default(playbook_dir) }}/.."
         cacheable: false
       delegate_to: localhost
       run_once: true
