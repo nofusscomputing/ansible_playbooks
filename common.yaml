@@ -61,6 +61,17 @@
       block:
 
 
+        - name: Variable Setup - project_dir
+          ansible.builtin.include_tasks:
+            file: tasks/var_project_dir.yaml
+            apply:
+              tags:
+                - always
+          when: var_project_dir is not defined
+          tags:
+            - always
+
+
         - name: Common tasks
           ansible.builtin.include_role:
             name: nfc_common

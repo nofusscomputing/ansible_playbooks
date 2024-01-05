@@ -21,7 +21,7 @@
 #
 - name: Conduct Backup
   hosts: all
-  gather_facts: "{% if task_nfc_common_required | default(false) | bool %}false{% else %}true{% endif %}"
+  gather_facts: false
 
 
   pre_tasks:
@@ -71,15 +71,15 @@
       block:
 
 
-        - name: Common tasks
-          ansible.builtin.include_role:
-            name: nfc_common
+        - name: Variable Setup - project_dir
+          ansible.builtin.include_tasks:
+            file: tasks/var_project_dir.yaml
             apply:
-              become: true
+              tags:
+                - always
+          when: var_project_dir is not defined
           tags:
             - always
-          vars:
-            common_gather_facts: true
 
 
       rescue:

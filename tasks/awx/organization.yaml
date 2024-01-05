@@ -13,6 +13,10 @@
     validate_certs: "{{ validate_certs | default('yes') }}"
   # no_log: true
   diff: true
+  tags:
+    - never
+    - complete
+    - organization
 
 
 - name: "Teams - {{ nfc_pb_awx_organization.name }}"
@@ -21,6 +25,10 @@
   loop: "{{ nfc_pb_awx_organization.teams | default([]) }}"
   loop_control:
     loop_var: nfc_pb_awx_team
+  tags:
+    - never
+    - complete
+    - organization
 
 
 - name: "RBAC - {{ nfc_pb_awx_organization.name }}"
@@ -31,6 +39,10 @@
     loop_var: nfc_pb_awx_rbac
   vars:
     nfc_pb_awx_organization_name: "{{ nfc_pb_awx_organization.name }}"
+  tags:
+    - never
+    - complete
+    - organization
 
 
 - name: "Projects - {{ nfc_pb_awx_organization.name }}"
@@ -39,3 +51,9 @@
   loop: "{{ nfc_pb_awx_organization.projects | default([]) }}"
   loop_control:
     loop_var: nfc_pb_awx_project
+  tags:
+    - never
+    - complete
+    - projects
+    - job_templates
+    - workflow_templates
