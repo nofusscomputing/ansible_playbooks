@@ -23,6 +23,10 @@
       no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
       tags:
         - always
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
   rescue:
