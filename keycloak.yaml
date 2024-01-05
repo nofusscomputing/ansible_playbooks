@@ -52,6 +52,21 @@
       block:
 
 
+        - name: Ensure Job Tags have been Specified
+          ansible.builtin.assert:
+            that:
+              - ansible_run_tags | default([]) | list | length | int > 0
+              - >
+                not (
+                  ansible_run_tags | default([]) | list | length | int == 1
+                    and
+                  'all' not in (ansible_run_tags | default([]) | list)
+                )
+            msg: This playbook requires job tags be set.
+          tags:
+            - always
+
+
         - name: Variable Setup - project_dir
           ansible.builtin.include_tasks:
             file: tasks/var_project_dir.yaml
