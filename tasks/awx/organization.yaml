@@ -17,6 +17,10 @@
     - never
     - complete
     - organization
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
 
 
 - name: "Teams - {{ nfc_pb_awx_organization.name }}"

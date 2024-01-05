@@ -85,3 +85,7 @@
         #             - absent
         #         default: present
   diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local

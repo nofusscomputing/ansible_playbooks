@@ -121,3 +121,7 @@
         #     - A dict of key/value pairs to set as custom attributes for the client_scope.
         #     - Values may be single values (for example a string) or a list of strings.
   diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local

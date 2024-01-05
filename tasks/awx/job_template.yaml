@@ -38,6 +38,10 @@
         state: present
         validate_certs: "{{ validate_certs | default(true) }}"
       loop: "{{ nfc_pb_awx_job_template.labels | default([]) }}"
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: "Configure Job Template {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
@@ -87,6 +91,10 @@
       # no_log: true
       # when: nfc_pb_awx_tower_template | default('') != ''
       diff: true
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Job/{{ nfc_pb_awx_job_template.name }}"

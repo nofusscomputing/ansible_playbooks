@@ -56,6 +56,32 @@
           ansible.builtin.assert:
             that:
               - ansible_run_tags | default([]) | list | length | int > 0
+              - >
+                not (
+                  ansible_run_tags | default([]) | list | length | int == 1
+                    and
+                  'all' not in (ansible_run_tags | default([]) | list)
+                )
+              - >
+                (
+                  'complete' in ansible_run_tags | default([]) | list
+                    or
+                  'credential_types' in ansible_run_tags | default([]) | list
+                    or
+                  'instances' in ansible_run_tags | default([]) | list
+                    or
+                  'instance_groups' in ansible_run_tags | default([]) | list
+                    or
+                  'job_templates' in ansible_run_tags | default([]) | list
+                    or
+                  'organization' in ansible_run_tags | default([]) | list
+                    or
+                  'project' in ansible_run_tags | default([]) | list
+                    or
+                  'settings' in ansible_run_tags | default([]) | list
+                    or
+                  'workflow_templates' in ansible_run_tags | default([]) | list
+                )
             msg: This playbook requires job tags be set.
           tags:
             - always
@@ -70,7 +96,6 @@
           when: var_project_dir is not defined
           tags:
             - always
-
 
 
       rescue:

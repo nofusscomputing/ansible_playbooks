@@ -15,6 +15,10 @@
         validate_certs: "{{ nfc_pb_glpi_validate_certs | default(true) | bool }}"
       no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
       register: glpi_api_request
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: Set fact
