@@ -20,3 +20,7 @@
     instances: "{{ nfc_pb_awx_instance_group.instances | default([]) | list }}"
     state: "{{ nfc_pb_awx_instance_group.state | default('present') }}"
   diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local

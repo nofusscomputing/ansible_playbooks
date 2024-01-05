@@ -30,6 +30,10 @@
         - never
         - complete
         - project
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
@@ -78,6 +82,10 @@
         - project
         - job_templates
         - workflow_templates
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: GIT Checkout Project
@@ -100,6 +108,10 @@
         - project
         - job_templates
         - workflow_templates
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
       # ansible.builtin.git.track_submodules=true does not work so this task exists 
@@ -115,6 +127,10 @@
         - project
         - job_templates
         - workflow_templates
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: Add Job templates
@@ -188,6 +204,10 @@
       no_log: true
       tags:
         - always
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
     - name: "Clean-up Git credentials"
       ansible.builtin.file:
@@ -197,3 +217,7 @@
       when: tower.filename.git_credential_file is defined
       tags:
         - always
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local

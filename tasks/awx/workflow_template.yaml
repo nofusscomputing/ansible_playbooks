@@ -12,6 +12,10 @@
     organization: "{{ nfc_pb_awx_organization.name }}"
     state: present
   loop: "{{ workflow_job_template.labels | default([]) }}"
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
 
 
 - name: Workflow
@@ -422,3 +426,7 @@
       #   - This option is used for full workflow update, if not used, nodes not described in workflow will persist and keep current associations and links.
       # type: bool
       # default: False
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
