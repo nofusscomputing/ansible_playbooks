@@ -75,7 +75,7 @@
                 (
                   'plugin_form_fetch_json' in ansible_run_tags | default([]) | list
                     or
-                  'ticket_template_from_itil_category in ansible_run_tags | default([]) | list
+                  'ticket_template_from_itil_category' in ansible_run_tags | default([]) | list
                     or
                   'ticket_create' in ansible_run_tags | default([]) | list
                     or
