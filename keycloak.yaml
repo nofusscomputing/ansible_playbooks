@@ -62,6 +62,12 @@
                     and
                   'all' not in (ansible_run_tags | default([]) | list)
                 )
+              - >
+                (
+                  'configure' in ansible_run_tags | default([]) | list
+                    or
+                  'saml_certificate' in ansible_run_tags | default([]) | list
+                )
             msg: This playbook requires job tags be set.
           tags:
             - always
