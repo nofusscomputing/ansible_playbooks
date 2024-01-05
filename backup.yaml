@@ -21,7 +21,7 @@
 #
 - name: Conduct Backup
   hosts: all
-  gather_facts: "{% if task_nfc_common_required | default(false) | bool %}false{% else %}true{% endif %}"
+  gather_facts: false
 
 
   pre_tasks:
