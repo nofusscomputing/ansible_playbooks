@@ -96,3 +96,7 @@
         #             - This parameter is not required for updating or deleting a role_representation but
         #               providing it will reduce the number of API calls required.
   diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local

@@ -6,6 +6,10 @@
     return_content: true
     validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) | bool }}"
   register: nfc_pb_keycloak_saml_certificate
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
 
 
 - name: Build fact part-1

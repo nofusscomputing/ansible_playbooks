@@ -80,3 +80,7 @@
         #     providerType: # type: str default: org.keycloak.storage.ldap.mappers.LDAPStorageMapper
         #     config: # type: dict
   diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local

@@ -449,6 +449,10 @@
         #             - For OpenID-Connect clients, client certificate for validating JWT issued by
         #               client and signed by its key, base64-encoded.
   diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
 
 
 - name: Client Roles
