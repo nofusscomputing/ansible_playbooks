@@ -69,7 +69,7 @@
                 not (
                   ansible_run_tags | default([]) | list | length | int == 1
                     and
-                  'all' not in (ansible_run_tags | default([]) | list)
+                  'all' in (ansible_run_tags | default([]) | list)
                 )
               - >
                 (
