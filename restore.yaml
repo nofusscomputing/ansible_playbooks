@@ -16,7 +16,7 @@
 #
 - name: Conduct Restoration of Backup(s)
   hosts: all
-  gather_facts: "{% if task_nfc_common_required | default(false) | bool %}false{% else %}true{% endif %}"
+  gather_facts: false
 
 
   pre_tasks:
@@ -66,14 +66,11 @@
       block:
 
 
-        - name: Common tasks
-          ansible.builtin.include_role:
-            name: nfc_common
-            apply:
-              become: true
-          vars:
-            common_gather_facts: true
-          when: task_nfc_common_required | default(false) | bool
+        - name: Dummy task
+          ansible.builtin.debug:
+            msg: "This task only exists as you cant have an empty block"
+          tags:
+            - always
 
 
       rescue:

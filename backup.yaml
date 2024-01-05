@@ -70,17 +70,12 @@
     - name: Block - pre_tasks
       block:
 
-
-        - name: Common tasks
-          ansible.builtin.include_role:
-            name: nfc_common
-            apply:
-              become: true
+        - name: Dummy task
+          ansible.builtin.debug:
+            msg: "This task only exists as you cant have an empty block"
           tags:
             - always
-          vars:
-            common_gather_facts: true
-
+ 
 
       rescue:
 
