@@ -298,8 +298,6 @@
             - always
 
 
-
-
   vars:
 
     ansible_connection: local
@@ -307,6 +305,7 @@
     nfc_pb_awx_tower_template:
 
       - name: "AWX / Tower Configure"
+        new_name: Configure/Application/AWX/All
         ask_tags_on_launch: false
         ask_inventory_on_launch: true
         ask_credential_on_launch: true
