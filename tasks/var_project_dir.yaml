@@ -1,0 +1,81 @@
+---
+#
+# Task File: Establish root directory
+#
+# Note: sometime in the future this task file should be added to nfc_common
+#
+
+- name: Path Exists - /runner
+  ansible.builtin.file:
+    path: /runner
+    state: directory
+  check_mode: true
+  register: check_dir_runner
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
+
+
+- name: Path Exists - /runner/project
+  ansible.builtin.file:
+    path: /runner/project
+    state: directory
+  check_mode: true
+  register: check_dir_runner_project
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
+
+
+- name: TRACE - Path exists check
+  ansible.builtin.debug:
+    msg:
+      - "{{ check_dir_runner }}"
+      - "{{ check_dir_runner_project }}"
+
+
+- name: Try Catch
+  block:
+
+
+    - name: AWX Check
+      ansible.builtin.assert:
+        that:
+          - not check_dir_runner.changed
+          - not check_dir_runner_project.changed
+          - >
+            awx_job_launch_type is defined
+              or
+            tower_job_launch_type is defined
+        fail_msg: "Not runnig from AWX / Ansible Automation Platform"
+        quiet: true
+      register: check_is_awx
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
+
+
+    - name: Set Project Directory Variable - AWX Initiated
+      ansible.builtin.set_fact:
+        project_dir: "/runner/project"
+        cacheable: false
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
+
+
+  rescue:
+
+
+    - name: Set Project Directory Variable - CLI Initiated
+      ansible.builtin.set_fact:
+        project_dir: "{{ inventory_dir }}/.."
+        cacheable: false
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local

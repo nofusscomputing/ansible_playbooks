@@ -70,12 +70,17 @@
     - name: Block - pre_tasks
       block:
 
-        - name: Dummy task
-          ansible.builtin.debug:
-            msg: "This task only exists as you cant have an empty block"
+
+        - name: Variable Setup - project_dir
+          ansible.builtin.include_tasks:
+            file: tasks/var_project_dir.yaml
+            apply:
+              tags:
+                - always
+          when: var_project_dir is not defined
           tags:
             - always
- 
+
 
       rescue:
 
