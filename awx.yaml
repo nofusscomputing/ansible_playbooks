@@ -312,34 +312,16 @@
         ask_limit_on_launch: true
         description: Configure AWX from Inventory
         execution_environment: "No Fuss Computing EE"
+        # extra_vars:
         job_type: "run"
+        job_tags: complate
         labels:
+          - application
           - awx
           - configure
-        # credentials:
-        #   - "Local"
         verbosity: 2
         use_fact_cache: true
-        survey_enabled: true
-        survey_spec: |
-          {
-            "name": "",
-            "spec": [
-              {
-                "max": 1024,
-                "min": 3,
-                "type": "text",
-                "choices": "",
-                "default": "my_awx_config",
-                "required": true,
-                "variable": "nfc_pb_awx_config_variable",
-                "new_question": true,
-                "question_name": "Inventory Variable",
-                "question_description": "The Variable in the Inventory the AWX config is under"
-              }
-            ],
-            "description": ""
-          }
+
         credential_types:
           - name: Git Credentials
             description: Creates ~/gitconfig with credentials that enable git operations on a private repository
@@ -370,6 +352,162 @@
                 tower:
                   filename:
                     git_credential_file: "{{ tower.filename.git_credential_file }}"
+
+
+      - name: Configure/Application/AWX/Credential Types
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Credential Types
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: credential_types
+        labels:
+          - application
+          - awx
+          - configure
+          - credential
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Instances
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Instances
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: instances
+        labels:
+          - application
+          - awx
+          - configure
+          - instance
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Instance Groups
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Instance Groups
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: instance_groups
+        labels:
+          - application
+          - awx
+          - configure
+          - group
+          - instance
+          - instance group
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Job Templates
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Job Templates
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: job_templates
+        labels:
+          - application
+          - awx
+          - configure
+          - job
+          - template
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Organizations
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Organizations
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: organization
+        labels:
+          - application
+          - awx
+          - configure
+          - organization
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Project
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Projects
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: project
+        labels:
+          - application
+          - awx
+          - configure
+          - project
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Settings
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Settings
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: settings
+        labels:
+          - application
+          - awx
+          - configure
+          - settings
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Workflow Templates
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Workflow Templates
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: workflow_templates
+        labels:
+          - application
+          - awx
+          - configure
+          - templates
+          - workflow
+        verbosity: 2
+        use_fact_cache: true
 
 
 #################################################################################################################################
