@@ -64,6 +64,7 @@
         depth: 1
         # track_submodules: false
         recursive: false
+      timeout: 300
       when: >
         nfc_pb_awx_project.playbook_path is defined
           or
