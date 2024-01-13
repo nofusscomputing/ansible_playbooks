@@ -106,10 +106,16 @@
 
 
     - name: Copy backup to Localhost
-      ansible.builtin.fetch:
-        src: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
-        dest: "/backup/"
-        flat: true
+      ansible.builtin.include_tasks:
+        file: tasks/file_system/copy_remote_local.yaml
+      vars:
+        directory_source: "{{ directory_tasks }}"
+        directory_destination: "/backup/"
+        file_name: "{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        permissions:
+          owner: root
+          group: backup
+          mode: '0740'
       when: nfc_pb_copy_local | default(true) | bool
 
 
