@@ -18,7 +18,7 @@ The following items can be backed up with this playbook:
 
   _All Data pertinent the the application_
 
-- [Containers](capplication.md)
+- [Containers](application.md)
 
   _Container paths and database dumps_
 
@@ -40,6 +40,11 @@ The following items can be backed up with this playbook:
 Running of these playbooks is no different to any other. However there are a fuew requirements that must be met first:
 
 - the user running the playbook must be a member of the `backup` group
+
+- for postgres actions `psql` has been installed
+
+    !!! tip
+        `psql` can be installed with `apt install postgresql-client-common` on a debian system
 
 
 ### Play workflow
