@@ -2,58 +2,76 @@
 
 - name: MariaDB Backup
   block:
-    # Ref: https://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/
-
-
-    # - name: Set Global Facts
-    #   ansible.builtin.set_fact:
-    #     filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime(ansible_date_time.epoch) }}"
-    #   when: filename_date_time | default('does_not_exist') == 'does_not_exist'
-
-
-    # - name: Set Task Facts
-    #   ansible.builtin.set_fact:
-    #     directory_tasks: '/tmp/task_backup_mariadb'
 
 
     - name: Prepare Backup Filename
       ansible.builtin.set_fact:
-        file_backup_no_extension_mariadb: "{{ filename_date_time }}-mariadb-{{ mariadb.name }}-{{ inventory_hostname }}"
+        file_backup_no_extension_mariadb: "{{ filename_date_time }}-mariadb-{{ database.name }}-{{ inventory_hostname }}"
+        directory_database_dump: "{{ directory_temp_destination }}/database-dump"
+        cacheable: false
 
 
-    - name: Backup {{ mariadb.name }} Database
+    - name: Ensure no existing Database Dump Directory
+      ansible.builtin.file:
+        name: "{{ directory_database_dump }}"
+        state: absent
+      become: true
+
+
+    - name: Create Database Dump Directory
+      ansible.builtin.file:
+        name: "{{ directory_database_dump }}"
+        state: directory
+        owner: root
+        group: backup
+        mode: '770'
+      become: true
+
+
+    - name: Dump of Database {{ database.name }}
       ansible.builtin.shell:
         cmd: |
-          docker run \
-            --rm \
-            --name mysqldump-keycloak \
-            -v {{ backup.mariadb.socket }}:/socket-mysqld/mysqld.sock \
-            -v {{ directory_tasks }}:{{ directory_tasks }} \
-          mariadb:10.6.14 \
+          {% if database.method | default('nothing') == 'docker' -%}
+            docker run \
+              --rm \
+              --name mysqldump-keycloak \
+              -v {{ database.socket }}:/socket-mysqld/mysqld.sock \
+              -v {{ directory_tasks }}:{{ directory_tasks }} \
+            mariadb:10.6.14 \
+          {%- endif %}
           mysqldump \
-            --socket=/socket-mysqld/mysqld.sock \
+            --socket=
+            {%- if database.method | default('nothing') == 'docker' -%}
+              /socket-mysqld/mysqld.sock
+            {%- else -%}
+              {{ database.socket }}
+            {%- endif %} \
             --quote-names \
             --protocol=socket \
-            --user={{ backup.mariadb.user }} \
-            --password={{ backup.mariadb.password }} \
+            --user={{ nfc_pb_mariadb_username }} \
+            --password={{ nfc_pb_mariadb_password }} \
             --lock-tables \
             --add-drop-database \
             --flush-privileges \
             --dump-date \
-            {{ mariadb.database }} \
-          | openssl \
-              smime -encrypt \
-              -binary -text -{{ backup.encryption_algorithm }} \
-              -out {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc \
-              -outform DER {{ directory_tasks }}/encryption_certificate;
-          tar \
-            --directory={{ directory_tasks }} \
-            -czf {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz \
-            {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
-
+            {{ database.name }} \
+          {% if database.encrypt | default(true) | bool -%}
+            | openssl \
+                smime -encrypt \
+                -binary -text -{{ backup.encryption_algorithm }} \
+                -out {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc \
+                -outform DER {{ directory_tasks }}/encryption_certificate;
+            tar \
+              --directory={{ directory_tasks }} \
+              -czf {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz \
+              {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
+              chown root:backup {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
+              chmod 0700 {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
+          {%- else -%}
+            > {{ directory_database_dump }}/{{ database.name }}.sql;
+          {%- endif %}
       args:
         executable: bash
-      # loop: "{{ mysql_backup }}"
       become: true
       register: mysql_backup
       failed_when: >
@@ -64,35 +82,42 @@
         'could not' in mysql_backup.stderr
           or
         'Exiting with failure' in mysql_backup.stderr
+          or
+        'Unknown database' in mysql_backup.stderr
 
 
-
-    - name: Store Backup
-      ansible.builtin.copy:
-        src: "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz"
-        dest: "/opt/backup/"
-        remote_src: true
+    - name: Set Database Dump Permissions
+      ansible.builtin.file:
+        name: |-
+          {% if database.encrypt | default(true) | bool -%}
+            {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc
+          {%- else -%}
+            {{ directory_database_dump }}/{{ database.name }}.sql
+          {%- endif %}
+        owner: root
+        group: backup
+        mode: '0740'
+        state: file
       become: true
 
 
   rescue:
 
+
     - name: Remove Failed Backup
       ansible.builtin.file:
         name: "{{ item }}"
         state: absent
+      become: true
       loop: "{{ tmp_files }}"
       vars:
         tmp_files:
           - "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz"
+          - "{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc"
 
-  always:
 
-    - name: Remove Task Temp Files
-      ansible.builtin.file:
-        name: "{{ item }}"
-        state: absent
-      loop: "{{ tmp_files }}"
-      vars:
-        tmp_files:
-          - "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc"
+    - name: Task Failed Force Kill Play
+      ansible.builtin.assert:
+        that:
+          - false
+        msg: "The Play Failed"

@@ -15,7 +15,7 @@ Available Playbooks:
 
 1. [awx.yaml](awx.md) 
 
-1. [backup.yaml](backup.md)
+1. [backup.yaml](backup/index.md)
 
 1. [common.yaml](common.md)
 

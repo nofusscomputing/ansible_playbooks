@@ -1,0 +1,12 @@
+---
+
+- name: Backup Containers
+  ansible.builtin.include_tasks:
+    file: backup/containers.yaml
+    apply:
+      tags:
+        - always
+  when: >
+    container.type == 'docker'
+      or
+    container.type == 'kube'

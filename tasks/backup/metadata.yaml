@@ -1,0 +1,32 @@
+---
+
+- name: Set Metadata Facts
+  ansible.builtin.set_fact:
+    metadata: []
+
+
+- name: Fetch File List
+  ansible.builtin.command:
+    cmd: bash -c find . *
+    chdir: "{{ directory_temp_destination }}"
+  changed_when: false
+  register: files_backup
+  no_log: true    # Don't log the files found. not required
+
+
+- name: Get File Stats
+  ansible.builtin.include_tasks:
+    file: tasks/file_stat.yaml
+  loop: "{{ files_backup.stdout_lines | list }}"
+  loop_control:
+    loop_var: filename
+
+
+- name: Create Metadata File
+  ansible.builtin.copy:
+    content: "{{ metadata | from_yaml | to_nice_yaml(indent=0) | indent(0) }}"
+    dest: "{{ directory_temp_destination }}/metadata.yaml"
+    owner: root
+    group: backup
+    mode: '0770'
+  become: true

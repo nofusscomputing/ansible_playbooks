@@ -14,6 +14,71 @@
 
 - name: Backups
   block:
+
+    - name: Fetch Remote User name
+      ansible.builtin.command:
+        cmd: whoami
+      register: remote_username
+      changed_when: false
+      tags:
+        - always
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        directory_tasks: '/home/{{ remote_username.stdout | trim }}/task_backup'
+        directory_temp_destination: '/home/{{ remote_username.stdout | trim }}/backup'
+      tags:
+        - always
+
+
+    - name: Clean existing Task Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: absent
+      become: true
+      tags:
+        - always
+
+
+    - name: Create Task Directories Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: directory
+        owner: root
+        group: backup
+        mode: '770'
+      become: true
+      tags:
+        - always
+
+
+    - name: Prepare Encryption Certificate
+      ansible.builtin.copy:
+        content: "{{ file_encryption_key }}"
+        dest: "{{ directory_tasks }}/encryption_certificate"
+        owner: root
+        group: backup
+        mode: '740'
+      become: true
+      tags:
+        - always
+
+
+    - name: Backup Containers
+      ansible.builtin.include_tasks:
+        file: tasks/backup-application.yaml
+        apply:
+          tags:
+            - always
+      loop: "{{ backup.applications }}"
+      loop_control:
+        loop_var: container
+        label: "{{ container.name }}"
+      tags:
+        - application
+
+
     - name: Backup Files
       ansible.builtin.include_tasks:
         file: tasks/backup-files.yaml
@@ -46,3 +111,11 @@
       tags:
         - postgresdb
 
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: absent
+      tags:
+        - always

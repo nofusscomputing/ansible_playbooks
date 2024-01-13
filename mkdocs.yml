@@ -27,7 +27,11 @@ nav:
 
       - projects/ansible/playbooks/awx.md
 
-      - projects/ansible/playbooks/backup.md
+      - Backup: 
+      
+        - projects/ansible/playbooks/backup/index.md
+
+        - projects/ansible/playbooks/backup/application.md
 
       - projects/ansible/playbooks/common.md
 
