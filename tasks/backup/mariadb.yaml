@@ -16,6 +16,12 @@
         name: "{{ directory_database_dump }}"
         state: absent
       become: true
+      delegate_to: |-
+        {%- if database.delegate | default('') == 'localhost' -%}
+          localhost
+        {%- else -%}
+          {{ inventory_hostname }}
+        {%- endif %}
 
 
     - name: Create Database Dump Directory
@@ -26,6 +32,12 @@
         group: backup
         mode: '770'
       become: true
+      delegate_to: |-
+        {%- if database.delegate | default('') == 'localhost' -%}
+          localhost
+        {%- else -%}
+          {{ inventory_hostname }}
+        {%- endif %}
 
 
     - name: Dump Database {{ database.name }}
@@ -39,6 +51,12 @@
         name: "{{ database.name }}"
         state: dump
         target: "{{ directory_database_dump }}/{{ database.name }}.sql"
+      delegate_to: |-
+        {%- if database.delegate | default('') == 'localhost' -%}
+          localhost
+        {%- else -%}
+          {{ inventory_hostname }}
+        {%- endif %}
 
 
     # - name: Dump of Database {{ database.name }}
@@ -112,6 +130,12 @@
         mode: '0740'
         state: file
       become: true
+      delegate_to: |-
+        {%- if database.delegate | default('') == 'localhost' -%}
+          localhost
+        {%- else -%}
+          {{ inventory_hostname }}
+        {%- endif %}
 
 
   rescue:
@@ -123,6 +147,12 @@
         state: absent
       become: true
       loop: "{{ tmp_files }}"
+      delegate_to: |-
+        {%- if database.delegate | default('') == 'localhost' -%}
+          localhost
+        {%- else -%}
+          {{ inventory_hostname }}
+        {%- endif %}
       vars:
         tmp_files:
           - "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz"

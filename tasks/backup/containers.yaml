@@ -66,6 +66,7 @@
           method: "{{ item[0].method }}"
           encrypt: "{{ item[0].encrypt | default(true) | bool }}"
           host: "{{ item[0].host }}"
+          delegate: "{{ item[0].delegate | default('') }}"
       when: >
         item[0].type == 'mariadb'
           or
@@ -84,6 +85,7 @@
           type: "{{ item[0].type }}"
           encrypt: "{{ item[0].encrypt | default(true) | bool }}"
           host: "{{ item[0].host }}"
+          delegate: "{{ item[0].delegate | default('') }}"
       when: item[0].type == 'postgres'
 
 

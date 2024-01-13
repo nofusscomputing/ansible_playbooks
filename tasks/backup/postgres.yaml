@@ -11,6 +11,12 @@
     name: "{{ directory_database_dump }}"
     state: absent
   become: true
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}
 
 
 - name: Create Database Dump Directory
@@ -21,6 +27,12 @@
     group: backup
     mode: '770'
   become: true
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}
 
 
 - name: Dump an existing database to a file
@@ -34,6 +46,12 @@
     name: "{{ database.name }}"
     state: dump
     target: "{{ directory_database_dump }}/{{ postgresdb_filename_backup }}"
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}
 
 
 - name: Set Database Dump Permissions
@@ -44,3 +62,9 @@
     mode: '0740'
     state: file
   become: true
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}

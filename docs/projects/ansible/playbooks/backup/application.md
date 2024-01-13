@@ -107,7 +107,7 @@ Database Backup dict are as follows.
       method: docker                         # Optional, choice=docker|direct. default=direct specify the method to backup the database
       encrypt: false                         # Optional, Boolean. default=true. Encrypt the database backup
       socket: /var/run/mysqld/mysqld.sock    # Mandatory. String. Path to the MySQL socket.
-      # address:         # 
+      delegate: localhost                    # Optional,choice=localhost. who should connect to the database
     ```
 
 === "Postgres"
@@ -121,7 +121,7 @@ Database Backup dict are as follows.
                                                       #                                                database
       encrypt: false                                  # Optional, Boolean. default=true. Encrypt the database backup
       host: main-postgresql-ha-pgpool.postgres.svc    # Mandatory. String. Path to the MySQL socket.
-      # address:         # 
+      delegate: localhost                             # Optional,choice=localhost. who should connect to the database
     ```
 
 
