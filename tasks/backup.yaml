@@ -1,0 +1,48 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+#
+# image: nofusscomputing/ansible-ee >= 0.1.0
+#
+- name: Set Global Facts
+  ansible.builtin.set_fact:
+    filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime }}"
+  when: filename_date_time | default('does_not_exist') == 'does_not_exist'
+
+
+- name: Backups
+  block:
+    - name: Backup Files
+      ansible.builtin.include_tasks:
+        file: tasks/backup-files.yaml
+        apply:
+          tags:
+            - files
+      when: backup.files | default([]) | length | int > 0
+      tags:
+        - files
+
+
+    - name: Backup mariadb
+      ansible.builtin.include_tasks:
+        file: tasks/backup-mariadb.yaml
+        apply:
+          tags:
+            - mariadb
+      when: backup.mariadb.databases | default([]) | length | int > 0
+      tags:
+        - mariadb
+
+
+    - name: Backup PostgresDB
+      ansible.builtin.include_tasks:
+        file: tasks/backup-postgres.yaml
+        apply:
+          tags:
+            - postgresdb
+      when: backup.postgresdb.databases | default([]) | length | int > 0
+      tags:
+        - postgresdb
+
