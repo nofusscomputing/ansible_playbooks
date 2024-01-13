@@ -101,6 +101,17 @@
         - application
 
 
+    - name: Restore Files
+      ansible.builtin.include_tasks:
+        file: tasks/restore-files.yaml
+        apply:
+          tags:
+            - files
+      when: restore.files | default([]) | length | int > 0
+      tags:
+        - files
+
+
   always:
 
     - name: Remove Task Temp Files
