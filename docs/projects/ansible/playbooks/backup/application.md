@@ -82,7 +82,7 @@ There are different varaible requirements depending on the container engine. Sel
     - name: glpi                             # Mandatory, String. Name of the Application
       type: kube                             # Mandatory. choice=docker|kube. Container engine type
       pod: postgres-0                        # Mandatory, String. the name of the pod to backup
-      container: backup                      # Mandatory. String. Name of the container to connect to.
+      container: backup                      # Optional. String. Name of the container to connect to.
       namespace: postgres                    # Mandatory. String. Namespace name where the pod belongs
       path:                                  # Mandatory*. List of String. Mandatory to backup files. Path within the container to 
                                              #                             backup
