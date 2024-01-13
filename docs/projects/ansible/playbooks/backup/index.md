@@ -45,10 +45,11 @@ Running of these playbooks is no different to any other. However there are a fue
     !!! tip
         `psql` can be installed with `apt install postgresql-client-<version>` on a Debian system
 
-- MariaDB / MySQL actions require `mysql` to be installed
+- MariaDB / MySQL actions require `mysql`, `mariadb-client-<version>` to be installed
 
     !!! tip
-        `mysql` can be installed with `apt install mariadb-client-core-<version>` on a Debian system.
+        `mysql` can be installed with `apt install mariadb-client-core-<version> mariadb-client-<version>` on a Debian system.
+
 
 ### Play workflow
 
