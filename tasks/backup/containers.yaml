@@ -94,7 +94,15 @@
 
     - name: Encrypt Backup Contents
       ansible.builtin.include_tasks:
-        file: encrypt_directory.yaml
+        file: tasks/file_system/encrypt_directory.yaml
+      vars:
+        directory_source: "{{ directory_temp_destination }}"
+        directory_destination: "{{ directory_tasks }}"
+        file_name: "{{ file_backup_no_extension }}"
+        permissions:
+          owner: root
+          group: backup
+          mode: '0740'
 
 
     - name: Copy backup to Localhost
