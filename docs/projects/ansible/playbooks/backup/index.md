@@ -13,7 +13,6 @@ This playbook provides an easy way to backup the data that forms part of your in
 
 The following items can be backed up with this playbook:
 
-
 - Application _(Planned)_
 
     _All Data pertinent the the application_
@@ -41,11 +40,15 @@ Running of these playbooks is no different to any other. However there are a fue
 
 - the user running the playbook must be a member of the `backup` group
 
-- for postgres actions `psql` has been installed
+- Postgres actions require `psql` to be installed
 
     !!! tip
-        `psql` can be installed with `apt install postgresql-client-<version>` on a debian system
+        `psql` can be installed with `apt install postgresql-client-<version>` on a Debian system
 
+- MariaDB / MySQL actions require `mysql` to be installed
+
+    !!! tip
+        `mysql` can be installed with `apt install mariadb-client-core-<version>` on a Debian system.
 
 ### Play workflow
 

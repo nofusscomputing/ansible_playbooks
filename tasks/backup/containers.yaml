@@ -65,7 +65,7 @@
           type: "{{ item[0].type }}"
           method: "{{ item[0].method }}"
           encrypt: "{{ item[0].encrypt | default(true) | bool }}"
-          socket: "{{ item[0].socket | default('') }}"
+          host: "{{ item[0].host }}"
       when: >
         item[0].type == 'mariadb'
           or

@@ -28,62 +28,75 @@
       become: true
 
 
-    - name: Dump of Database {{ database.name }}
-      ansible.builtin.shell:
-        cmd: |
-          {% if database.method | default('nothing') == 'docker' -%}
-            docker run \
-              --rm \
-              --name mysqldump-keycloak \
-              -v {{ database.socket }}:/socket-mysqld/mysqld.sock \
-              -v {{ directory_tasks }}:{{ directory_tasks }} \
-            mariadb:10.6.14 \
-          {%- endif %}
-          mysqldump \
-            --socket=
-            {%- if database.method | default('nothing') == 'docker' -%}
-              /socket-mysqld/mysqld.sock
-            {%- else -%}
-              {{ database.socket }}
-            {%- endif %} \
-            --quote-names \
-            --protocol=socket \
-            --user={{ nfc_pb_mariadb_username }} \
-            --password={{ nfc_pb_mariadb_password }} \
-            --lock-tables \
-            --add-drop-database \
-            --flush-privileges \
-            --dump-date \
-            {{ database.name }} \
-          {% if database.encrypt | default(true) | bool -%}
-            | openssl \
-                smime -encrypt \
-                -binary -text -{{ backup.encryption_algorithm }} \
-                -out {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc \
-                -outform DER {{ directory_tasks }}/encryption_certificate;
-            tar \
-              --directory={{ directory_tasks }} \
-              -czf {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz \
-              {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
-              chown root:backup {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
-              chmod 0700 {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
-          {%- else -%}
-            > {{ directory_database_dump }}/{{ database.name }}.sql;
-          {%- endif %}
-      args:
-        executable: bash
-      become: true
-      register: mysql_backup
-      failed_when: >
-        't connect to local server' in mysql_backup.stderr
-          or
-        'Unable to' in mysql_backup.stderr
-          or
-        'could not' in mysql_backup.stderr
-          or
-        'Exiting with failure' in mysql_backup.stderr
-          or
-        'Unknown database' in mysql_backup.stderr
+    - name: Dump Database {{ database.name }}
+      community.mysql.mysql_db:
+        login_host: "{{ database.host.name }}"
+        login_user: "{{ nfc_pb_mariadb_username }}"
+        login_password: "{{ nfc_pb_mariadb_password }}"
+        login_port: "{{ database.host.port | default(omit) }}"
+        login_unix_socket: "{{ database.host.socket | default(omit) }}"
+
+        name: "{{ database.name }}"
+        state: dump
+        target: "{{ directory_database_dump }}/{{ database.name }}.sql"
+
+
+    # - name: Dump of Database {{ database.name }}
+    #   ansible.builtin.shell:
+    #     cmd: |
+    #       {% if database.method | default('nothing') == 'docker' -%}
+    #         docker run \
+    #           --rm \
+    #           --name mysqldump-keycloak \
+    #           -v {{ database.socket }}:/socket-mysqld/mysqld.sock \
+    #           -v {{ directory_tasks }}:{{ directory_tasks }} \
+    #         mariadb:10.6.14 \
+    #       {%- endif %}
+    #       mysqldump \
+    #         --socket=
+    #         {%- if database.method | default('nothing') == 'docker' -%}
+    #           /socket-mysqld/mysqld.sock
+    #         {%- else -%}
+    #           {{ database.socket }}
+    #         {%- endif %} \
+    #         --quote-names \
+    #         --protocol=socket \
+    #         --user={{ nfc_pb_mariadb_username }} \
+    #         --password={{ nfc_pb_mariadb_password }} \
+    #         --lock-tables \
+    #         --add-drop-database \
+    #         --flush-privileges \
+    #         --dump-date \
+    #         {{ database.name }} \
+    #       {% if database.encrypt | default(true) | bool -%}
+    #         | openssl \
+    #             smime -encrypt \
+    #             -binary -text -{{ backup.encryption_algorithm }} \
+    #             -out {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc \
+    #             -outform DER {{ directory_tasks }}/encryption_certificate;
+    #         tar \
+    #           --directory={{ directory_tasks }} \
+    #           -czf {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz \
+    #           {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
+    #           chown root:backup {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
+    #           chmod 0700 {{ file_backup_no_extension_mariadb }}-{{ backup.encryption_algorithm }}.sql.enc;
+    #       {%- else -%}
+    #         > {{ directory_database_dump }}/{{ database.name }}.sql;
+    #       {%- endif %}
+    #   args:
+    #     executable: bash
+    #   become: true
+    #   register: mysql_backup
+    #   failed_when: >
+    #     't connect to local server' in mysql_backup.stderr
+    #       or
+    #     'Unable to' in mysql_backup.stderr
+    #       or
+    #     'could not' in mysql_backup.stderr
+    #       or
+    #     'Exiting with failure' in mysql_backup.stderr
+    #       or
+    #     'Unknown database' in mysql_backup.stderr
 
 
     - name: Set Database Dump Permissions
