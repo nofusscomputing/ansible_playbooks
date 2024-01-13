@@ -1,0 +1,10 @@
+---
+
+- name: Copy Backup to host
+  ansible.builtin.copy:
+    src: "{{ source_file_path }}"
+    dest: "{{ directory_destination }}"
+    owner: "{{ permissions.owner | default(omit) }}"
+    group: "{{ permissions.group | default(omit) }}"
+    mode: "{{ permissions.mode | default(omit) }}"
+  become: true
