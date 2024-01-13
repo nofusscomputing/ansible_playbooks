@@ -53,7 +53,7 @@
         loop_var: container_path
 
 
-    - name: Backup Database
+    - name: Backup MariaDB/MySQL Database
       ansible.builtin.include_tasks:
         file: mariadb.yaml
       with_subelements:
@@ -70,6 +70,21 @@
         item[0].type == 'mariadb'
           or
         item[0].type == 'mysql'
+
+
+    - name: Backup Postgres Database
+      ansible.builtin.include_tasks:
+        file: tasks/backup/postgres.yaml
+      with_subelements:
+        - "{{ container.databases | default([]) | list }}"
+        - names
+      vars:
+        database:
+          name: "{{ item[1] }}"
+          type: "{{ item[0].type }}"
+          encrypt: "{{ item[0].encrypt | default(true) | bool }}"
+          host: "{{ item[0].host | default('') }}"
+      when: item[0].type == 'postgres'
 
 
     - name: Create Metadata File

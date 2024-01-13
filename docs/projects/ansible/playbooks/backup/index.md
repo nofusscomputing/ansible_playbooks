@@ -16,11 +16,11 @@ The following items can be backed up with this playbook:
 
 - Application _(Planned)_
 
-  _All Data pertinent the the application_
+    _All Data pertinent the the application_
 
 - [Containers](application.md)
 
-  _Container paths and database dumps_
+    _Container paths and database dumps_
 
 - Files
 
@@ -44,7 +44,7 @@ Running of these playbooks is no different to any other. However there are a fue
 - for postgres actions `psql` has been installed
 
     !!! tip
-        `psql` can be installed with `apt install postgresql-client-common` on a debian system
+        `psql` can be installed with `apt install postgresql-client-<version>` on a debian system
 
 
 ### Play workflow

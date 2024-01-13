@@ -321,7 +321,7 @@
               databases:
                 - names:                                 # Mandatory. List of String. name(s) of database to backup
                     - glpi
-                  type: mariadb                          # Mandatory, choice=mariadb|mysql
+                  type: mariadb                          # Mandatory, choice=mariadb|mysql|postgres
                   method: docker                         # Optional, choice=docker|direct. default=direct specify the method to backup the database
                   encrypt: false                         # Optional, Boolean. default=true. Encrypt the database backup
                   socket: /var/run/mysqld/mysqld.sock    # Mandatory. String. Path to the MySQL socket.

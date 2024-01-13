@@ -63,7 +63,8 @@ There are different varaible requirements depending on the container engine. Sel
     - name: glpi                             # Mandatory, String. Name of the Application
       type: docker                           # Mandatory. choice=docker|kube. Container engine type
       container: glpi                        # Mandatory. String. Name of the container to backup.
-      path:                                  # Mandatory. List of String. Path within the container to backup
+      path:                                  # Mandatory*. List of String. Mandatory to backup files. Path within the container to 
+                                             #                                                        backup
         - /var/www/html/config
         - /var/www/html/files
         - /var/log
@@ -83,29 +84,48 @@ There are different varaible requirements depending on the container engine. Sel
       pod: postgres-0                        # Mandatory, String. the name of the pod to backup
       container: backup                      # Mandatory. String. Name of the container to connect to.
       namespace: postgres                    # Mandatory. String. Namespace name where the pod belongs
-      path:                                  # Mandatory. List of String. Path within the container to backup
+      path:                                  # Mandatory*. List of String. Mandatory to backup files. Path within the container to 
+                                             #                             backup
         - /opt/backup
       databases: []                          # Mandatory*. List of dict. Required only if backing up database
     ```
 
 === "Application"
 
-  To Be Developed
+    To Be Developed
 
-Database Backup dict
 
-``` yaml
+Database Backup dict are as follows.
 
-- names:                                 # Mandatory. List of String. name(s) of database to backup
-    - glpi
-  type: mariadb                          # Mandatory, choice=mariadb|mysql
-  method: docker                         # Optional, choice=docker|direct. default=direct specify the method to backup the database
-  encrypt: false                         # Optional, Boolean. default=true. Encrypt the database backup
-  socket: /var/run/mysqld/mysqld.sock    # Mandatory. String. Path to the MySQL socket.
-  # address:         # 
-```
+=== "MariaDB / MySQL"
 
-A part of the backup archive a metadata file is created `metadata.yaml`. This is a yaml file containing the details of the files within the backup. The metadata file is a yaml formated list of dicts.
+    ``` yaml
+
+    - names:                                 # Mandatory. List of String. name(s) of database to backup
+        - glpi
+      type: mariadb                          # Mandatory, choice=mariadb|mysql|postgres
+      method: docker                         # Optional, choice=docker|direct. default=direct specify the method to backup the database
+      encrypt: false                         # Optional, Boolean. default=true. Encrypt the database backup
+      socket: /var/run/mysqld/mysqld.sock    # Mandatory. String. Path to the MySQL socket.
+      # address:         # 
+    ```
+
+=== "Postgres"
+
+    ``` yaml
+
+    - names:                                          # Mandatory. List of String. name(s) of database to backup
+        - glpi
+      type: postgres                                  # Mandatory, choice=mariadb|mysql|postgres
+      method: docker                                  # Optional, choice=docker|direct. default=direct specify the method to backup the
+                                                      #                                                database
+      encrypt: false                                  # Optional, Boolean. default=true. Encrypt the database backup
+      host: main-postgresql-ha-pgpool.postgres.svc    # Mandatory. String. Path to the MySQL socket.
+      # address:         # 
+    ```
+
+
+As part of the backup archive a metadata file is created `metadata.yaml`. This is a yaml file containing the details of the files within the backup. The metadata file is a yaml formated list of dicts.
 
 metadata file contents example
 
