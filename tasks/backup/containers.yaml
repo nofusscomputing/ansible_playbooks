@@ -83,7 +83,7 @@
           name: "{{ item[1] }}"
           type: "{{ item[0].type }}"
           encrypt: "{{ item[0].encrypt | default(true) | bool }}"
-          host: "{{ item[0].host | default('') }}"
+          host: "{{ item[0].host }}"
       when: item[0].type == 'postgres'
 
 
