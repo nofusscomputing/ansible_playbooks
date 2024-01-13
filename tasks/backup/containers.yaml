@@ -48,7 +48,7 @@
     - name: Backup Containers
       ansible.builtin.include_tasks:
         file: container.yaml
-      loop: "{{ container.path }}"
+      loop: "{{ container.path | default([]) | list }}"
       loop_control:
         loop_var: container_path
 
