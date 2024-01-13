@@ -1,0 +1,53 @@
+---
+
+- name: Container Restore
+  block:
+
+
+    - name: Clean existing Temp Directory
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}"
+        state: absent
+      become: true
+      tags:
+        - always
+
+
+    - name: Create Temp Directory
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}"
+        state: directory
+        owner: root
+        group: backup
+        mode: '770'
+      become: true
+      tags:
+        - always
+
+
+    - name: Decrypt Backup Contents
+      ansible.builtin.include_tasks:
+        file: tasks/file_system/decrypt_file.yaml
+      vars:
+        directory_source: "{{ directory_tasks }}"
+        directory_destination: "{{ directory_temp_destination }}"
+        file_name: "{{ nfc_pb_restore.file_restore }}"
+
+
+    - name: Restore Container
+      ansible.builtin.include_tasks:
+        file: tasks/restore/container.yaml
+      loop: "{{ container.path | default([]) | list }}"
+      loop_control:
+        loop_var: container_path
+        label: container.name
+
+
+  always:
+
+
+    - name: Clean Backup Data
+      ansible.builtin.file:
+        path: "{{ directory_temp_destination }}"
+        state: absent
+      become: true

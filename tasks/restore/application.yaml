@@ -1,0 +1,22 @@
+---
+
+- name: Ensure Restore details set
+  ansible.builtin.assert:
+    that:
+      - nfc_pb_restore is defined
+      - nfc_pb_restore | default('') != ''
+    msg: "A file to restore must be specified"
+
+
+- name: Restore Containers
+  ansible.builtin.include_tasks:
+    file: tasks/restore/containers.yaml
+    apply:
+      tags:
+        - always
+  vars:
+    container: "{{ application }}"
+  when: >
+    application.type == 'docker'
+      or
+    application.type == 'kube'

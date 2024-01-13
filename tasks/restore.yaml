@@ -1,0 +1,111 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+#
+# image: nofusscomputing/ansible-ee >= 0.1.0
+#
+
+- name: Restore Backup
+  block:
+
+    - name: Ensure Backup Filename Set
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_restore is defined
+          - nfc_pb_restore | default('') != ''
+        msg: "A file to restore must be specified"
+      tags:
+        - always
+
+
+    - name: Fetch Remote User name
+      ansible.builtin.command:
+        cmd: whoami
+      register: remote_username
+      changed_when: false
+      tags:
+        - always
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        directory_tasks: '/home/{{ remote_username.stdout | trim }}/task_restore'
+        directory_temp_destination: '/home/{{ remote_username.stdout | trim }}/restore'
+      tags:
+        - always
+
+
+    - name: Clean existing Task Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: absent
+      become: true
+      tags:
+        - always
+
+
+    - name: Create Task Directories Directory
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: directory
+        owner: root
+        group: backup
+        mode: '770'
+      become: true
+      tags:
+        - always
+
+
+    - name: Prepare Decryption Certificate
+      ansible.builtin.copy:
+        content: "{{ vault_file_decryption_key }}"
+        dest: "{{ directory_tasks }}/decryption_certificate"
+        owner: root
+        group: backup
+        mode: '740'
+      become: true
+      tags:
+        - always
+
+
+    - name: Copy backup to Remote Host
+      ansible.builtin.include_tasks:
+        file: tasks/file_system/copy_local_remote.yaml
+        apply:
+          tags:
+            - always
+      vars:
+        source_file_path: "{{ nfc_pb_restore.restore_directory_backups }}/{{ nfc_pb_restore.file_restore }}.enc.tar.gz"
+        directory_destination: "{{ directory_tasks }}"
+        permissions:
+          owner: root
+          group: backup
+          mode: '0740'
+      tags:
+        - always
+
+
+    - name: Restore Application
+      ansible.builtin.include_tasks:
+        file: tasks/restore/application.yaml
+        apply:
+          tags:
+            - always
+      loop: "{{ nfc_pb_restore.applications }}"
+      loop_control:
+        loop_var: application
+        label: "{{ application.name }}"
+      tags:
+        - application
+
+
+  always:
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}"
+        state: absent
+      tags:
+        - always

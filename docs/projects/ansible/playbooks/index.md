@@ -29,7 +29,7 @@ Available Playbooks:
 
 1. [postgresdb.yaml](postgresdb.md)
 
-1. [restore.yaml](restore.md)
+1. [restore.yaml](restore/index.md)
 
 
 ## Docs ToDo

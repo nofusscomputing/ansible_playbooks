@@ -9,14 +9,14 @@ about: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 !!! Note
     Docs Still under development
 
-This Playbook is designed to restore backups to various systems. It uses the configuration as defined in the Ansible Inventory. The specific backup details are from our [backup playbook](backup/index.md). Currently the following restoration of backups is supported:
+This Playbook is designed to restore backups to various systems. It uses the configuration as defined in the Ansible Inventory. The specific backup details are from our [backup playbook](../backup/index.md). Currently the following restoration of backups is supported:
 
 - Files
 
 
 ## Files Restoration Task
 
-The file restoration tasks within the playbook will restore backups created by our [backup playbook](backup/index.md).
+The file restoration tasks within the playbook will restore backups created by our [backup playbook](../backup/index.md).
 
 
 ### Playbook Variables
