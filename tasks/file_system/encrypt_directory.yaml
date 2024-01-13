@@ -10,7 +10,7 @@
           {%- for exclude_path in excludes | default([]) %}
           --exclude="{{ exclude_path }}" \
           {%- endfor %}
-          {{ directory_source }}; \
+          -C {{ directory_source }} .; \
         openssl \
           smime -encrypt -binary -text -{{ encryption_algorithm | default('aes256') }} \
           -in {{ directory_tasks }}/{{ file_name }}.tar.gz \

@@ -45,7 +45,9 @@ nav:
 
       - projects/ansible/playbooks/postgresdb.md
 
-      - projects/ansible/playbooks/restore.md
+      - Restoration:
+      
+        - projects/ansible/playbooks/restore/index.md
 
     - Roles:
 
