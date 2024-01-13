@@ -1,6 +1,6 @@
 ---
 
-- name: Client Configuration
+- name: Client Configuration {{ keycloak_client.name }}
   community.general.keycloak_client:
     auth_keycloak_url: "{{ nfc_pb_keycloak_auth_keycloak_url }}"
     auth_realm: "{{ nfc_pb_keycloak_auth_realm }}"
