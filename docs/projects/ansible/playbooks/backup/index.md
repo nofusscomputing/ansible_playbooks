@@ -36,7 +36,7 @@ The following items can be backed up with this playbook:
 
 ## Using the Playooks
 
-Running of these playbooks is no different to any other. However there are a fuew requirements that must be met first:
+Running of these playbooks is no different to any other. However there are a few requirements that must be met first:
 
 - the user running the playbook must be a member of the `backup` group
 

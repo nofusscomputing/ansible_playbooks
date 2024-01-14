@@ -38,6 +38,9 @@ The playbook follows the following flow when conducting a container backup.
 
 Backing up multiple items will have the workflow above start again from step two.
 
+!!! info
+    On error during any stage of the workflow, prior to the play stopping all files related to the workflow, included any created (i.e. extracting contents of archive) will be removed so there are no traces on the remote host.
+
 ## Variables
 
 Required variables.
@@ -101,13 +104,16 @@ Database Backup dict are as follows.
 
     ``` yaml
 
-    - names:                                 # Mandatory. List of String. name(s) of database to backup
+    - names:                                   # Mandatory. List of String. name(s) of database to backup
         - glpi
-      type: mariadb                          # Mandatory, choice=mariadb|mysql|postgres
-      method: docker                         # Optional, choice=docker|direct. default=direct specify the method to backup the database
-      encrypt: false                         # Optional, Boolean. default=true. Encrypt the database backup
-      socket: /var/run/mysqld/mysqld.sock    # Mandatory. String. Path to the MySQL socket.
-      delegate: localhost                    # Optional,choice=localhost. who should connect to the database
+      type: mariadb                            # Mandatory, choice=mariadb|mysql|postgres
+      method: docker                           # Optional, choice=docker|direct. default=direct specify the method to backup the database
+      encrypt: false                           # Optional, Boolean. default=true. Encrypt the database backup
+      host:
+        name:                                  # Mandatory*. String. Database host DNS or IP Address.
+        port:                                  # Optional, Integer. port of database host to connect to.
+        socket: /var/run/mysqld/mysqld.sock    # Mandatory*. String. Path to the MySQL socket.
+      delegate: localhost                      # Optional,choice=localhost. who should connect to the database
     ```
 
 === "Postgres"
@@ -120,7 +126,10 @@ Database Backup dict are as follows.
       method: docker                                  # Optional, choice=docker|direct. default=direct specify the method to backup the
                                                       #                                                database
       encrypt: false                                  # Optional, Boolean. default=true. Encrypt the database backup
-      host: main-postgresql-ha-pgpool.postgres.svc    # Mandatory. String. Path to the MySQL socket.
+      host: 
+        name: main-postgresql-ha-pgpool.postgres.svc    # Mandatory. String. Database host DNS or IP Address.
+        port:
+        socket:
       delegate: localhost                             # Optional,choice=localhost. who should connect to the database
     ```
 
