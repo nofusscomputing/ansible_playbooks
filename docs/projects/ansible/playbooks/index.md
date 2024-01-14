@@ -31,6 +31,14 @@ Available Playbooks:
 
 1. [restore.yaml](restore/index.md)
 
+1. Direct Module Access
+
+    These playbooks allow the direct calling of an Ansible module.
+
+    1. [ansible_module_mysql.yaml](modules/mysql.md)
+
+    1. [ansible_module_postgres.yaml](modules/postgres.md)
+
 
 ## Docs ToDo
 
