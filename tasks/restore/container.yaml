@@ -9,11 +9,11 @@
   ansible.builtin.command:
     cmd: |-
       {%- if container.type == 'docker' -%}
-        docker cp -a {{ directory_temp_destination }}/{{ container_path.name }} {{ container.container }}:{{ container_path.path }}
+        docker cp -a {{ container_backup_tmp_dir }} {{ container.container }}:{{ container_path.path }}
       {% elif container.type == 'kube' -%}
         kubectl cp --no-preserve=true
         {%- if container.container is defined %} --container={{ container.container }}
-        {%- endif %} {{ directory_temp_destination }}/{{ container_path.name }} {{ ' ' + container.namespace }}/{{ container.pod }}:{{ container_path.path }}
+        {%- endif %} {{ container_backup_tmp_dir }} {{ ' ' + container.namespace }}/{{ container.pod }}:{{ container_path.path }}
       {%- else -%}
         echo "no type specified"; exit 127;
       {%- endif %}
