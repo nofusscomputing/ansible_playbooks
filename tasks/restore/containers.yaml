@@ -63,6 +63,15 @@
       loop_control:
         loop_var: database
 
+
+    - name: Restore Postgres Database
+      ansible.builtin.include_tasks:
+        file: tasks/restore/postgres.yaml
+      loop: "{{ container.databases.postgres | default([]) | list }}"
+      loop_control:
+        loop_var: database
+
+
   always:
 
 
