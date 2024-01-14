@@ -65,7 +65,7 @@
         - always
 
 
-    - name: Backup Containers
+    - name: Backup Application
       ansible.builtin.include_tasks:
         file: tasks/backup-application.yaml
         apply:
