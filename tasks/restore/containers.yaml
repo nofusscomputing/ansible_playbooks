@@ -1,0 +1,82 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# image: nofusscomputing/ansible-ee > 0.11.0rc0
+
+
+- name: Container Restore
+  block:
+
+
+    - name: Clean existing Temp Directory
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}"
+        state: absent
+      become: true
+      tags:
+        - always
+
+
+    - name: Create Temp Directory
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}"
+        state: directory
+        owner: root
+        group: backup
+        mode: '770'
+      become: true
+      tags:
+        - always
+
+
+    - name: Decrypt Backup Contents
+      ansible.builtin.include_tasks:
+        file: tasks/file_system/decrypt_file.yaml
+      vars:
+        directory_source: "{{ directory_tasks }}"
+        directory_destination: "{{ directory_temp_destination }}"
+        file_name: "{{ container.file_restore }}"
+
+
+    - name: Restore Container
+      ansible.builtin.include_tasks:
+        file: tasks/restore/container.yaml
+      loop: "{{ container.path | default([]) | list }}"
+      loop_control:
+        loop_var: container_path
+        label: container.name
+
+
+    - name: Restore MariaDB/MySQL Database
+      ansible.builtin.include_tasks:
+        file: tasks/restore/mariadb.yaml
+      loop: |-
+        {%- if container.databases.mariadb is defined -%}
+          {{ container.databases.mariadb | list }}
+        {%- elif container.databases.mysql is defined -%}
+          {{ container.databases.mysql | list }}
+        {%- else -%}
+          []
+        {%- endif %}
+      loop_control:
+        loop_var: database
+
+
+    - name: Restore Postgres Database
+      ansible.builtin.include_tasks:
+        file: tasks/restore/postgres.yaml
+      loop: "{{ container.databases.postgres | default([]) | list }}"
+      loop_control:
+        loop_var: database
+
+
+  always:
+
+
+    - name: Clean Backup Data
+      ansible.builtin.file:
+        path: "{{ directory_temp_destination }}"
+        state: absent
+      become: true

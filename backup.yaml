@@ -133,35 +133,12 @@
             - always
 
 
-        - name: Backup Files
+        - name: Conduct Backup
           ansible.builtin.include_tasks:
-            file: tasks/backup-files.yaml
-            apply:
-              tags:
-                - files
-          when: backup.files | default([]) | length | int > 0
+            file: tasks/backup.yaml
           tags:
-            - files
+            - always
 
-        - name: Backup mariadb
-          ansible.builtin.include_tasks:
-            file: tasks/backup-mariadb.yaml
-            apply:
-              tags:
-                - mariadb
-          when: backup.mariadb.databases | default([]) | length | int > 0
-          tags:
-            - mariadb
-
-        - name: Backup PostgresDB
-          ansible.builtin.include_tasks:
-            file: tasks/backup-postgres.yaml
-            apply:
-              tags:
-                - postgresdb
-          when: backup.postgresdb.databases | default([]) | length | int > 0
-          tags:
-            - postgresdb
 
       rescue:
 
@@ -291,7 +268,10 @@
 
   vars:
 
+
     nfc_pb_awx_tower_template:
+
+
       - name: "Backup(s) from Inventory config"
         ask_limit_on_launch: true
         ask_tags_on_launch: true
@@ -317,4 +297,65 @@
         #   - "Local"
         verbosity: 2
         use_fact_cache: true
-        survey_enabled: true
+
+      - name: "Backup/Application"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Playbook to backup an Installed Application
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          encryption_algorithm: aes256                   # Encryption algorithm
+          applications:
+            - name: glpi                                 # Mandatory, String. Name of the Application
+              type: docker                               # Mandatory. choice=docker|kube. Container engine type
+              container: glpi                            # Mandatory. String. Name of the container to backup.
+              path:                                      # Mandatory. List of String. Path within the container to backup
+                - /var/www/html/config
+                - /var/www/html/files
+                - /var/log
+                - /var/www/html/marketplace
+                - /var/www/html/plugins
+              databases:
+                - names:                                 # Mandatory. List of String. name(s) of database to backup
+                    - glpi
+                  type: mariadb                          # Mandatory, choice=mariadb|mysql|postgres
+                  method: docker                         # Optional, choice=docker|direct. default=direct specify the method to backup the database
+                  encrypt: false                         # Optional, Boolean. default=true. Encrypt the database backup
+                  socket: /var/run/mysqld/mysqld.sock    # Mandatory. String. Path to the MySQL socket.
+        forks: 3
+        job_type: "run"
+        job_tags: application
+        labels:
+          - backup
+          - container
+          - files
+          - mariadb
+          - postgres
+        # credentials:
+        #   - "Local"
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: "Backup/Inventory"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: false
+        description: |
+          Playbook to backup an Installed Application using inventory Variables
+        execution_environment: "No Fuss Computing EE"
+        forks: 3
+        job_type: "run"
+        job_tags: application
+        labels:
+          - backup
+          - container
+          - files
+          - mariadb
+          - postgres
+        verbosity: 2
+        use_fact_cache: true

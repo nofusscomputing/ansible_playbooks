@@ -1,0 +1,56 @@
+---
+
+- name: Decrypt File
+  block:
+
+
+    - name: Decrypt File
+      ansible.builtin.shell:
+        cmd: |
+          openssl smime -decrypt \
+            -in {{ directory_source }}/{{ file_name }}.enc.tar.gz \
+            -binary -inform DEM \
+            -inkey {{ directory_tasks }}/decryption_certificate \
+            -out {{ directory_source }}/{{ file_name }}.tar.gz; \
+          tar -xzf \
+            {{ directory_tasks }}/{{ file_name }}.tar.gz \
+            -C {{ directory_destination }};
+      args:
+        executable: bash
+      changed_when: false
+      register: file_restoration
+      become: true
+      failed_when: "'Error' in file_restoration.stderr"
+
+
+  rescue:
+
+
+    - name: Remove Decrypted File(s)
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      become: true
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_destination }}"
+
+
+    - name: Task Failed Force Kill Play
+      ansible.builtin.assert:
+        that:
+          - false
+        msg: "The Play Failed"
+
+  always:
+
+    - name: Remove Backup File
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      become: true
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_source }}/{{ file_name }}.enc.tar.gz"

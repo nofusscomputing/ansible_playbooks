@@ -1,0 +1,91 @@
+---
+- name: Restore Postgres Database
+  block:
+
+
+    - name: Backup Filename
+      ansible.builtin.set_fact:
+        postgresdb_file_path_backup: "{{ directory_temp_destination }}/database-dump/{{ database.name }}.sql"
+        cacheable: false
+
+
+    - name: Ensure Backup File Exists
+      ansible.builtin.file:
+        name: "{{ postgresdb_file_path_backup }}"
+        state: file
+      become: true
+
+
+    - name: Remove Existing Database
+      ansible.builtin.include_tasks:
+        file: tasks/modules/community-postgresql-postgresql_db.yaml
+        apply:
+          tags:
+            - always
+      vars:
+        task_name_module: Remove Existing Database - {{ database.name }}
+        module_database:
+          delegate_to: |-
+            {%- if database.delegate | default('') == 'localhost' -%}
+              localhost
+            {%- else -%}
+              {{ inventory_hostname }}
+            {%- endif %}
+          name: "{{ database.destination | default(database.name) }}"
+          force: true
+          host: "{{ database.host | from_yaml }}"
+          retries: 3
+          state: absent
+
+
+    - name: Create Blank Database
+      ansible.builtin.include_tasks:
+        file: tasks/modules/community-postgresql-postgresql_db.yaml
+        apply:
+          tags:
+            - always
+      vars:
+        task_name_module: Create Blank Database - {{ database.name }}
+        module_database:
+          delegate_to: |-
+            {%- if database.delegate | default('') == 'localhost' -%}
+              localhost
+            {%- else -%}
+              {{ inventory_hostname }}
+            {%- endif %}
+          name: "{{ database.destination | default(database.name) }}"
+          force: true
+          host: "{{ database.host | from_yaml }}"
+          retries: 3
+          state: present
+
+
+    - name: Restore Database
+      ansible.builtin.include_tasks:
+        file: tasks/modules/community-postgresql-postgresql_db.yaml
+        apply:
+          tags:
+            - always
+      vars:
+        task_name_module: Restore Database - {{ database.name }}
+        module_database:
+          delegate_to: |-
+            {%- if database.delegate | default('') == 'localhost' -%}
+              localhost
+            {%- else -%}
+              {{ inventory_hostname }}
+            {%- endif %}
+          name: "{{ database.destination | default(database.name) }}"
+          host: "{{ database.host | from_yaml }}"
+          state: restore
+          target: "{{ postgresdb_file_path_backup }}"
+          become: true
+
+
+  always:
+
+    - name: Remove Backup File
+      ansible.builtin.file:
+        name: "{{ postgresdb_file_path_backup }}"
+        state: absent
+      become: true

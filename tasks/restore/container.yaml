@@ -1,0 +1,36 @@
+---
+
+- name: Restore Container path - {{ container_path.name }}
+  block:
+
+
+    - name: Prepare Backup Destination name
+      ansible.builtin.set_fact:
+        container_backup_tmp_dir: "{{ directory_temp_destination }}/{{ container_path.name }}"
+        cacheable: false
+
+
+    - name: Restore Container Path {{ container_path }}
+      ansible.builtin.command:
+        cmd: |-
+          {%- if container.type == 'docker' -%}
+            docker cp -a {{ container_backup_tmp_dir }} {{ container.container }}:{{ container_path.path }}
+          {% elif container.type == 'kube' -%}
+            kubectl cp --no-preserve=true
+            {%- if container.container is defined %} --container={{ container.container }}
+            {%- endif %} {{ container_backup_tmp_dir }} {{ ' ' + container.namespace }}/{{ container.pod }}:{{ container_path.path }}
+          {%- else -%}
+            echo "no type specified"; exit 127;
+          {%- endif %}
+      become: true
+      changed_when: false
+
+
+  always:
+
+
+    - name: Remove Recovered Directory - {{ container_backup_tmp_dir }}
+      ansible.builtin.file:
+        name: "{{ container_backup_tmp_dir }}"
+        state: absent
+      become: true

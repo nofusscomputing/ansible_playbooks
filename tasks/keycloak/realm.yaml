@@ -109,6 +109,14 @@
   loop_control:
     loop_var: keycloak_role
 
+- name: Client Scopes
+  ansible.builtin.include_tasks:
+    file: tasks/keycloak/client_scope.yaml
+  loop: "{{ keycloak_realm.client_scopes | default([]) }}"
+  loop_control:
+    loop_var: keycloak_clientscope
+
+
 - name: Realm Clients
   ansible.builtin.include_tasks:
     file: tasks/keycloak/client.yaml
@@ -116,13 +124,6 @@
   loop_control:
     loop_var: keycloak_client
 
-
-- name: Client Scopes
-  ansible.builtin.include_tasks:
-    file: tasks/keycloak/client_scope.yaml
-  loop: "{{ keycloak_realm.client_scopes | default([]) }}"
-  loop_control:
-    loop_var: keycloak_clientscope
 
 
 - name: User Role Mappings

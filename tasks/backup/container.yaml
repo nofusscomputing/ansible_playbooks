@@ -1,0 +1,69 @@
+---
+
+- name: Prepare Backup Filename
+  ansible.builtin.set_fact:
+    path_name: "{{ (container_path | split('/'))[(container_path | split('/') | list | length) - 1] }}"
+    cacheable: false
+
+
+- name: Prepare Backup Destination name
+  ansible.builtin.set_fact:
+    container_backup_tmp_dir: "{{ directory_temp_destination }}/{{ path_name }}"
+    cacheable: false
+
+
+- name: Ensure no existing backup dir
+  ansible.builtin.file:
+    name: "{{ container_backup_tmp_dir }}"
+    state: absent
+  become: true
+
+
+- name: Create Backup Directory
+  ansible.builtin.file:
+    name: "{{ container_backup_tmp_dir }}"
+    state: directory
+    owner: root
+    group: backup
+    mode: '0770'
+  become: true
+
+
+# kubectl cp copies files to specified path
+# docker cp copies named dir to tmp loc
+- name: Backup Container Path
+  ansible.builtin.command:
+    cmd: |-
+      {%- if container.type == 'docker' -%}
+        docker cp -a {{ container.container }}:/{{ container_path }} {{ container_backup_tmp_dir }}
+      {% elif container.type == 'kube' -%}
+        kubectl cp --no-preserve=true
+        {%- if container.container is defined %} --container={{ container.container }}
+        {%- endif %} {{ ' ' + container.namespace }}/{{ container.pod }}:/{{ container_path }} {{ container_backup_tmp_dir }}
+        {%- if container.type == 'kube' %}/{{ container_path }} {% endif %}
+      {%- else -%}
+        echo "no type specified"; exit 127;
+      {%- endif %}
+  become: true
+
+
+- name: Docker cp normalization
+  ansible.builtin.shell:
+    cmd: |-
+      cp -pr {{ container_backup_tmp_dir }}/{{ path_name }}/* {{ container_backup_tmp_dir }}/;
+      rm -fr {{ container_backup_tmp_dir }}/{{ path_name }};
+    executable: bash
+  become: true
+  changed_when: false
+  when: container.type == 'docker'
+
+- name: Kubectl cp normalization
+  ansible.builtin.shell:
+    cmd: |-
+      cp -pr {{ container_backup_tmp_dir }}{{ container_path }}/* {{ container_backup_tmp_dir }}/;
+      rm -fr {{ container_backup_tmp_dir }}/{{ container_path }};
+    #  rm -fr {{ container_backup_tmp_dir }}/{{ (container_path | split('/'))[0] }};
+    executable: bash
+  become: true
+  changed_when: false
+  when: container.type == 'kube'

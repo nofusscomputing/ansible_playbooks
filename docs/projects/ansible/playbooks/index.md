@@ -15,7 +15,7 @@ Available Playbooks:
 
 1. [awx.yaml](awx.md) 
 
-1. [backup.yaml](backup.md)
+1. [backup.yaml](backup/index.md)
 
 1. [common.yaml](common.md)
 
@@ -29,7 +29,15 @@ Available Playbooks:
 
 1. [postgresdb.yaml](postgresdb.md)
 
-1. [restore.yaml](restore.md)
+1. [restore.yaml](restore/index.md)
+
+1. Direct Module Access
+
+    These playbooks allow the direct calling of an Ansible module.
+
+    1. [ansible_module_mysql.yaml](modules/mysql.md)
+
+    1. [ansible_module_postgres.yaml](modules/postgres.md)
 
 
 ## Docs ToDo

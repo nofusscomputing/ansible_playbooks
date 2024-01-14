@@ -128,15 +128,12 @@
             - always
 
 
-        - name: Restore Files
+        - name: Restoration
           ansible.builtin.include_tasks:
-            file: tasks/restore-files.yaml
-            apply:
-              tags:
-                - files
-          when: restore.files | default([]) | length | int > 0
+            file: tasks/restore.yaml
           tags:
-            - files
+            - always
+
 
       rescue:
 
@@ -269,6 +266,7 @@
     # backup_storage_directory: /backup
 
     nfc_pb_awx_tower_template:
+
       - name: "Restore specified backup from Inventory config"
         ask_limit_on_launch: true
         ask_tags_on_launch: true
@@ -314,3 +312,43 @@
               "question_name": "Backup Storage Directory",
               "question_description": "The root directory of where the backups are stored"
           }
+
+      - name: "Restore/Application"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Playbook to restore backups to various systems using config from inventory
+          Available tags:
+            'files' Restore Specified file(s),
+          If no tag is specified, all tasks will run if the applicable variables are set.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          nfc_pb_restore:
+            file_restore:                # Mandatory, String. Name of file without extension to restore
+            restore_directory_backups:   # Mandatory, String. Name of backup file to restore without file extension. .enc.tar is assumed
+            applications:
+              - name: vaultwarden           # Mandatory, String. Name of the Application
+                type: kube                  #   Mandatory, string. Kubernetes container engine
+                path:                       # Mandatory*, List of Dict. Required to restore files to path
+                  - name: data                  # Mandatory. String. sub-directory name inside the archive
+                    path: /data                 # Mandatory, String. Path within the container to restore to
+                pod: vaultwarden-0
+                namespace: vaultwarden
+                databases:                  # Mandatory*, dict, choice=mariadb|mysql. Only required if database restoration to be done.
+                  mariadb:                      # Mandatory, string. MariaDB/MySQL databases to restore
+                    - name: vaultwarden                     # Mandatory, String. Backup database filename.
+                      host:                                 # Database connection hosr
+                        name: mariadb-galera.mariadb.svc    # Mandatory. String. DNS or IP of database host to connect
+                        destination: vaultwarden            # Optional, string. default={use name key} database name to restore to.
+        job_type: "run"
+        job_tags: application
+        labels:
+          - restore
+          - files
+          - mariadb
+          - mysql
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: false

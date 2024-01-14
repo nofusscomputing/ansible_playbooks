@@ -1,0 +1,39 @@
+---
+
+- name: Copy backup to Remote Host
+  ansible.builtin.include_tasks:
+    file: tasks/file_system/copy_local_remote.yaml
+    apply:
+      tags:
+        - always
+  vars:
+    source_file_path: "{{ nfc_pb_restore.restore_directory_backups }}/{{ application.file_restore }}.enc.tar.gz"
+    directory_destination: "{{ directory_tasks }}"
+    permissions:
+      owner: root
+      group: backup
+      mode: '0740'
+  tags:
+    - always
+
+
+- name: Ensure Restore details set
+  ansible.builtin.assert:
+    that:
+      - nfc_pb_restore is defined
+      - nfc_pb_restore | default('') != ''
+    msg: "A file to restore must be specified"
+
+
+- name: Restore Containers
+  ansible.builtin.include_tasks:
+    file: tasks/restore/containers.yaml
+    apply:
+      tags:
+        - always
+  vars:
+    container: "{{ application }}"
+  when: >
+    application.type == 'docker'
+      or
+    application.type == 'kube'

@@ -1,55 +1,70 @@
 ---
 
-- name: Backup database
-  block:
-
-    - name: Prepare Backup Filename
-      ansible.builtin.set_fact:
-        postgresdb_filename_backup: "{{ filename_date_time }}-postgres-{{ postgresdb.name }}.sql"
+- name: Prepare Backup Filename
+  ansible.builtin.set_fact:
+    postgresdb_filename_backup: "{{ database.name }}.sql"
+    directory_database_dump: "{{ directory_temp_destination }}/database-dump"
 
 
-    - name: Dump an existing database to a file
-      community.postgresql.postgresql_db:
-        name: "{{ postgresdb.database }}"
-        state: dump
-        target: "{{ directory_tasks }}/{{ postgresdb_filename_backup }}"
-        login_host: "{{ postgresdb_host }}"
-        login_user: "{{ postgresdb_user }}"
-        login_password: "{{ postgresdb_password }}"
-      connection: "{{ backup.postgresdb.connection | default(omit) }}"
-      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
-      no_log: true
+- name: Ensure no existing Database Dump Directory
+  ansible.builtin.file:
+    name: "{{ directory_database_dump }}"
+    state: absent
+  become: true
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}
 
 
-    - name: Backup File Details
-      ansible.builtin.stat:
-        name: "{{ directory_tasks }}/{{ postgresdb_filename_backup }}"
-      connection: "{{ backup.postgresdb.connection | default(omit) }}"
-      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+- name: Create Database Dump Directory
+  ansible.builtin.file:
+    name: "{{ directory_database_dump }}"
+    state: directory
+    owner: root
+    group: backup
+    mode: '770'
+  become: true
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}
 
 
-    - name: Store Backup
-      ansible.builtin.copy:
-        src: "{{ directory_tasks }}/{{ postgresdb_filename_backup }}"
-        dest: "{{ backup.directory }}"
-        remote_src: true
-      connection: "{{ backup.postgresdb.connection | default(omit) }}"
-      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+- name: Dump an existing database to a file
+  community.postgresql.postgresql_db:
+    login_host: "{{ database.host.name }}"
+    port: "{{ database.host.port | default(omit) }}"
+    login_user: "{{ nfc_pb_postgres_username }}"
+    login_password: "{{ nfc_pb_postgres_password }}"
+    login_unix_socket: "{{ database.host.socket | default(omit) }}"
+
+    name: "{{ database.name }}"
+    state: dump
+    target: "{{ directory_database_dump }}/{{ postgresdb_filename_backup }}"
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}
 
 
-  rescue:
-
-    - name: Remove Failed Backup
-      ansible.builtin.file:
-        name: "{{ postgresdb_directory_backup }}/{{ postgresdb_filename_backup }}"
-        state: absent
-      connection: "{{ backup.postgresdb.connection | default(omit) }}"
-      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
-
-    - name: Fail Play
-      ansible.builtin.assert:
-        that:
-          - false
-        fail_msg: Backup of Postgres database '{{ postgresdb.name }}' Failed!
-      connection: "{{ backup.postgresdb.connection | default(omit) }}"
-      delegate_to: "{% if backup.postgresdb.connection == 'local' %}localhost{% else %}omit{% endif %}"
+- name: Set Database Dump Permissions
+  ansible.builtin.file:
+    name: "{{ directory_database_dump }}/{{ postgresdb_filename_backup }}"
+    owner: root
+    group: backup
+    mode: '0740'
+    state: file
+  become: true
+  delegate_to: |-
+    {%- if database.delegate | default('') == 'localhost' -%}
+      localhost
+    {%- else -%}
+      {{ inventory_hostname }}
+    {%- endif %}
