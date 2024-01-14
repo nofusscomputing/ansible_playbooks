@@ -50,6 +50,11 @@ Running of these playbooks is no different to any other. However there are a few
     !!! tip
         `mysql` can be installed with `apt install mariadb-client-core-<version> mariadb-client-<version>` on a Debian system.
 
+- Kubernetes containers that are having their files backed-up, require tar to be instlled in the contianer.
+
+    !!! tip
+        If tar is not installed within the container, add a sidecar container that contains tar. `debian:bookworm-slim` is one such container and use `bash -c sleep 9999999999999999999` as the container command so it doesn't stop.
+
 
 ### Play workflow
 
