@@ -1,0 +1,21 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# image: nofusscomputing/ansible-ee > 0.11.0rc0
+
+- name: "{{ task_name_module | default('MariaDB Database Action') }}"
+  community.mysql.mysql_db:
+    login_host: "{{ module_database.host.name }}"
+    login_user: "{{ nfc_pb_mariadb_username }}"
+    login_password: "{{ nfc_pb_mariadb_password }}"
+    login_port: "{{ module_database.host.port | default(omit) }}"
+    login_unix_socket: "{{ module_database.host.socket | default(omit) }}"
+
+    name: "{{ module_database.name }}"
+    state: "{{ module_database.state }}"
+    target: "{{ module_database.target | default(omit) }}"
+
+  delegate_to: "{{ module_database.delegate_to | default(omit) }}"
+  no_log: "{{ module_database.no_log | default(false) | bool }}"

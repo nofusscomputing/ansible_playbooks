@@ -1,4 +1,10 @@
 ---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# image: nofusscomputing/ansible-ee > 0.11.0rc0
+
 
 - name: Container Restore
   block:
@@ -42,6 +48,20 @@
         loop_var: container_path
         label: container.name
 
+
+    - name: Restore MariaDB/MySQL Database
+      ansible.builtin.include_tasks:
+        file: tasks/restore/mariadb.yaml
+      loop: |-
+        {%- if container.databases.mariadb is defined -%}
+          {{ container.databases.mariadb | list }}
+        {%- elif container.databases.mysql is defined -%}
+          {{ container.databases.mysql | list }}
+        {%- else -%}
+          []
+        {%- endif %}
+      loop_control:
+        loop_var: database
 
   always:
 
