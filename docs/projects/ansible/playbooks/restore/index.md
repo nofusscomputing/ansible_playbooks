@@ -6,44 +6,29 @@ template: project.html
 about: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 ---
 
-!!! Note
-    Docs Still under development
 
-This Playbook is designed to restore backups to various systems. It uses the configuration as defined in the Ansible Inventory. The specific backup details are from our [backup playbook](../backup/index.md). Currently the following restoration of backups is supported:
-
-- Files
+This Playbook is designed to restore backups that were createdby our [backup](../backup/index.md) playbook.
 
 
-## Files Restoration Task
+## Using the Playooks
 
-The file restoration tasks within the playbook will restore backups created by our [backup playbook](../backup/index.md).
+Running of this playbook is no different to any other. However there are a few requirements that must be met first:
+
+- The user running the playbook must be a member of the `backup` group on the remote host.
+
+- Postgres actions require `psql` and `pg_config` to be installed and python modules `psycopg2`.
+
+    !!! tip
+        install with `apt install postgresql-client-<version> postgresql-common` on a Debian system and `pip install psycopg2-binary` for the python modules
+
+- MariaDB / MySQL actions require `mysql`, `mariadb-client-<version>` to be installed and python modules `PyMySQL`
+
+    !!! tip
+        `mysql` can be installed with `apt install mariadb-client-core-<version> mariadb-client-<version>` on a Debian system and `pip install PyMySQL` for the python modules.
 
 
-### Playbook Variables
+## Restoration tasks
 
-The following is the minimum required defined variables in inventory
+Just like out backup playbook, this playbook is broken down into sub-tasks, being:
 
-``` yaml
-
-restore:
-  backup_storage_directory: /backup
-  files:
-    - name: ""        # Mandatory, String. {backup_file_name}-{inventory_hostname}
-      root_directory: '' # Optional, string. root directory where to restore. default=/
-
-backup:
-  encryption_algorithm: aes256
-
-```
-
-during the running of this playbook, you must specify additional variables `backup_storage_directory` and `restore_backup_date`. for example
-
-``` bash
-clear; ansible-playbook --limit {the ansible host to restore the backup to} \
-  -i inventory/production \
-  /playbooks/restore.yaml \
-  --vault-id recovery@recovery_vault \
-  --extra-vars "restore_backup_date=2023-10-24-13:14:08-+0000" \
-  --extra-vars "backup_storage_directory=/backup" \
-  --tags files
-```
+- [Application restore](application.md). This covers application type Containers. Specifically in this case, Kubernetes containers
