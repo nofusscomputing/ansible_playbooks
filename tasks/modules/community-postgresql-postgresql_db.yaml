@@ -1,5 +1,37 @@
 ---
 
+- name: Connection Validation - Assumed Socket
+  ansible.builtin.assert:
+    that:
+      - module_database.host.socket is defined
+    msg: "If no host DNS or IP Address is specified, you must supply the socket to use for the connection"
+  when: module_database.host.name is not defined
+
+
+- name: Variable Validation - Dump Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "to dump a database, you must specify the path to save the dump"
+  when: module_database.state == 'dump'
+
+
+- name: Variable Validation - Import Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "to Import a database, you must specify the path to the dump (.sql) file"
+  when: module_database.state == 'restore'
+
+
+- name: Variable Validation - Rename Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "To rename a database, option target must be specified"
+  when: module_database.state == 'rename'
+
+
 - name: "{{ task_name_module | default('MariaDB Database Action') }}"
   community.postgresql.postgresql_db:
     login_user: "{{ nfc_pb_postgres_username }}"
