@@ -37,7 +37,7 @@
       vars:
         directory_source: "{{ directory_tasks }}"
         directory_destination: "{{ directory_temp_destination }}"
-        file_name: "{{ nfc_pb_restore.file_restore }}"
+        file_name: "{{ container.file_restore }}"
 
 
     - name: Restore Container

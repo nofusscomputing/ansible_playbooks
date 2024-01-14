@@ -46,7 +46,6 @@ Restoration Yaml Object.
 
 ``` yaml
 nfc_pb_restore:
-  file_restore:                 # Mandatory, String. Name of file without extension to restore
   restore_directory_backups:    # Mandatory, String. Name of backup file to restore without file extension. .enc.tar is assumed
   applications: []              # Mandatory, List of Dict. The applications to restore
 ```
@@ -62,6 +61,7 @@ To restore an application, an application list item must be added to `nfc_pb_res
 
     ``` yaml
     - name: vaultwarden         # Mandatory, String. Name of the Application
+      file_restore:                 # Mandatory, String. Name of file without extension to restore
       type: kube                # Mandatory, string. Kubernetes container engine
       path: []                  # Mandatory*, List of Dict. Required to restore files to path
       pod: vaultwarden-0
@@ -79,6 +79,9 @@ To restore an application, an application list item must be added to `nfc_pb_res
 === "Application"
 
     To Be Developed
+
+!!! tip
+    If you wish to restore backups for multiple applications this is possible by adding additional application list items.
 
 
 #### Files
