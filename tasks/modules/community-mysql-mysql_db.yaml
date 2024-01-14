@@ -5,6 +5,30 @@
 #
 # image: nofusscomputing/ansible-ee > 0.11.0rc0
 
+- name: Connection Validation - Assumed Socket
+  ansible.builtin.assert:
+    that:
+      - module_database.host.socket is defined
+    msg: "If no host DNS or IP Address is specified, you must supply the socket to use for the connection"
+  when: module_database.host.name is not defined
+
+
+- name: Variable Validation - Dump Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "to dump a database, you must specify the path to save the dump"
+  when: module_database.state == 'dump'
+
+
+- name: Variable Validation - Import Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "to Import a database, you must specify the path to the dump (.sql) file"
+  when: module_database.state == 'import'
+
+
 - name: "{{ task_name_module | default('MariaDB Database Action') }}"
   community.mysql.mysql_db:
     login_host: "{{ module_database.host.name }}"
@@ -17,5 +41,6 @@
     state: "{{ module_database.state }}"
     target: "{{ module_database.target | default(omit) }}"
 
+  become: "{{ module_database.become | default(omit) }}"
   delegate_to: "{{ module_database.delegate_to | default(omit) }}"
   no_log: "{{ module_database.no_log | default(false) | bool }}"
