@@ -41,6 +41,14 @@ nav:
 
       - projects/ansible/playbooks/keycloak.md
 
+      - Ansible Modules:
+
+        - projects/ansible/playbooks/modules/index.md
+
+        - projects/ansible/playbooks/modules/mysql.md
+
+        - projects/ansible/playbooks/modules/postgres.md
+
       - projects/ansible/playbooks/mariadb.md
 
       - projects/ansible/playbooks/postgresdb.md
