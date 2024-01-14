@@ -1,0 +1,711 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/playbooks/awx/
+#
+# This playbook is for running task files that are the Ansible module definition
+#
+- name: Ansible Module Playbook - PostgreSQL
+  hosts: all
+  gather_facts: false
+
+
+  pre_tasks:
+
+
+      # Play and task set time
+    - name: Set Start Time
+      ansible.builtin.set_fact:
+        nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_automation'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_automation: {
+          "time": {
+            "start": "{{ nfc_task_starttime | string }}",
+            "end": 0
+          }
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      when: nfc_automation is not defined
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_task'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "{{ ansible_play_name | default('') | lower | string }}",
+          "error": 0,
+          "roles": "{{ ansible_play_role_names | default('') | string }}",
+          "skip_tags": "{{ ansible_skip_tags | default([])| list }}",
+          "start": "{{ nfc_task_starttime | string }}",
+          "tags": "{{ ansible_run_tags | default([]) | list }}"
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    - name: Block - pre_tasks
+      block:
+
+
+        - name: Variable Setup - project_dir
+          ansible.builtin.include_tasks:
+            file: tasks/var_project_dir.yaml
+            apply:
+              tags:
+                - always
+          when: var_project_dir is not defined
+          tags:
+            - always
+
+
+      rescue:
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+    # Don't use the 'roles' section.
+  roles: []
+    # if the included role(s) do not contain a rescue block, the playbook may stop
+    # executing in this section (roles) with the post_tasks not running. This will
+    # cause the artifacts to be incomplete. It's recommended to include your roles
+    # in section(s) 'pre_tasks', 'tasks' or 'post_tasks' and from within a block with
+   # rescue so that the playbook can complete and ensure that all artifacts are set.
+
+
+  tasks:
+
+
+    - name: Block - tasks
+      block:
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error eccured, follow error path to fail play
+          tags:
+            - always
+
+
+        - name: Ansible Module postgresql.postgresql_db
+          ansible.builtin.include_tasks:
+            file: tasks/modules/community-postgresql-postgresql_db.yaml
+          tags:
+            - community-postgresql-postgresql_db
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  post_tasks:
+
+    - name: Tasks post_task
+      block:
+
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, follow error path to fail play
+          tags:
+            - always
+
+
+        ########################################################################
+        #
+        # Your tasks here
+        #
+        ########################################################################
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Task and automation end time.
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set task end time
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | combine({
+                'end': nfc_task_endtime | string
+              }) ] }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set Automation end time.
+          # every playbook must set this variable so that the end time
+          # is equal to the fail time or the end of a group of playbooks.
+        - name: Set automation end time
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'time': nfc_automation.time | combine({
+                  'end': nfc_task_endtime | string
+                })
+              }) }}"
+            nfc_task_endtime: null
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set the artifacts as a fact for subsequent playbook useage
+          # Note: variable 'per_host' must be 'false' so that the artifacts
+          # work within AWX / Ansible Automation Platform.
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
+
+
+          # Final error check to fail the entire play run on error 
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  vars:
+
+    nfc_pb_awx_tower_template:
+
+      - name: "Module/Community/PostgreSQL/PostgreSQL_DB"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          A Playbook for Ansible module community.postgresql.postgresql_db
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          ---
+          # Omit any not required
+          module_database:
+            host:
+              name:
+              port:
+              socket:
+            name:
+            state:
+            force:
+            target:
+            # These are used by the task and can be safely omited if not required
+            become:
+            delegate_to:
+            no_log
+            retries:
+
+        job_type: "run"
+        job_tags: community-postgresql-postgresql_db
+        labels:
+          - community
+          - database
+          - module
+          - postgres
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: "Database/PostgreSQL/Database/Create"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: false
+        description: |
+          Create a Postgres Database.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          ---
+          module_database:
+            state: present
+        job_type: "run"
+        job_tags: community-postgresql-postgresql_db
+        labels:
+          - create
+          - database
+          - module
+          - postgres
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey: |
+          {
+            "max": 25,
+            "min": 25,
+            "type": "text",
+            "choices": "",
+            "default": "",
+            "required": true,
+            "variable": "module_database.name",
+            "new_question": true,
+            "question_name": "Name",
+            "question_description": "Name of the database"
+          },
+          {
+              "max": 50,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "main-postgresql-ha-pgpool.postgres.svc",
+              "required": false,
+              "variable": "module_database.host.name",
+              "new_question": true,
+              "question_name": "DNS / IP Address",
+              "question_description": "Database Host connection point. If using socket for connection this is not required."
+          },
+          {
+              "max": 4,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.port",
+              "new_question": true,
+              "question_name": "Port Number",
+              "question_description": "Database Host Port to use for the connection.
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.socket",
+              "new_question": true,
+              "question_name": "Socket Path",
+              "question_description": "Database Socket to use for the connection"
+          }
+
+
+      - name: "Database/PostgreSQL/Database/Delete"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: false
+        description: |
+          Delete a Postgres Database.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          ---
+          module_database:
+            state: absent
+        job_type: "run"
+        job_tags: community-postgresql-postgresql_db
+        labels:
+          - database
+          - delete
+          - module
+          - postgres
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey: |
+          {
+            "max": 25,
+            "min": 25,
+            "type": "text",
+            "choices": "",
+            "default": "",
+            "required": true,
+            "variable": "module_database.name",
+            "new_question": true,
+            "question_name": "Name",
+            "question_description": "Name of the database"
+          },
+          {
+              "max": 50,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "main-postgresql-ha-pgpool.postgres.svc",
+              "required": false,
+              "variable": "module_database.host.name",
+              "new_question": true,
+              "question_name": "DNS / IP Address",
+              "question_description": "Database Host connection point. If using socket for connection this is not required."
+          },
+          {
+              "max": 4,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.port",
+              "new_question": true,
+              "question_name": "Port Number",
+              "question_description": "Database Host Port to use for the connection.
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.socket",
+              "new_question": true,
+              "question_name": "Socket Path",
+              "question_description": "Database Socket to use for the connection"
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "multiplechoice",
+              "choices": [
+                "true",
+                "false"
+              ],
+              "default": "",
+              "required": true,
+              "variable": "module_database.force",
+              "new_question": true,
+              "question_name": "Force delete database",
+              "question_description": "Force deleting alows the database to be deleted when there are active connections"
+          }
+
+
+      - name: "Database/PostgresSQL/Database/Dump"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: false
+        description: |
+          Dump a Postgres Database to file.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          ---
+          module_database:
+            state: dump
+            become: true
+        job_type: "run"
+        job_tags: community-postgresql-postgresql_db
+        labels:
+          - database
+          - dump
+          - module
+          - postgres
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey: |
+          {
+            "max": 25,
+            "min": 25,
+            "type": "text",
+            "choices": "",
+            "default": "",
+            "required": true,
+            "variable": "module_database.name",
+            "new_question": true,
+            "question_name": "Name",
+            "question_description": "Name of the database"
+          },
+          {
+              "max": 50,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "main-postgresql-ha-pgpool.postgres.svc",
+              "required": false,
+              "variable": "module_database.host.name",
+              "new_question": true,
+              "question_name": "DNS / IP Address",
+              "question_description": "Database Host connection point. If using socket for connection this is not required."
+          },
+          {
+              "max": 4,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.port",
+              "new_question": true,
+              "question_name": "Port Number",
+              "question_description": "Database Host Port to use for the connection.
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.socket",
+              "new_question": true,
+              "question_name": "Socket Path",
+              "question_description": "Database Socket to use for the connection"
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "/tmp/postgres_database_dump.sql",
+              "required": false,
+              "variable": "module_database.target",
+              "new_question": true,
+              "question_name": "Socket Path",
+              "question_description": "Dump file Path"
+          }
+
+
+      - name: "Database/PostgresSQL/Database/Import"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: false
+        description: |
+          Import a Postgres Database from file (.sql).
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          ---
+          module_database:
+            state: restore
+            become: true
+        job_type: "run"
+        job_tags: community-postgresql-postgresql_db
+        labels:
+          - database
+          - import
+          - module
+          - postgres
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey: |
+          {
+            "max": 25,
+            "min": 25,
+            "type": "text",
+            "choices": "",
+            "default": "",
+            "required": true,
+            "variable": "module_database.name",
+            "new_question": true,
+            "question_name": "Name",
+            "question_description": "Name of the database"
+          },
+          {
+              "max": 50,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "main-postgresql-ha-pgpool.postgres.svc",
+              "required": false,
+              "variable": "module_database.host.name",
+              "new_question": true,
+              "question_name": "DNS / IP Address",
+              "question_description": "Database Host connection point. If using socket for connection this is not required."
+          },
+          {
+              "max": 4,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.port",
+              "new_question": true,
+              "question_name": "Port Number",
+              "question_description": "Database Host Port to use for the connection.
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.socket",
+              "new_question": true,
+              "question_name": "Socket Path",
+              "question_description": "Database Socket to use for the connection"
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "/tmp/postgres_database_dump.sql",
+              "required": false,
+              "variable": "module_database.target",
+              "new_question": true,
+              "question_name": "Socket Path",
+              "question_description": "Dump file Path"
+          }
+
+
+      - name: "Database/PostgresSQL/Database/Rename"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: false
+        description: |
+          Rename a Postgres Database.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          ---
+          module_database:
+            state: rename
+        job_type: "run"
+        job_tags: community-postgresql-postgresql_db
+        labels:
+          - database
+          - module
+          - postgres
+          - rename
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        survey: |
+          {
+            "max": 25,
+            "min": 25,
+            "type": "text",
+            "choices": "",
+            "default": "",
+            "required": true,
+            "variable": "module_database.name",
+            "new_question": true,
+            "question_name": "Name",
+            "question_description": "Name of the database"
+          },
+          {
+              "max": 50,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "main-postgresql-ha-pgpool.postgres.svc",
+              "required": false,
+              "variable": "module_database.host.name",
+              "new_question": true,
+              "question_name": "DNS / IP Address",
+              "question_description": "Database Host connection point. If using socket for connection this is not required."
+          },
+          {
+              "max": 4,
+              "min": 1,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.port",
+              "new_question": true,
+              "question_name": "Port Number",
+              "question_description": "Database Host Port to use for the connection.
+          },
+          {
+              "max": 254,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": false,
+              "variable": "module_database.host.socket",
+              "new_question": true,
+              "question_name": "Socket Path",
+              "question_description": "Database Socket to use for the connection"
+          },
+          {
+              "max": 20,
+              "min": 3,
+              "type": "text",
+              "choices": "",
+              "default": "",
+              "required": true,
+              "variable": "module_database.target",
+              "new_question": true,
+              "question_name": "New Name",
+              "question_description": "The name the database will be renamed to"
+          }
