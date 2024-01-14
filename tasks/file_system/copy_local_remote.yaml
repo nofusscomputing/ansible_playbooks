@@ -1,10 +1,30 @@
 ---
 
-- name: Copy Backup to host
-  ansible.builtin.copy:
-    src: "{{ source_file_path }}"
-    dest: "{{ directory_destination }}"
-    owner: "{{ permissions.owner | default(omit) }}"
-    group: "{{ permissions.group | default(omit) }}"
-    mode: "{{ permissions.mode | default(omit) }}"
-  become: true
+- name: File Copy
+  block:
+
+
+    - name: Copy Backup to host
+      ansible.builtin.copy:
+        src: "{{ source_file_path }}"
+        dest: "{{ directory_destination }}"
+        owner: "{{ permissions.owner | default(omit) }}"
+        group: "{{ permissions.group | default(omit) }}"
+        mode: "{{ permissions.mode | default(omit) }}"
+      become: true
+
+
+  rescue:
+
+
+    - name: Remove Failed Copy
+      ansible.builtin.file:
+        name: "{{ source_file_path }}"
+        state: absent
+
+
+    - name: Task Failed Force Kill Play
+      ansible.builtin.assert:
+        that:
+          - false
+        msg: "The Play Failed"
