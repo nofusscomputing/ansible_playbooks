@@ -125,4 +125,4 @@ To restore a database a database list item must be added at path `nfc_pb_restore
         socket:                                         # Optional. String. Path to the MySQL socket to use for connection.
                                                         #                   If used host.name is not required
       destination: vaultwarden                          # Optional, string. default={use name key} database name to restore to.
-   
+   ```

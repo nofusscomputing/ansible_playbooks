@@ -6,20 +6,12 @@ template: project.html
 about: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 ---
 
-This playbook provides an easy way to backup the data that forms part of your infrastructure. The playbook has been designed in such a way that the backups are per application and contain all of the data pertinent to that application.
+This playbook provides an easy way to backup the data that forms part of your infrastructure. The playbook has been designed in such a way that the backups are per [application](application.md) and contain all of the data pertinent to that application.
 
 
 ## Features
 
 The following items can be backed up with this playbook:
-
-- Application _(Planned)_
-
-    _All Data pertinent the the application_
-
-- [Containers](application.md)
-
-    _Container paths and database dumps_
 
 - Files
 
@@ -58,7 +50,7 @@ Running of these playbooks is no different to any other. However there are a few
 
 ### Play workflow
 
-The basic workflow for all backup tasks is as follows:
+The basic workflow for all backup tasks is as follows and is grouped per application:
 
 1. Creates temp directories for backup task
 
@@ -68,7 +60,7 @@ The basic workflow for all backup tasks is as follows:
 
 1. copies the backup file locally
 
-To view the workflow of the type of backup, refer to thir documentation pages.
+To view the workflow of the type of backup, refer to their [documentation pages](application.md).
 
 
 ## Commonalities
