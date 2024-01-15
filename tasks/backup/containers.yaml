@@ -101,6 +101,7 @@
         directory_source: "{{ directory_temp_destination }}"
         directory_destination: "{{ directory_tasks }}"
         file_name: "{{ file_backup_no_extension }}"
+        exclude_path: "{{ container.excludes }}"
         permissions:
           owner: root
           group: backup

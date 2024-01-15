@@ -66,6 +66,7 @@ There are different varaible requirements depending on the container engine. Sel
     - name: glpi                             # Mandatory, String. Name of the Application
       type: docker                           # Mandatory. choice=docker|kube. Container engine type
       container: glpi                        # Mandatory. String. Name of the container to backup.
+      excludes: []                           # Optional, List of String.  paths to exclude. Relative to the backup directory temp structure
       path:                                  # Mandatory*. List of String. Mandatory to backup files. Path within the container to 
                                              #                                                        backup
         - /var/www/html/config
@@ -87,6 +88,7 @@ There are different varaible requirements depending on the container engine. Sel
       pod: postgres-0                        # Mandatory, String. the name of the pod to backup
       container: backup                      # Optional. String. Name of the container to connect to.
       namespace: postgres                    # Mandatory. String. Namespace name where the pod belongs
+      excludes: []                           # Optional, List of String.  paths to exclude. Relative to the backup directory temp structure
       path:                                  # Mandatory*. List of String. Mandatory to backup files. Path within the container to 
                                              #                             backup
         - /opt/backup
@@ -96,6 +98,14 @@ There are different varaible requirements depending on the container engine. Sel
 === "Application"
 
     To Be Developed
+
+
+When files are copied to the backup staging directory, each source path is truncated to the last folder name in the path. i.e. A path of `/opt/mydata/the_folder` would be added to the staging directory called `the_folder`. It's important to remember this, as the last directory of all paths to be backed up must be unique. If they are not, the contents of multiple source paths will be merged.
+
+!!! tip
+    If you find that the archive directory name conflicts, i.e. two or more directories have the same name, go up one directory and use exclude patterns to ensure the directories are unique.
+
+Exclusion of files from the backup is done at the archive file creation stage. The archive is created with `tar` and the exclusion pattern is what is expected for the `tar` CLI application. Exclusion patterns are to be relative to the staging directory. i.e. start with the directory name then the path to exclude, `./directory_name/path/to/exclude/filename.txt`, `./directory_name/path/to/exclude/a_directory/`.
 
 
 Database Backup dict are as follows.
