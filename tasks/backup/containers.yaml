@@ -122,6 +122,12 @@
       when: nfc_pb_copy_local | default(true) | bool
 
 
+    - name: Remove Backup Archive
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        state: absent
+
+
   always:
 
 
