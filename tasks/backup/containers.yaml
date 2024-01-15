@@ -113,7 +113,7 @@
         file: tasks/file_system/copy_remote_local.yaml
       vars:
         directory_source: "{{ directory_tasks }}"
-        directory_destination: "/backup/"
+        directory_destination: "{{ backup.directory }}"
         file_name: "{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
         permissions:
           owner: root
