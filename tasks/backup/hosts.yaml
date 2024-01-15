@@ -1,0 +1,138 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# description:
+#              Task file for backing up Specified paths to an archive.
+#
+# image: nofusscomputing/ansible-ee >= 0.1.0
+# tags: nil
+#
+- name: Set Global Facts
+  ansible.builtin.set_fact:
+    filename_date_time: "{{ '%Y-%m-%d-%H:%M:%S-%z' | strftime }}"
+  when: filename_date_time | default('does_not_exist') == 'does_not_exist'
+
+
+- name: File Backup
+  block:
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        file_backup_no_extension: "{{ filename_date_time }}-{{ host_app.name | replace(' ', '_') }}-{{ inventory_hostname }}"
+
+
+    - name: Clean existing Temp Directory
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}"
+        state: absent
+      become: true
+      tags:
+        - always
+
+
+    - name: Create Temp Directory
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}"
+        state: directory
+        owner: root
+        group: backup
+        mode: '770'
+      become: true
+      tags:
+        - always
+
+
+    - name: Backup Host paths
+      ansible.builtin.include_tasks:
+        file: application.yaml
+      loop: "{{ host_app.path | default([]) | list }}"
+      loop_control:
+        loop_var: host_path
+
+
+    - name: Backup MariaDB/MySQL Database
+      ansible.builtin.include_tasks:
+        file: mariadb.yaml
+      with_subelements:
+        - "{{ host_app.databases | default([]) | list }}"
+        - names
+      vars:
+        database:
+          name: "{{ item[1] }}"
+          type: "{{ item[0].type }}"
+          method: "{{ item[0].method }}"
+          encrypt: "{{ item[0].encrypt | default(true) | bool }}"
+          host: "{{ item[0].host }}"
+          delegate: "{{ item[0].delegate | default('') }}"
+      when: >
+        item[0].type == 'mariadb'
+          or
+        item[0].type == 'mysql'
+
+
+    - name: Backup Postgres Database
+      ansible.builtin.include_tasks:
+        file: tasks/backup/postgres.yaml
+      with_subelements:
+        - "{{ host_app.databases | default([]) | list }}"
+        - names
+      vars:
+        database:
+          name: "{{ item[1] }}"
+          type: "{{ item[0].type }}"
+          encrypt: "{{ item[0].encrypt | default(true) | bool }}"
+          host: "{{ item[0].host }}"
+          delegate: "{{ item[0].delegate | default('') }}"
+      when: item[0].type == 'postgres'
+
+
+    - name: Create Metadata File
+      ansible.builtin.include_tasks:
+        file: tasks/backup/metadata.yaml
+
+
+    - name: Encrypt Backup Contents
+      ansible.builtin.include_tasks:
+        file: tasks/file_system/encrypt_directory.yaml
+      vars:
+        directory_source: "{{ directory_temp_destination }}"
+        directory_destination: "{{ directory_tasks }}"
+        file_name: "{{ file_backup_no_extension }}"
+        exclude_path: "{{ host_app.excludes }}"
+        permissions:
+          owner: root
+          group: backup
+          mode: '0740'
+
+
+    - name: Copy backup to Localhost
+      ansible.builtin.include_tasks:
+        file: tasks/file_system/copy_remote_local.yaml
+      vars:
+        directory_source: "{{ directory_tasks }}"
+        directory_destination: "{{ backup.directory }}"
+        file_name: "{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        permissions:
+          owner: root
+          group: backup
+          mode: '0740'
+      when: nfc_pb_copy_local | default(true) | bool
+
+
+    - name: Remove Backup Archive
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        state: absent
+
+
+  always:
+
+
+    - name: Clean Backup Data
+      ansible.builtin.file:
+        path: "{{ directory_temp_destination }}"
+        state: absent
+      become: true

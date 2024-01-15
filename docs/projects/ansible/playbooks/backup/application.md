@@ -41,24 +41,23 @@ Backing up multiple items will have the workflow above start again from step two
 !!! info
     On error during any stage of the workflow, prior to the play stopping all files related to the workflow, included any created (i.e. extracting contents of archive) will be removed so there are no traces on the remote host.
 
+
 ## Variables
 
 Required variables.
 
 ``` yaml
 backup:
-  # directory: /opt/backup              # To Be Removed
-  encryption_algorithm: aes256          # Encryption algorithm
-  applications: []                      # Mandatory, List of dict. List of applications to backup
+  directory: /opt/backup          # Mandatory, String. Path to save downloaded archive(s) to.
+  encryption_algorithm: aes256    # Encryption algorithm
+  applications: []                # Mandatory, List of dict. List of applications to backup
 
 ```
 
 
-### Backup an Application
+### Backup
 
-Options for the application list are detailed below.
-
-There are different varaible requirements depending on the application type. Select the appropriate tab.
+There are different varaible requirements depending on the application type. Select the appropriate tab to view the definition.
 
 === "Docker"
 
@@ -71,6 +70,19 @@ There are different varaible requirements depending on the application type. Sel
       container: glpi         # Mandatory. String. Name of the container to backup.
       excludes: []            # Optional, List of String.  paths to exclude. Relative to the backup directory temp structure
       path: []                # Mandatory*. List of String. Mandatory to backup files. Path within the container to backup
+      databases: []           # Mandatory*. List of dict. Required only if backing up database
+    ```
+
+=== "Host"
+
+    Host application definition
+
+    ``` yaml
+
+    - name: k3s               # Mandatory, String. Name of the Application
+      type: host              # Mandatory. choice=docker|kube. Container engine type
+      excludes: []            # Optional, List of String.  paths to exclude. Relative to the backup directory temp structure
+      path:  []               # Mandatory*. List of String. Mandatory to backup files. Path within the container to backup
       databases: []           # Mandatory*. List of dict. Required only if backing up database
     ```
 
@@ -89,10 +101,6 @@ There are different varaible requirements depending on the application type. Sel
       path:  []               # Mandatory*. List of String. Mandatory to backup files. Path within the container to backup
       databases: []           # Mandatory*. List of dict. Required only if backing up database
     ```
-
-=== "Host"
-
-    To Be Developed
 
 
 ### Paths
@@ -115,7 +123,7 @@ Exclusion of files from the backup is done after the files are staged. The exclu
 
 ### Database
 
-Database Backup dict are as follows.
+Database Backup definition is as follows.
 
 === "MariaDB / MySQL"
 
