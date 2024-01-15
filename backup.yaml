@@ -4,20 +4,14 @@
 # https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 #
 # Playbook for Backing up various systems.
-# tags are optional, with each task only running if applicable variabls are set.
+# tags are mandatory, with each task only running if applicable variabls are set.
 #
-# image: nofusscomputing/ansible-ee >= 0.3.0
+# image: nofusscomputing/ansible-ee >= 0.11.0
 #
 # Tags:
 #
-#   - files
-#     Backup Specified files to archive
-#
-#   - mariadb
-#     Backup Mariadb/MySQL Database
-#
-#   - postgres
-#     backup PostgresDB Database
+#   - application
+#     Backup a Complete application to archive
 #
 - name: Conduct Backup
   hosts: all
@@ -271,32 +265,6 @@
 
     nfc_pb_awx_tower_template:
 
-
-      - name: "Backup(s) from Inventory config"
-        ask_limit_on_launch: true
-        ask_tags_on_launch: true
-        ask_credential_on_launch: true
-        ask_variables_on_launch: true
-        description: |
-          Playbook to backup various systems using config within inventory
-          Available tags:
-            'files' Backup Specified files Database,
-            'mariadb' Backup a MariaDB Database,
-            'postgresdb' Backup a postgres Database.
-          If no tag is specified, all tasks will run if the applicable variables are set.
-        execution_environment: "No Fuss Computing EE"
-        forks: 3
-        job_type: "run"
-        job_tags: files, mariadb, postgresdb
-        labels:
-          - backup
-          - files
-          - mariadb
-          - postgres
-        # credentials:
-        #   - "Local"
-        verbosity: 2
-        use_fact_cache: true
 
       - name: "Backup/Application"
         ask_limit_on_launch: true

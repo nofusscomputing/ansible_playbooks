@@ -79,38 +79,6 @@
         - application
 
 
-    - name: Backup Files
-      ansible.builtin.include_tasks:
-        file: tasks/backup-files.yaml
-        apply:
-          tags:
-            - files
-      when: backup.files | default([]) | length | int > 0
-      tags:
-        - files
-
-
-    - name: Backup mariadb
-      ansible.builtin.include_tasks:
-        file: tasks/backup-mariadb.yaml
-        apply:
-          tags:
-            - mariadb
-      when: backup.mariadb.databases | default([]) | length | int > 0
-      tags:
-        - mariadb
-
-
-    - name: Backup PostgresDB
-      ansible.builtin.include_tasks:
-        file: tasks/backup-postgres.yaml
-        apply:
-          tags:
-            - postgresdb
-      when: backup.postgresdb.databases | default([]) | length | int > 0
-      tags:
-        - postgresdb
-
   always:
 
     - name: Remove Task Temp Files
