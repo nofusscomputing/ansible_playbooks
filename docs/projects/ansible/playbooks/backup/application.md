@@ -110,7 +110,7 @@ When files are copied to the backup staging directory, each source path is trunc
 !!! tip
     If you find that the archive directory name conflicts, i.e. two or more directories have the same name, go up one directory and use exclude patterns to ensure the directories are unique.
 
-Exclusion of files from the backup is done at the archive file creation stage. The archive is created with `tar` and the exclusion pattern is what is expected for the `tar` CLI application. Exclusion patterns are to be relative to the staging directory. i.e. start with the directory name then the path to exclude, `./directory_name/path/to/exclude/filename.txt`, `./directory_name/path/to/exclude/a_directory/`.
+Exclusion of files from the backup is done after the files are staged. The exclusion pattern is what is a path relative to the staging directory. i.e. start with the directory name then the path to exclude, `directory_name/path/to/exclude/filename.txt`, `directory_name/path/to/exclude/a_directory/`.
 
 
 ### Database
