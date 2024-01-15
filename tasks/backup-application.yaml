@@ -6,7 +6,9 @@
     apply:
       tags:
         - always
+  vars:
+    container: "{{ application }}"
   when: >
-    container.type == 'docker'
+    application.type == 'docker'
       or
-    container.type == 'kube'
+    application.type == 'kube'

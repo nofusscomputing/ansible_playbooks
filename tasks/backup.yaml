@@ -73,8 +73,8 @@
             - always
       loop: "{{ backup.applications }}"
       loop_control:
-        loop_var: container
-        label: "{{ container.name }}"
+        loop_var: application
+        label: "{{ application.name }}"
       tags:
         - application
 
