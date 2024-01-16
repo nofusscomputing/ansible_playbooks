@@ -16,7 +16,7 @@
 
 - name: Backup Host Application
   ansible.builtin.include_tasks:
-    file: backup/containers.yaml
+    file: backup/hosts.yaml
     apply:
       tags:
         - always

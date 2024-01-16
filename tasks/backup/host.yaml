@@ -8,7 +8,7 @@
 
 - name: Prepare Backup Destination name
   ansible.builtin.set_fact:
-    host_app_backup_tmp_dir: "{{ directory_temp_destination }}/{{ path_name }}"
+    host_app_backup_tmp_dir: "{{ directory_temp_destination }}{{ path_name }}"
     cacheable: false
 
 
@@ -34,7 +34,7 @@
 - name: Backup Container Path
   ansible.builtin.command:
     cmd: |-
-      cp --force --recursive --verbose --preserve --target-directory={{ container_backup_tmp_dir }} {{ container_path }}
+      cp --force --recursive --verbose --preserve --target-directory={{ host_path }} {{ host_app_backup_tmp_dir }}
   become: true
   changed_when: false
 
@@ -43,4 +43,5 @@
   ansible.builtin.file:
     name: "{{ host_app_backup_tmp_dir }}/{{ item }}"
     state: absent
+  loop: "{{ host_app.excludes | default([]) | list }}"
   become: true
