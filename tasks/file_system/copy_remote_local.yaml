@@ -1,5 +1,12 @@
 ---
 
+- name: TRACE - Copy Details
+  ansible.builtin.debug:
+    msg: {
+      "source": "{{ directory_source }}/{{ file_name }}",
+      "destination": "{{ directory_destination }}"
+    }
+
 - name: Copy Remote file to Localhost
   ansible.builtin.fetch:
     src: "{{ directory_source }}/{{ file_name }}"
