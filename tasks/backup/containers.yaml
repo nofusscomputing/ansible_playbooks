@@ -63,7 +63,6 @@
         database:
           name: "{{ item[1] }}"
           type: "{{ item[0].type }}"
-          method: "{{ item[0].method }}"
           encrypt: "{{ item[0].encrypt | default(true) | bool }}"
           host: "{{ item[0].host }}"
           delegate: "{{ item[0].delegate | default('') }}"
