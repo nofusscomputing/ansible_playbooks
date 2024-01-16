@@ -29,6 +29,29 @@
   when: module_database.state == 'import'
 
 
+- name: Install MariaDB Dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    install_recommends: false
+  become: true
+  loop: "{{ apps }}"
+  vars:
+    apps:
+      - mariadb-client
+
+
+- name: Install MariaDB required PIP Modules
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    state: present
+  become: true
+  loop: "{{ modules }}"
+  vars:
+    modules:
+      - PyMySQL
+
+
 - name: "{{ task_name_module | default('MariaDB Database Action') }}"
   community.mysql.mysql_db:
     login_host: "{{ module_database.host.name }}"
