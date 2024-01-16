@@ -72,6 +72,7 @@
 
 - name: Remove Excluded Items
   ansible.builtin.file:
-    name: "{{ host_app_backup_tmp_dir }}/{{ item }}"
+    name: "{{ container_backup_tmp_dir }}/{{ item }}"
     state: absent
+  loop: "{{ container.excludes | default([]) | list }}"
   become: true
