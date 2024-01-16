@@ -1,0 +1,47 @@
+---
+
+- name: Prepare Backup Filename
+  ansible.builtin.set_fact:
+    path_name: "{{ (host_path | split('/'))[(host_path | split('/') | list | length) - 1] }}"
+    cacheable: false
+
+
+- name: Prepare Backup Destination name
+  ansible.builtin.set_fact:
+    host_app_backup_tmp_dir: "{{ directory_temp_destination }}"
+    cacheable: false
+
+
+- name: Ensure no existing backup dir
+  ansible.builtin.file:
+    name: "{{ host_app_backup_tmp_dir }}"
+    state: absent
+  become: true
+
+
+- name: Create Backup Directory
+  ansible.builtin.file:
+    name: "{{ host_app_backup_tmp_dir }}"
+    state: directory
+    owner: root
+    group: backup
+    mode: '0770'
+  become: true
+
+
+# kubectl cp copies files to specified path
+# docker cp copies named dir to tmp loc
+- name: Backup Path
+  ansible.builtin.command:
+    cmd: |-
+      cp --force --recursive --verbose --preserve --target-directory={{ host_app_backup_tmp_dir }} {{ host_path }}
+  become: true
+  changed_when: false
+
+
+- name: Remove Excluded Items
+  ansible.builtin.file:
+    name: "{{ host_app_backup_tmp_dir }}/{{ item }}"
+    state: absent
+  loop: "{{ host_app.excludes | default([]) | list }}"
+  become: true

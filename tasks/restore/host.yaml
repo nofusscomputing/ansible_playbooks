@@ -1,0 +1,28 @@
+---
+
+- name: Restore Host path - {{ host_path.name }}
+  block:
+
+
+    - name: Prepare Backup Destination name
+      ansible.builtin.set_fact:
+        application_host_backup_tmp_dir: "{{ directory_temp_destination }}/{{ host_path.name }}"
+        cacheable: false
+
+
+    - name: Restore Host Path {{ host_path.path }}
+      ansible.builtin.command:
+        cmd: |-
+          bash -c 'cp --force --recursive --verbose --preserve --target-directory={{ host_path.path }} {{ application_host_backup_tmp_dir }}/*'
+      become: true
+      changed_when: false
+
+
+  always:
+
+
+    - name: Remove Recovered Directory - {{ application_host_backup_tmp_dir }}
+      ansible.builtin.file:
+        name: "{{ application_host_backup_tmp_dir }}"
+        state: absent
+      become: true

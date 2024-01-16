@@ -21,7 +21,7 @@
 
     - name: Set Task Facts
       ansible.builtin.set_fact:
-        file_backup_no_extension: "{{ filename_date_time }}-{{ container.name | replace(' ', '_') }}-{{ inventory_hostname }}"
+        file_backup_no_extension: "{{ filename_date_time }}-{{ host_app.name | replace(' ', '_') }}-{{ inventory_hostname }}"
 
 
     - name: Clean existing Temp Directory
@@ -45,24 +45,25 @@
         - always
 
 
-    - name: Backup Containers
+    - name: Backup Host paths
       ansible.builtin.include_tasks:
-        file: container.yaml
-      loop: "{{ container.path | default([]) | list }}"
+        file: host.yaml
+      loop: "{{ host_app.path | default([]) | list }}"
       loop_control:
-        loop_var: container_path
+        loop_var: host_path
 
 
     - name: Backup MariaDB/MySQL Database
       ansible.builtin.include_tasks:
         file: mariadb.yaml
       with_subelements:
-        - "{{ container.databases | default([]) | list }}"
+        - "{{ host_app.databases | default([]) | list }}"
         - names
       vars:
         database:
           name: "{{ item[1] }}"
           type: "{{ item[0].type }}"
+          method: "{{ item[0].method }}"
           encrypt: "{{ item[0].encrypt | default(true) | bool }}"
           host: "{{ item[0].host }}"
           delegate: "{{ item[0].delegate | default('') }}"
@@ -76,7 +77,7 @@
       ansible.builtin.include_tasks:
         file: tasks/backup/postgres.yaml
       with_subelements:
-        - "{{ container.databases | default([]) | list }}"
+        - "{{ host_app.databases | default([]) | list }}"
         - names
       vars:
         database:
@@ -100,7 +101,7 @@
         directory_source: "{{ directory_temp_destination }}"
         directory_destination: "{{ directory_tasks }}"
         file_name: "{{ file_backup_no_extension }}"
-        exclude_path: "{{ container.excludes }}"
+        exclude_path: "{{ host_app.excludes }}"
         permissions:
           owner: root
           group: backup

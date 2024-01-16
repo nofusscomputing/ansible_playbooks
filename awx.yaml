@@ -351,7 +351,7 @@
         execution_environment: "No Fuss Computing EE"
         # extra_vars:
         job_type: "run"
-        job_tags: complate
+        job_tags: complete
         labels:
           - application
           - awx

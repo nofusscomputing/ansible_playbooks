@@ -5,8 +5,9 @@
     name: "{{ directory_temp_destination }}/{{ filename | replace('./', '') }}"
     get_checksum: true
     checksum_algorithm: sha256
-  # become: true
+  become: true
   register: file_details
+  no_log: true    # Dont log of disposable info
 
 
 - name: Add to stats var
@@ -21,5 +22,6 @@
         'gid': file_details.stat.gid,
         'mode': file_details.stat.mode
       }] }}"
+    cacheable: false
   when: not file_details.stat.isdir
   no_log: true    # Dont log the building of variables

@@ -41,21 +41,23 @@ Backing up multiple items will have the workflow above start again from step two
 !!! info
     On error during any stage of the workflow, prior to the play stopping all files related to the workflow, included any created (i.e. extracting contents of archive) will be removed so there are no traces on the remote host.
 
+
 ## Variables
 
 Required variables.
 
 ``` yaml
 backup:
-  # directory: /opt/backup              # To Be Removed
-  encryption_algorithm: aes256          # Encryption algorithm
-  applications: []                      # Mandatory, List of dict. List of applications to backup
+  directory: /opt/backup          # Mandatory, String. Path to save downloaded archive(s) to.
+  encryption_algorithm: aes256    # Encryption algorithm
+  applications: []                # Mandatory, List of dict. List of applications to backup
 
 ```
 
-Options for the application list are detailed below.
 
-There are different varaible requirements depending on the container engine. Select the appropriate tab.
+### Backup
+
+There are different varaible requirements depending on the application type. Select the appropriate tab to view the definition.
 
 === "Docker"
 
@@ -63,17 +65,25 @@ There are different varaible requirements depending on the container engine. Sel
 
     ``` yaml
 
-    - name: glpi                             # Mandatory, String. Name of the Application
-      type: docker                           # Mandatory. choice=docker|kube. Container engine type
-      container: glpi                        # Mandatory. String. Name of the container to backup.
-      path:                                  # Mandatory*. List of String. Mandatory to backup files. Path within the container to 
-                                             #                                                        backup
-        - /var/www/html/config
-        - /var/www/html/files
-        - /var/log
-        - /var/www/html/marketplace
-        - /var/www/html/plugins
-      databases: []                          # Mandatory*. List of dict. Required only if backing up database
+    - name: glpi              # Mandatory, String. Name of the Application
+      type: docker            # Mandatory. choice=docker|kube. Container engine type
+      container: glpi         # Mandatory. String. Name of the container to backup.
+      excludes: []            # Optional, List of String.  paths to exclude. Relative to the backup directory temp structure
+      path: []                # Mandatory*. List of String. Mandatory to backup files. Path within the container to backup
+      databases: []           # Mandatory*. List of dict. Required only if backing up database
+    ```
+
+=== "Host"
+
+    Host application definition
+
+    ``` yaml
+
+    - name: k3s               # Mandatory, String. Name of the Application
+      type: host              # Mandatory. choice=docker|kube. Container engine type
+      excludes: []            # Optional, List of String.  paths to exclude. Relative to the backup directory temp structure
+      path:  []               # Mandatory*. List of String. Mandatory to backup files. Path within the container to backup
+      databases: []           # Mandatory*. List of dict. Required only if backing up database
     ```
 
 === "Kubernetes"
@@ -82,23 +92,38 @@ There are different varaible requirements depending on the container engine. Sel
 
     ``` yaml
 
-    - name: glpi                             # Mandatory, String. Name of the Application
-      type: kube                             # Mandatory. choice=docker|kube. Container engine type
-      pod: postgres-0                        # Mandatory, String. the name of the pod to backup
-      container: backup                      # Optional. String. Name of the container to connect to.
-      namespace: postgres                    # Mandatory. String. Namespace name where the pod belongs
-      path:                                  # Mandatory*. List of String. Mandatory to backup files. Path within the container to 
-                                             #                             backup
-        - /opt/backup
-      databases: []                          # Mandatory*. List of dict. Required only if backing up database
+    - name: glpi              # Mandatory, String. Name of the Application
+      type: kube              # Mandatory. choice=docker|kube. Container engine type
+      pod: postgres-0         # Mandatory, String. the name of the pod to backup
+      container: backup       # Optional. String. Name of the container to connect to.
+      namespace: postgres     # Mandatory. String. Namespace name where the pod belongs
+      excludes: []            # Optional, List of String.  paths to exclude. Relative to the backup directory temp structure
+      path:  []               # Mandatory*. List of String. Mandatory to backup files. Path within the container to backup
+      databases: []           # Mandatory*. List of dict. Required only if backing up database
     ```
 
-=== "Application"
 
-    To Be Developed
+### Paths
+
+Path item definition. This list of items is at location `backup.application[x].path`
+
+``` yaml
+- /var/www/html/marketplace
+- /var/www/html/plugins 
+```
 
 
-Database Backup dict are as follows.
+When files are copied to the backup staging directory, each source path is truncated to the last folder name in the path. i.e. A path of `/opt/mydata/the_folder` would be added to the staging directory called `the_folder`. It's important to remember this, as the last directory of all paths to be backed up must be unique. If they are not, the contents of multiple source paths will be merged.
+
+!!! tip
+    If you find that the archive directory name conflicts, i.e. two or more directories have the same name, go up one directory and use exclude patterns to ensure the directories are unique.
+
+Exclusion of files from the backup is done after the files are staged. The exclusion pattern is what is a path relative to the staging directory. i.e. start with the directory name then the path to exclude, `directory_name/path/to/exclude/filename.txt`, `directory_name/path/to/exclude/a_directory/`.
+
+
+### Database
+
+Database Backup definition is as follows.
 
 === "MariaDB / MySQL"
 

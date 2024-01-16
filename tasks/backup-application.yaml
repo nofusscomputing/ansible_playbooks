@@ -6,7 +6,20 @@
     apply:
       tags:
         - always
+  vars:
+    container: "{{ application }}"
   when: >
-    container.type == 'docker'
+    application.type == 'docker'
       or
-    container.type == 'kube'
+    application.type == 'kube'
+
+
+- name: Backup Host Application
+  ansible.builtin.include_tasks:
+    file: backup/hosts.yaml
+    apply:
+      tags:
+        - always
+  vars:
+    host_app: "{{ application }}"
+  when: application.type == 'host'

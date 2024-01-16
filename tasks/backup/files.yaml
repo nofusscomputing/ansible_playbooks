@@ -47,6 +47,9 @@
       ansible.builtin.copy:
         src: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
         dest: "{{ backup.directory }}"
+        owner: root
+        group: backup
+        mode: '0740'
         remote_src: true
       become: true
 

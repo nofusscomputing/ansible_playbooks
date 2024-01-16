@@ -57,6 +57,7 @@
   changed_when: false
   when: container.type == 'docker'
 
+
 - name: Kubectl cp normalization
   ansible.builtin.shell:
     cmd: |-
@@ -67,3 +68,11 @@
   become: true
   changed_when: false
   when: container.type == 'kube'
+
+
+- name: Remove Excluded Items
+  ansible.builtin.file:
+    name: "{{ directory_temp_destination }}/{{ item }}"
+    state: absent
+  loop: "{{ container.excludes | default([]) | list }}"
+  become: true

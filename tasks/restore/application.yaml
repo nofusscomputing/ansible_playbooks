@@ -37,3 +37,13 @@
     application.type == 'docker'
       or
     application.type == 'kube'
+
+- name: Restore Host(s)
+  ansible.builtin.include_tasks:
+    file: tasks/restore/hosts.yaml
+    apply:
+      tags:
+        - always
+  vars:
+    application_host: "{{ application }}"
+  when: application.type == 'host'

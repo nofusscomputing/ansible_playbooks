@@ -34,6 +34,4 @@ Running of this playbook is no different to any other. However there are a few r
 
 ## Restoration tasks
 
-Just like out backup playbook, this playbook is broken down into sub-tasks, being:
-
-- [Application restore](application.md). This covers application type Containers. Specifically in this case, Kubernetes containers
+Just like out backup playbook, this playbook is broken down into sub-tasks, that is by [Application](application.md). This covers application type Kubernetes Container.

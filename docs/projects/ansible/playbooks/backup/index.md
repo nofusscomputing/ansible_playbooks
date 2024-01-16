@@ -6,32 +6,32 @@ template: project.html
 about: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 ---
 
-This playbook provides an easy way to backup the data that forms part of your infrastructure. The playbook has been designed in such a way that the backups are per application and contain all of the data pertinent to that application.
+This playbook provides an easy way to backup the data that forms part of your infrastructure. The playbook has been designed in such a way that each backup is a discrete unit, known as an application backup. Each [application](application.md) contains all data related to that application: files and database dumps. Each backup unit is then stored as an encrypted tar archive ready for [restoration](../restore/index.md).
 
 
 ## Features
 
-The following items can be backed up with this playbook:
+- Backup of:
 
-- Application _(Planned)_
+    - Files
 
-    _All Data pertinent the the application_
+        _directory or group of directories_
 
-- [Containers](application.md)
+    - **Planned** Kubernetes Secrets 
 
-    _Container paths and database dumps_
+        _manifests of the secret_
 
-- Files
+    - MariaDB / MySQL
 
-    _directory or group of directories_
+        _Database dump_
 
-- MariaDB / MySQL
+    - PostgresDB
 
-    _Database dump_
+        _Database dump_
 
-- PostgresDB
+- Encrypted backups
 
-    _Database dump_
+- Restoration of an application from one application type to the other
 
 
 ## Using the Playooks
@@ -40,15 +40,15 @@ Running of these playbooks is no different to any other. However there are a few
 
 - the user running the playbook must be a member of the `backup` group
 
-- Postgres actions require `psql` to be installed
+- Postgres actions require `psql` to be installed and pip module `psycopg2`
 
     !!! tip
-        `psql` can be installed with `apt install postgresql-client-<version>` on a Debian system
+        Install with `apt install postgresql-client` on a Debian system
 
-- MariaDB / MySQL actions require `mysql`, `mariadb-client-<version>` to be installed
+- MariaDB / MySQL actions require `mysqldump`and `mysql` to be installed and pip module `PyMySQL`.
 
     !!! tip
-        `mysql` can be installed with `apt install mariadb-client-core-<version> mariadb-client-<version>` on a Debian system.
+        Install with `apt install mariadb-client` on a Debian system.
 
 - Kubernetes containers that are having their files backed-up, require tar to be instlled in the contianer.
 
@@ -56,9 +56,13 @@ Running of these playbooks is no different to any other. However there are a few
         If tar is not installed within the container, add a sidecar container that contains tar. `debian:bookworm-slim` is one such container and use `bash -c sleep 9999999999999999999` as the container command so it doesn't stop.
 
 
+!!! danger "Alert"
+    When a backup path contains a symlink, these are not followed. As a consequence, the symlink not the data is backed up. You are advised to add the symlink to `excludes` and set the directory where the symlinked file resides as a path to backup. As nessacary, add additional excludes to exclude files that you dont wish to backup that reside in the symlinked files directory.
+
+
 ### Play workflow
 
-The basic workflow for all backup tasks is as follows:
+The basic workflow for all backup tasks is as follows and is grouped per application:
 
 1. Creates temp directories for backup task
 
@@ -68,7 +72,7 @@ The basic workflow for all backup tasks is as follows:
 
 1. copies the backup file locally
 
-To view the workflow of the type of backup, refer to thir documentation pages.
+To view the workflow of the type of backup, refer to their [documentation pages](application.md).
 
 
 ## Commonalities

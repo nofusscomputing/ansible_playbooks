@@ -11,6 +11,7 @@
     chdir: "{{ directory_temp_destination }}"
   changed_when: false
   register: files_backup
+  become: true
   no_log: true    # Don't log the files found. not required
 
 
