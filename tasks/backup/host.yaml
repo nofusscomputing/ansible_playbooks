@@ -8,7 +8,7 @@
 
 - name: Prepare Backup Destination name
   ansible.builtin.set_fact:
-    host_app_backup_tmp_dir: "{{ directory_temp_destination }}{{ path_name }}"
+    host_app_backup_tmp_dir: "{{ directory_temp_destination }}"
     cacheable: false
 
 
