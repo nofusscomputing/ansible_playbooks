@@ -3,7 +3,7 @@
 - name: Copy Remote file to Localhost
   ansible.builtin.fetch:
     src: "{{ directory_source }}/{{ file_name }}"
-    dest: "{{ directory_destination }}"
+    dest: "{{ directory_destination }}/"
     flat: true
 
 
