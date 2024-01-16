@@ -5,7 +5,7 @@
     name: "{{ directory_temp_destination }}/{{ filename | replace('./', '') }}"
     get_checksum: true
     checksum_algorithm: sha256
-  # become: true
+  become: true
   register: file_details
 
 
