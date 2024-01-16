@@ -51,6 +51,7 @@
     extra_args: '--index-url https://gitlab.com/api/v4/projects/45741845/packages/pypi/simple'
   become: true
   loop: "{{ modules }}"
+  failed_when: false # This task can fail as python 3.10 packages not avail
   vars:
     modules:
       - psycopg2
