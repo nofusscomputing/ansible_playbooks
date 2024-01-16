@@ -54,7 +54,7 @@
 
 - name: "{{ task_name_module | default('MariaDB Database Action') }}"
   community.mysql.mysql_db:
-    login_host: "{{ module_database.host.name }}"
+    login_host: "{{ module_database.host.name | default(omit)}}"
     login_user: "{{ nfc_pb_mariadb_username }}"
     login_password: "{{ nfc_pb_mariadb_password }}"
     login_port: "{{ module_database.host.port | default(omit) }}"
