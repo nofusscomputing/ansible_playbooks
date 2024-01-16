@@ -264,9 +264,7 @@
         description: |
           A Playbook for Ansible module community.mysql.mysql_db
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
-          # Omit any not required
+        extra_vars:
           module_database:
             host:
               name:
@@ -275,10 +273,9 @@
             name:
             state:
             target:
-            # These are used by the task and can be safely omited if not required
             become:
             delegate_to:
-            no_log
+            no_log:
 
         job_type: "run"
         job_tags: community-mysql-mysql_db
@@ -321,8 +318,7 @@
         description: |
           Create a MariaDB / MySQL Database.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: present
         job_type: "run"
@@ -394,8 +390,7 @@
         description: |
           Delete a MariaDB / MySQL Database.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: absent
         job_type: "run"
@@ -467,8 +462,7 @@
         description: |
           Dump a MariaDB / MySQL Database to file.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: dump
             become: true
@@ -553,8 +547,7 @@
         description: |
           Import a MariaDB / MySQL Database from dump file (.sql).
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: import
             become: true

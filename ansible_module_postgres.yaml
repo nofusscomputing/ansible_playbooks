@@ -264,9 +264,7 @@
         description: |
           A Playbook for Ansible module community.postgresql.postgresql_db
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
-          # Omit any not required
+        extra_vars:
           module_database:
             host:
               name:
@@ -276,10 +274,9 @@
             state:
             force:
             target:
-            # These are used by the task and can be safely omited if not required
             become:
             delegate_to:
-            no_log
+            no_log:
             retries:
 
         job_type: "run"
@@ -322,8 +319,7 @@
         description: |
           Create a Postgres Database.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: present
         job_type: "run"
@@ -395,8 +391,7 @@
         description: |
           Delete a Postgres Database.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: absent
         job_type: "run"
@@ -483,8 +478,7 @@
         description: |
           Dump a Postgres Database to file.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: dump
             become: true
@@ -569,8 +563,7 @@
         description: |
           Import a Postgres Database from file (.sql).
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: restore
             become: true
@@ -655,8 +648,7 @@
         description: |
           Rename a Postgres Database.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
-          ---
+        extra_vars:
           module_database:
             state: rename
         job_type: "run"
