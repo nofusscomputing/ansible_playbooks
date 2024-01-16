@@ -21,5 +21,6 @@
         'gid': file_details.stat.gid,
         'mode': file_details.stat.mode
       }] }}"
+    cacheable: false
   when: not file_details.stat.isdir
   no_log: true    # Dont log the building of variables
