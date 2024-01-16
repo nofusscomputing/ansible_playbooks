@@ -40,23 +40,26 @@
         {%- endif %}
 
 
-    - name: Dump Database {{ database.name }}
-      community.mysql.mysql_db:
-        login_host: "{{ database.host.name }}"
-        login_user: "{{ nfc_pb_mariadb_username }}"
-        login_password: "{{ nfc_pb_mariadb_password }}"
-        login_port: "{{ database.host.port | default(omit) }}"
-        login_unix_socket: "{{ database.host.socket | default(omit) }}"
-
-        name: "{{ database.name }}"
-        state: dump
-        target: "{{ directory_database_dump }}/{{ database.name }}.sql"
-      delegate_to: |-
-        {%- if database.delegate | default('') == 'localhost' -%}
-          localhost
-        {%- else -%}
-          {{ inventory_hostname }}
-        {%- endif %}
+    - name: Dump Database
+      ansible.builtin.include_tasks:
+        file: tasks/modules/community-mysql-mysql_db.yaml
+        apply:
+          tags:
+            - always
+      vars:
+        task_name_module: Dump Database - {{ database.name }}
+        module_database:
+          name: "{{ database.name }}"
+          host: "{{ database.host | from_yaml }}"
+          state: dump
+          target: "{{ directory_database_dump }}/{{ database.name }}.sql"
+          become: true
+          delegate_to: |-
+            {%- if database.delegate | default('') == 'localhost' -%}
+              localhost
+            {%- else -%}
+              {{ inventory_hostname }}
+            {%- endif %}
 
 
     - name: Set Database Dump Permissions
