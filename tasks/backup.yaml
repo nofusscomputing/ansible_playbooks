@@ -71,7 +71,7 @@
         apply:
           tags:
             - always
-      loop: "{{ backup.applications }}"
+      loop: "{{ nfc_pb_backup.applications }}"
       loop_control:
         loop_var: application
         label: "{{ application.name }}"
