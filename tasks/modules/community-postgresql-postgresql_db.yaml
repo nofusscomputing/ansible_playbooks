@@ -32,6 +32,30 @@
   when: module_database.state == 'rename'
 
 
+- name: Install PostgreSQL Dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    install_recommends: false
+  become: true
+  loop: "{{ apps }}"
+  vars:
+    apps:
+      - postgresql-client
+
+
+- name: Install PostgreSQL required PIP Modules
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    state: present
+    extra_args: '--index-url https://gitlab.com/api/v4/projects/45741845/packages/pypi/simple'
+  become: true
+  loop: "{{ modules }}"
+  vars:
+    modules:
+      - psycopg2
+
+
 - name: "{{ task_name_module | default('MariaDB Database Action') }}"
   community.postgresql.postgresql_db:
     login_user: "{{ nfc_pb_postgres_username }}"
