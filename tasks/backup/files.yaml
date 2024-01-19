@@ -21,9 +21,9 @@
           {{ path }} \
           {%- endfor %};
         openssl \
-          smime -encrypt -binary -text -{{ backup.encryption_algorithm }} \
+          smime -encrypt -binary -text -{{ nfc_pb_backup.encryption_algorithm }} \
           -in {{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz \
-          -out {{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz \
+          -out {{ directory_tasks }}/{{ file_backup_no_extension }}-{{ nfc_pb_backup.encryption_algorithm }}.enc.tar.gz \
           -outform DER {{ directory_tasks }}/encryption_certificate;
         rm -f {{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz;
 
@@ -45,8 +45,8 @@
 
     - name: Store Backup
       ansible.builtin.copy:
-        src: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
-        dest: "{{ backup.directory }}"
+        src: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ nfc_pb_backup.encryption_algorithm }}.enc.tar.gz"
+        dest: "{{ nfc_pb_backup.directory }}"
         owner: root
         group: backup
         mode: '0740'
@@ -72,4 +72,4 @@
       vars:
         tmp_files:
           - "{{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz"
-          - "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+          - "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ nfc_pb_backup.encryption_algorithm }}.enc.tar.gz"
