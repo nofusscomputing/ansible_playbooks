@@ -288,7 +288,7 @@
         verbosity: 2
         use_fact_cache: true
         credential_types:
-          - name: playbook/mariadb/login
+          - name: Playbook/MariaDB/Login
             description: A Credential type for No Fuss Computings Playbooks for MariaDB/MySQL login credentials
             inputs: |
               fields:
@@ -301,9 +301,8 @@
                   label: Password
                   secret: true
               required:
-                - host
-                - app_token
-                - user_token
+                - username
+                - password
             injectors: >
               extra_vars:
                 nfc_pb_mariadb_username: '{{ username }}'
