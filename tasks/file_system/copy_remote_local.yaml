@@ -21,7 +21,7 @@
     group: "{{ permissions.group | default(omit) }}"
     mode: "{{ permissions.mode | default(omit) }}"
     state: file
-  become: true
+  failed_when: false
   delegate_to: localhost
   vars:
     ansible_connection: local
