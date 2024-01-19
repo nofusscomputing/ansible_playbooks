@@ -324,24 +324,24 @@
             'files' Restore Specified file(s),
           If no tag is specified, all tasks will run if the applicable variables are set.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
+        extra_vars:
           nfc_pb_restore:
-            file_restore:                # Mandatory, String. Name of file without extension to restore
-            restore_directory_backups:   # Mandatory, String. Name of backup file to restore without file extension. .enc.tar is assumed
+            file_restore:
+            restore_directory_backups:
             applications:
-              - name: vaultwarden           # Mandatory, String. Name of the Application
-                type: kube                  #   Mandatory, string. Kubernetes container engine
-                path:                       # Mandatory*, List of Dict. Required to restore files to path
-                  - name: data                  # Mandatory. String. sub-directory name inside the archive
-                    path: /data                 # Mandatory, String. Path within the container to restore to
+              - name: vaultwarden
+                type: kube
+                path:
+                  - name: data
+                    path: /data
                 pod: vaultwarden-0
                 namespace: vaultwarden
-                databases:                  # Mandatory*, dict, choice=mariadb|mysql. Only required if database restoration to be done.
-                  mariadb:                      # Mandatory, string. MariaDB/MySQL databases to restore
-                    - name: vaultwarden                     # Mandatory, String. Backup database filename.
-                      host:                                 # Database connection hosr
-                        name: mariadb-galera.mariadb.svc    # Mandatory. String. DNS or IP of database host to connect
-                        destination: vaultwarden            # Optional, string. default={use name key} database name to restore to.
+                databases:
+                  mariadb:
+                    - name: vaultwarden
+                      host:
+                        name: mariadb-galera.mariadb.svc
+                        destination: vaultwarden
         job_type: "run"
         job_tags: application
         labels:
