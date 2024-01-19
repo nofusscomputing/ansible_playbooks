@@ -1,0 +1,371 @@
+---
+- name: Keycloak
+  hosts: localhost
+  become: false
+  gather_facts: false
+
+
+  pre_tasks:
+
+
+      # Play and task set time
+    - name: Set Start Time
+      ansible.builtin.set_fact:
+        nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_automation'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_automation: {
+          "time": {
+            "start": "{{ nfc_task_starttime | string }}",
+            "end": 0
+          }
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      when: nfc_automation is not defined
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_task'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "{{ ansible_play_name | default('') | lower | string }}",
+          "error": 0,
+          "roles": "{{ ansible_play_role_names | default('') | string }}",
+          "skip_tags": "{{ ansible_skip_tags | default([])| list }}",
+          "start": "{{ nfc_task_starttime | string }}",
+          "tags": "{{ ansible_run_tags | default([]) | list }}"
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    - name: Block - pre_tasks
+      block:
+
+
+        - name: Ensure Job Tags have been Specified
+          ansible.builtin.assert:
+            that:
+              - ansible_run_tags | default([]) | list | length | int > 0
+              - >
+                not (
+                  ansible_run_tags | default([]) | list | length | int == 1
+                    and
+                  'all' in (ansible_run_tags | default([]) | list)
+                )
+              - >
+                (
+                  'configure' in ansible_run_tags | default([]) | list
+                    or
+                  'saml_certificate' in ansible_run_tags | default([]) | list
+                )
+            msg: This playbook requires job tags be set.
+          tags:
+            - always
+
+
+        - name: Variable Setup - project_dir
+          ansible.builtin.include_tasks:
+            file: tasks/var_project_dir.yaml
+            apply:
+              tags:
+                - always
+          when: var_project_dir is not defined
+          tags:
+            - always
+
+
+      rescue:
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+    # Don't use the 'roles' section.
+  roles: []
+    # if the included role(s) do not contain a rescue block, the playbook may stop
+    # executing in this section (roles) with the post_tasks not running. This will
+    # cause the artifacts to be incomplete. It's recommended to include your roles
+    # in section(s) 'pre_tasks', 'tasks' or 'post_tasks' and from within a block with
+   # rescue so that the playbook can complete and ensure that all artifacts are set.
+
+
+  tasks:
+
+
+    - name: Block - tasks
+      block:
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error eccured, follow error path to fail play
+          tags:
+            - always
+
+################################################################################################
+        # - name: Configure AWX
+        #   ansible.builtin.include_tasks:
+        #     file: tasks/awx/settings.yaml
+        #   tags:
+        #     - always
+
+          # need pip install python-ldap
+        - name: Realm Configuration
+          ansible.builtin.include_tasks:
+            file: tasks/keycloak/realm.yaml
+            apply:
+              tags:
+                - always
+          loop: "{{ keycloak_configuration }}"
+          loop_control:
+            loop_var: keycloak_realm
+          tags:
+            - never
+            - configure
+
+
+        - name: Fetch SAML Public Certificate
+          ansible.builtin.include_tasks:
+            file: tasks/keycloak/saml_info.yaml
+            apply:
+              tags:
+                - always
+          tags:
+            - never
+            - saml_certificate
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  post_tasks:
+
+    - name: Tasks post_task
+      block:
+
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, follow error path to fail play
+          tags:
+            - always
+
+
+        ########################################################################
+        #
+        # Your tasks here
+        #
+        ########################################################################
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Task and automation end time.
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set task end time
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | combine({
+                'end': nfc_task_endtime | string
+              }) ] }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set Automation end time.
+          # every playbook must set this variable so that the end time
+          # is equal to the fail time or the end of a group of playbooks.
+        - name: Set automation end time
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'time': nfc_automation.time | combine({
+                  'end': nfc_task_endtime | string
+                })
+              }) }}"
+            nfc_task_endtime: null
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set the artifacts as a fact for subsequent playbook useage
+          # Note: variable 'per_host' must be 'false' so that the artifacts
+          # work within AWX / Ansible Automation Platform.
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
+
+
+          # Final error check to fail the entire play run on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  vars:
+
+    ansible_connection: local
+
+    nfc_pb_awx_tower_template:
+
+      - name: "Keycloak/Configure/From Inventory"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        description: Configure Keycloak from Inventory
+        execution_environment: "No Fuss Computing EE"
+        job_type: "run"
+        job_tags: configure
+        labels:
+          - configure
+          - keycloak
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true
+        credential_types:
+          - name: playbook/keycloak/api
+            description: Creates The variables required to log in to a keycloak instance
+            inputs: |
+              fields:
+                - id: username
+                  type: string
+                  label: Username
+                - id: password
+                  type: string
+                  label: Password
+                  secret: true
+                - id: url
+                  type: string
+                  label: Keycloak URL
+                  help_text: Ensure that `https://` is prefixed to url
+                - id: auth_realm
+                  type: string
+                  label: Relam to authenticate against
+                - id: validate_certs
+                  type: string
+                  label: Validate Keycloak Certificate
+              required:
+                - username
+                - password
+                - url
+            injectors: >
+              extra_vars:
+                nfc_pb_keycloak_auth_keycloak_url: "{{ url }}"
+                nfc_pb_keycloak_auth_realm: "{{ auth_realm }}"
+                nfc_pb_keycloak_auth_username: "{{ username }}"
+                nfc_pb_keycloak_auth_password: "{{ password }}"
+                nfc_pb_keycloak_validate_certs: "{{ validate_certs | default(true) }}"
+
+
+      - name: "Keycloak/Realm/SAML/Fetch/Public Certificate"
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_inventory_on_launch: true
+        ask_limit_on_launch: false
+        ask_variables_on_launch: true
+        description: Fetch SAML public from a keycloak instance
+        execution_environment: "No Fuss Computing EE"
+        extra_vars:
+          nfc_pb_keycloak_url: https://keycloak.local
+          nfc_pb_keycloak_realm: nofusscomputing
+          nfc_pb_keycloak_validate_certs: true
+        job_type: "run"
+        job_tags: saml_certificate
+        labels:
+          - certificate
+          - fetch
+          - keycloak
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: true

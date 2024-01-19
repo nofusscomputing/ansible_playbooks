@@ -8,11 +8,61 @@ include:
 
 
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
-  #GIT_SYNC_URL: "https://$GITHUB_USERNAME_ROBOT:$GITHUB_TOKEN_ROBOT@github.com/NoFussComputing/ansible_playbooks.git"
+  GIT_SUBMODULE_STRATEGY: normal
+  GIT_SYNC_URL: "https://$GITHUB_USERNAME_ROBOT:$GITHUB_TOKEN_ROBOT@github.com/NoFussComputing/ansible_playbooks.git"
   MY_PROJECT_ID: "46364551"
   PAGES_ENVIRONMENT_PATH: projects/ansible/playbooks/
+  ANSIBLE_FORCE_COLOR: 'true'
+  GIT_SUBMODULE_DEPTH: 1
 
+
+Prepare:
+  stage: test
+  image: nofusscomputing/ansible-ee:dev
+  before_script:
+    # - export ANSIBLE_ROLES_PATH=test/roles
+    - ansible-galaxy install -r test/roles/requirements.yaml -p test/roles/
+  script:
+    - ansible-playbook test/test.yaml -vvv --tags prepare
+  dependencies: []
+  artifacts:
+    untracked: false
+    when: always
+    expire_in: "1 year"
+    paths:
+      - "scratchpad/"
+      - "test/"
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: always
+    - when: never
+
+Tests:
+  stage: test
+  image: nofusscomputing/ansible-ee:dev
+  needs:
+    - job: Prepare
+      artifacts: true
+  variables:
+    ANSIBLE_FORCE_COLOR: 'false'
+    GIT_STRATEGY: none
+  script:
+    - ansible-playbook test/test.yaml -vvv --tags $NFC_JOB_TAG
+  parallel:
+    matrix:
+      - NFC_JOB_TAG: unit
+      # - NFC_JOB_TAG: functional
+  artifacts:
+    untracked: false
+    when: always
+    expire_in: "1 year"
+    reports:
+      junit:
+        - "$CI_PROJECT_DIR/scratchpad/*.junit.xml"
+  rules:
+    - if: $CI_COMMIT_BRANCH
+      when: on_success
+    - when: never
 
 execution_environment.Submodule.Deploy:
   extends: .submodule_update_trigger
@@ -20,3 +70,25 @@ execution_environment.Submodule.Deploy:
     SUBMODULE_UPDATE_TRIGGER_PROJECT: nofusscomputing/projects/ansible/execution_environment
     GIT_COMMIT_TYPE: feat
     GIT_COMMIT_TYPE_CATEGORY: $CI_PROJECT_NAME
+
+
+Website.Submodule.Deploy:
+  extends: .submodule_update_trigger
+  variables:
+    SUBMODULE_UPDATE_TRIGGER_PROJECT: nofusscomputing/infrastructure/website
+    GIT_COMMIT_TYPE: feat
+  environment:
+    url: https://nofusscomputing.com/$PAGES_ENVIRONMENT_PATH
+    name: Documentation
+  rules:
+    - if:  # condition_dev_branch_push
+        $CI_COMMIT_BRANCH == "development" && 
+        $CI_PIPELINE_SOURCE == "push"
+      exists:
+        - '{docs/**,pages/**}/*.md'
+      changes:
+        paths:
+          - '{docs/**,pages/**}/*.md'
+        compare_to: 'master'
+      when: always
+    - when: never

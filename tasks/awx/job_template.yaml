@@ -38,17 +38,25 @@
         state: present
         validate_certs: "{{ validate_certs | default(true) }}"
       loop: "{{ nfc_pb_awx_job_template.labels | default([]) }}"
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: "Configure Job Template {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
       awx.awx.job_template:
         name: "{{ nfc_pb_awx_job_template.name }}"
+        new_name: "{{ nfc_pb_awx_job_template.name | default(omit) }}"
         description: "{{ nfc_pb_awx_job_template.description | default(omit) }}"
         controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
         controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
         controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
         controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+
+        concurrent_jobs_enabled: "{{ nfc_pb_awx_job_template.concurrent_jobs_enabled | default(false) | bool }}"
         execution_environment: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
+        extra_vars: "{{ nfc_pb_awx_job_template.extra_vars | default(omit) }}"
         forks: "{{ nfc_pb_awx_job_template.forks| default(1) }}"
         job_type: "{{ nfc_pb_awx_job_template.job_type | default('run') }}"
         job_tags: "{{ nfc_pb_awx_job_template.job_tags | default(omit) }}"
@@ -83,6 +91,10 @@
       # no_log: true
       # when: nfc_pb_awx_tower_template | default('') != ''
       diff: true
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Job/{{ nfc_pb_awx_job_template.name }}"

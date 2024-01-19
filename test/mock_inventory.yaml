@@ -1,0 +1,154 @@
+all:
+  hosts:
+    localhost:
+      vars:
+        ansible_connection: local
+  children:
+
+    awx:
+      hosts:
+        localhost:
+
+
+    type:
+      children:
+
+
+        type_hardware:
+          children:
+
+
+            type_hardware_orangepi:
+              hosts:
+
+
+            type_hardware_virtual:
+              hosts:
+
+
+        type_operating_system:
+          children:
+
+
+            type_operating_system_linux:
+              children:
+
+
+                type_operating_system_linux_armbian:
+                  hosts:
+
+
+                type_operating_system_linux_debian:
+                  hosts:
+
+
+
+                type_operating_system_linux_ubuntu:
+                  hosts:
+
+
+
+    desktops:
+      children:
+        
+        desktop_debian:
+          hosts:
+
+
+    servers:
+      children:
+
+
+        servers_linux:
+          hosts:
+
+
+        servers_windows:
+          hosts:
+
+
+    database:
+      children:
+
+
+        mariadb:
+          hosts:
+
+
+        postgres:
+          hosts:
+
+
+    docker:
+      hosts:
+
+
+    kubernetes:
+      children:
+
+
+        k3s:
+          hosts:
+
+
+        k8s:
+          hosts:
+
+
+        kubernetes_cluster:
+          children:
+
+            kubernetes_cluster_awx_local:
+              hosts:
+
+
+            kubernetes_cluster_earth:
+              hosts:
+
+
+            kubernetes_cluster_prime:
+              hosts:
+
+
+        kubernetes_master:
+          hosts:
+
+
+        kubernetes_worker:
+          hosts:
+
+
+    location: # name_topology_region
+      children:
+
+
+        australia:
+            hosts:
+
+
+        asia:
+          children:
+
+
+        europe:
+          hosts:
+
+
+    provider: # name_topology_datacenter
+      children:
+
+
+        google:
+          hosts:
+
+
+        hostinger:
+          hosts:
+
+
+        oracle:
+          hosts:
+
+        
+        self_host:
+          children:

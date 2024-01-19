@@ -1,0 +1,15 @@
+---
+- name: Playbook Tests
+  hosts: localhost
+  gather_facts: true
+  become: false
+  vars:
+    ansible_connection: local
+
+  tasks:
+
+    - name: Unit Testing
+      ansible.builtin.include_role:
+        name: nfc_test
+      tags:
+        - always

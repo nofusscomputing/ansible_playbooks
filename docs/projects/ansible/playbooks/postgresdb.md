@@ -12,3 +12,7 @@ about: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 - backup
 
 - restore
+
+- Create User
+
+- Create Database

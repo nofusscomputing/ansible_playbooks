@@ -13,29 +13,51 @@
     validate_certs: "{{ validate_certs | default('yes') }}"
   # no_log: true
   diff: true
+  tags:
+    - never
+    - complete
+    - organization
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
 
 
 - name: "Teams - {{ nfc_pb_awx_organization.name }}"
   ansible.builtin.include_tasks:
     file: tasks/awx/team.yaml
-  loop: "{{ nfc_pb_awx_organization.teams }}"
+  loop: "{{ nfc_pb_awx_organization.teams | default([]) }}"
   loop_control:
     loop_var: nfc_pb_awx_team
+  tags:
+    - never
+    - complete
+    - organization
 
 
 - name: "RBAC - {{ nfc_pb_awx_organization.name }}"
   ansible.builtin.include_tasks:
     file: tasks/awx/rbac.yaml
-  loop: "{{ nfc_pb_awx_organization.rbac }}"
+  loop: "{{ nfc_pb_awx_organization.rbac | default([]) }}"
   loop_control:
     loop_var: nfc_pb_awx_rbac
   vars:
     nfc_pb_awx_organization_name: "{{ nfc_pb_awx_organization.name }}"
+  tags:
+    - never
+    - complete
+    - organization
 
 
 - name: "Projects - {{ nfc_pb_awx_organization.name }}"
   ansible.builtin.include_tasks:
     file: tasks/awx/project.yaml
-  loop: "{{ nfc_pb_awx_organization.projects }}"
+  loop: "{{ nfc_pb_awx_organization.projects | default([]) }}"
   loop_control:
     loop_var: nfc_pb_awx_project
+  tags:
+    - never
+    - complete
+    - projects
+    - job_templates
+    - workflow_templates

@@ -1,0 +1,73 @@
+---
+- name: Encrypt Directory
+  block:
+
+    - name: Tar and Encrypt directory
+      ansible.builtin.shell: |
+        tar -czf {{ directory_tasks }}/{{ file_name }}.tar.gz \
+          --acls \
+          --xattrs \
+          {%- for exclude_path in excludes | default([]) %}
+          --exclude="{{ exclude_path }}" \
+          {%- endfor %}
+          -C {{ directory_source }} .; \
+        openssl \
+          smime -encrypt -binary -text -{{ encryption_algorithm | default('aes256') }} \
+          -in {{ directory_tasks }}/{{ file_name }}.tar.gz \
+          -out {{ directory_tasks }}/{{ file_name }}-{{ encryption_algorithm | default('aes256') }}.enc.tar.gz \
+          -outform DER {{ directory_tasks }}/encryption_certificate;
+
+      args:
+        executable: /bin/bash
+      changed_when: false
+      become: true
+      register: encrypt_directory
+      failed_when: >
+        'Exiting with failure' in encrypt_directory.stderr
+          or
+        'Unable to' in encrypt_directory.stderr
+          or
+        'could not' in encrypt_directory.stderr
+          or
+        'Exiting with failure' in encrypt_directory.stderr
+          or
+        "Can't open" in encrypt_directory.stderr
+          or
+         encrypt_directory.rc != 0
+
+
+    - name: Set Encrypted Backup File Ownership / Permissions
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ encryption_algorithm | default('aes256') }}.enc.tar.gz"
+        owner: "{{ permissions.owner | default(omit) }}"
+        group: "{{ permissions.group | default(omit) }}"
+        mode: "{{ permissions.mode | default(omit) }}"
+        state: file
+      become: true
+
+
+  rescue:
+
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ directory_destination }}/{{ file_name }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        state: absent
+      become: true
+
+
+    - name: Task Failed Force Kill Play
+      ansible.builtin.assert:
+        that:
+          - false
+        msg: "The Play Failed"
+
+
+  always:
+
+
+    - name: Remove Task Temp Files
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}/{{ file_backup_no_extension }}.tar.gz"
+        state: absent
+      become: true

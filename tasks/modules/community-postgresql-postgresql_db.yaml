@@ -1,0 +1,79 @@
+---
+
+- name: Connection Validation - Assumed Socket
+  ansible.builtin.assert:
+    that:
+      - module_database.host.socket is defined
+    msg: "If no host DNS or IP Address is specified, you must supply the socket to use for the connection"
+  when: module_database.host.name is not defined
+
+
+- name: Variable Validation - Dump Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "to dump a database, you must specify the path to save the dump"
+  when: module_database.state == 'dump'
+
+
+- name: Variable Validation - Import Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "to Import a database, you must specify the path to the dump (.sql) file"
+  when: module_database.state == 'restore'
+
+
+- name: Variable Validation - Rename Database
+  ansible.builtin.assert:
+    that:
+      - module_database.target is defined
+    msg: "To rename a database, option target must be specified"
+  when: module_database.state == 'rename'
+
+
+- name: Install PostgreSQL Dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    install_recommends: false
+  become: true
+  loop: "{{ apps }}"
+  vars:
+    apps:
+      - postgresql-client
+
+
+- name: Install PostgreSQL required PIP Modules
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    state: present
+    extra_args: '--index-url https://gitlab.com/api/v4/projects/45741845/packages/pypi/simple'
+  become: true
+  loop: "{{ modules }}"
+  failed_when: false # This task can fail as python 3.10 packages not avail
+  vars:
+    modules:
+      - psycopg2
+
+
+- name: "{{ task_name_module | default('MariaDB Database Action') }}"
+  community.postgresql.postgresql_db:
+    login_user: "{{ nfc_pb_postgres_username }}"
+    login_password: "{{ nfc_pb_postgres_password }}"
+
+    login_host: "{{ module_database.host.name }}"
+    port: "{{ module_database.host.port | default(omit) }}"
+
+    login_unix_socket: "{{ module_database.host.socket | default(omit) }}"
+
+    name: "{{ module_database.name }}"
+    state: "{{ module_database.state }}"
+
+    force: "{{ module_database.force | default(omit) }}"
+    target: "{{ module_database.target | default(omit) }}"
+
+  become: "{{ module_database.become | default(omit) }}"
+  delegate_to: "{{ module_database.delegate_to | default(omit) }}"
+  no_log: "{{ module_database.no_log | default(false) | bool }}"
+  retries: "{{ module_database.retries | default(omit) }}"

@@ -1,0 +1,73 @@
+---
+#
+# No Fuss Computing
+# https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
+#
+# image: nofusscomputing/ansible-ee > 0.11.0rc0
+
+- name: MariaDB Restore
+  block:
+
+
+    - name: TRACE Database Object
+      ansible.builtin.debug:
+        msg: "{{ database }}"
+
+
+    # Ensure database file exists
+    - name: Ensure DB Restore file exists
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}/database-dump/{{ database.name }}.sql"
+        state: file
+      become: true
+
+
+    # remove existing database
+    - name: Remove existing Database {{ database.name }}
+      ansible.builtin.include_tasks:
+        file: tasks/modules/community-mysql-mysql_db.yaml
+        apply:
+          tags:
+            - always
+      vars:
+        task_name_module: Remove existing Database - {{ database.name }}
+        module_database:
+          delegate_to: |-
+            {%- if database.delegate | default('') == 'localhost' -%}
+              localhost
+            {%- else -%}
+              {{ inventory_hostname }}
+            {%- endif %}
+          name: "{{ database.destination | default(database.name) }}"
+          host: "{{ database.host | from_yaml }}"
+          state: absent
+
+
+    # Restore database dump
+    - name: Restore Database {{ database.name }}
+      ansible.builtin.include_tasks:
+        file: tasks/modules/community-mysql-mysql_db.yaml
+        apply:
+          tags:
+            - always
+      vars:
+        task_name_module: Restore database - {{ database.name }}
+        module_database:
+          delegate_to: |-
+            {%- if database.delegate | default('') == 'localhost' -%}
+              localhost
+            {%- else -%}
+              {{ inventory_hostname }}
+            {%- endif %}
+          host: "{{ database.host }}"
+          name: "{{ database.destination | default(database.name) }}"
+          state: import
+          target: "{{ directory_temp_destination }}/database-dump/{{ database.name }}.sql"
+
+  always:
+
+    - name: Remove database dump file
+      ansible.builtin.file:
+        name: "{{ directory_temp_destination }}/database-dump/{{ database.name }}.sql"
+        state: absent
+      become: true

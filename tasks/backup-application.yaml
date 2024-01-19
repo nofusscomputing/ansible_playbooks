@@ -1,0 +1,25 @@
+---
+
+- name: Backup Containers
+  ansible.builtin.include_tasks:
+    file: backup/containers.yaml
+    apply:
+      tags:
+        - always
+  vars:
+    container: "{{ application }}"
+  when: >
+    application.type == 'docker'
+      or
+    application.type == 'kube'
+
+
+- name: Backup Host Application
+  ansible.builtin.include_tasks:
+    file: backup/hosts.yaml
+    apply:
+      tags:
+        - always
+  vars:
+    host_app: "{{ application }}"
+  when: application.type == 'host'

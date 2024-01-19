@@ -1,0 +1,86 @@
+---
+
+- name: User Federation Configuration
+  community.general.keycloak_user_federation:
+    auth_keycloak_url: "{{ nfc_pb_keycloak_auth_keycloak_url }}"
+    auth_realm: "{{ nfc_pb_keycloak_auth_realm }}"
+    auth_username: "{{ nfc_pb_keycloak_auth_username }}"
+    auth_password: "{{ nfc_pb_keycloak_auth_password }}"
+    validate_certs: "{{ nfc_pb_keycloak_validate_certs | default(true) }}"
+
+    state: "{{ keycloak_federation.state | default('present') }}" # type: str choices: - present - absent
+    realm: "{{ keycloak_realm.realm }}" # type: str
+    id: "{{ keycloak_federation.id }}" # type: str
+    name: "{{ keycloak_federation.name }}" # type: str
+    provider_id: "{{ keycloak_federation.provider_id | default('ldap') }}" # type: str choices: - ldap - kerberos - sssd
+    provider_type: "{{ keycloak_federation.provider_type | default(omit) }}" # default: org.keycloak.storage.UserStorageProvider type: str
+    parent_id: "{{ keycloak_federation.parent_id | default(omit) }}" # type: str
+    config: "{{ keycloak_federation.config }}" # type: dict
+
+      # enabled: # default: true type: bool
+      # priority: # default: 0 type: int
+      # importEnabled: # default: true type: bool
+      # editMode: # type: str choices: - READ_ONLY - WRITABLE - UNSYNCED
+      # syncRegistrations: # default: false type: bool
+      # vendor: # type: str
+      # usernameLDAPAttribute: # type: str
+      # rdnLDAPAttribute: # type: str
+      # uuidLDAPAttribute: # type: str
+      # userObjectClasses: # type: str
+      # connectionUrl: # type: str
+      # usersDn: # type: str
+      # customUserSearchFilter: # type: str
+      # searchScope: # default: '1' type: str  choices: - '1' - '2'
+      # authType: # default: 'none' type: str choices: - none - simple
+      # bindDn: # type: str
+      # bindCredential:  # type: str
+      # startTls: # default: false type: bool
+      # usePasswordModifyExtendedOp: # default: false type: bool
+      # validatePasswordPolicy: # default: false type: bool
+      # trustEmail: # default: false type: bool
+      # useTruststoreSpi: # default: ldapsOnly type: str choices: - always - ldapsOnly - never
+      # connectionTimeout: # type: int
+      # readTimeout: # ype: int
+      # pagination: # default: true type: bool
+      # connectionPooling: # default: true type: bool
+      # connectionPoolingAuthentication: # type: str choices: - none - simple - DIGEST-MD5
+      # connectionPoolingDebug: # type: str
+      # connectionPoolingInitSize: # type: int
+      # connectionPoolingMaxSize: # type: int
+      # connectionPoolingPrefSize: # type: int
+      # connectionPoolingProtocol: # type: str
+      # connectionPoolingTimeout: # type: int
+      # allowKerberosAuthentication: # default: false type: bool
+      # kerberosRealm: # type: str
+      # krbPrincipalAttribute: # type: str
+      # serverPrincipal: # type: str
+      # keyTab: # type: str
+      # debug: # type: bool
+      # useKerberosForPasswordAuthentication: # default: false type: bool
+      # allowPasswordAuthentication: # type: bool
+      # batchSizeForSync: # default: 1000 type: int
+      # fullSyncPeriod: # default: -1 type: int
+      # changedSyncPeriod: # default: -1 type: int
+      # updateProfileFirstLogin: # type: bool
+      # cachePolicy: # type: str default: 'DEFAULT' choices: - DEFAULT - EVICT_DAILY - EVICT_WEEKLY - MAX_LIFESPAN - NO_CACHE
+      # evictionDay: # type: str
+      # evictionHour: # type: str
+      # evictionMinute: # type: str
+      # maxLifespan: # type: int
+
+    mappers: "{{ keycloak_federation.mappers | default(omit) }}"
+
+        # type: list
+        # elements: dict
+        # suboptions:
+        #     id: # type: str
+        #     name: # type: str
+        #     parentId: # type: str
+        #     providerId: # type: str
+        #     providerType: # type: str default: org.keycloak.storage.ldap.mappers.LDAPStorageMapper
+        #     config: # type: dict
+  diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local

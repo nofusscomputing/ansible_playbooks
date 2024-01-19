@@ -9,20 +9,20 @@
 
 <br>
 
-![Gitlab forks count](https://img.shields.io/badge/dynamic/json?label=Forks&query=%24.forks_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2F&color=ff782e&logo=gitlab&style=plastic) ![Gitlab stars](https://img.shields.io/badge/dynamic/json?label=Stars&query=%24.star_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2F&color=ff782e&logo=gitlab&style=plastic) [![Open Issues](https://img.shields.io/badge/dynamic/json?color=ff782e&logo=gitlab&style=plastic&label=Open%20Issues&query=%24.statistics.counts.opened&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2Fissues_statistics)](https://gitlab.com/nofusscomputing/projects/ansible/Ansible_Playbooks/-/issues)
+![Gitlab forks count](https://img.shields.io/badge/dynamic/json?label=Forks&query=%24.forks_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2F&color=ff782e&logo=gitlab&style=plastic) ![Gitlab stars](https://img.shields.io/badge/dynamic/json?label=Stars&query=%24.star_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2F&color=ff782e&logo=gitlab&style=plastic) [![Open Issues](https://img.shields.io/badge/dynamic/json?color=ff782e&logo=gitlab&style=plastic&label=Open%20Issues&query=%24.statistics.counts.opened&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2Fissues_statistics)](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/issues)
 
 
 
 ![GitHub forks](https://img.shields.io/github/forks/NofussComputing/ansible_playbooks?logo=github&style=plastic&color=000000&labell=Forks) ![GitHub stars](https://img.shields.io/github/stars/NofussComputing/ansible_playbooks?color=000000&logo=github&style=plastic) ![Github Watchers](https://img.shields.io/github/watchers/NofussComputing/ansible_playbooks?color=000000&label=Watchers&logo=github&style=plastic)
 <br>
 
-This project is hosted on [gitlab](https://gitlab.com/nofusscomputing/projects/ansible/Ansible_Playbooks) and has a read-only copy hosted on [Github](https://github.com/NofussComputing/ansible_playbooks).
+This project is hosted on [gitlab](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks) and has a read-only copy hosted on [Github](https://github.com/NofussComputing/ansible_playbooks).
 
 ----
 
 **Stable Branch**
 
-![Gitlab build status - stable](https://img.shields.io/badge/dynamic/json?color=ff782e&label=Build&query=0.status&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2Fpipelines%3Fref%3Dmaster&logo=gitlab&style=plastic) ![branch release version](https://img.shields.io/badge/dynamic/yaml?color=ff782e&logo=gitlab&style=plastic&label=Release&query=%24.commitizen.version&url=https%3A//gitlab.com/nofusscomputing/projects/ansible/Ansible_Playbooks%2F-%2Fraw%2Fmaster%2F.cz.yaml) 
+![Gitlab build status - stable](https://img.shields.io/badge/dynamic/json?color=ff782e&label=Build&query=0.status&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F46364551%2Fpipelines%3Fref%3Dmaster&logo=gitlab&style=plastic) ![branch release version](https://img.shields.io/badge/dynamic/yaml?color=ff782e&logo=gitlab&style=plastic&label=Release&query=%24.commitizen.version&url=https%3A//gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks%2F-%2Fraw%2Fmaster%2F.cz.yaml) 
 
 ----
 

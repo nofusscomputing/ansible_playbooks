@@ -1,0 +1,62 @@
+---
+
+- name: MariaDB Backup
+  block:
+
+
+    - name: Encrypt and TAR File {{ source_file }}
+      ansible.builtin.shell:
+        cmd: |
+          cat {{ source_file }} \
+          | openssl \
+              smime -encrypt \
+              -binary -text -{{ encryption_algorithm }} \
+              -out {{ directory_tasks }}/{{ dest_file }}.enc \
+              -outform DER {{ directory_tasks }}/encryption_certificate;
+          tar \
+            --directory={{ directory_tasks }} \
+            -czf {{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz \
+            {{ dest_file }}.enc;
+      args:
+        executable: bash
+      become: true
+      register: encrypt_file
+      failed_when: >
+        'Exiting with failure' in encrypt_file.stderr
+          or
+        'Unable to' in encrypt_file.stderr
+          or
+        'could not' in encrypt_file.stderr
+          or
+        'Exiting with failure' in encrypt_file.stderr
+
+
+    - name: Set Encrypted Backup File Ownership / Permissions
+      ansible.builtin.file:
+        name: "{{ directory_tasks }}/{{ file_backup_no_extension_mariadb }}.tar.gz"
+        owner: "{{ permissions.owner | default(omit) }}"
+        group: "{{ permissions.group | default(omit) }}"
+        mode: "{{ permissions.mode | default(omit) }}"
+        state: file
+      become: true
+
+
+  rescue:
+
+
+    - name: Remove Failed Backup
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      become: true
+      loop: "{{ tmp_files }}"
+      vars:
+        tmp_files:
+          - "{{ directory_tasks }}/{{ dest_file }}.enc"
+
+
+    - name: Task Failed Force Kill Play
+      ansible.builtin.assert:
+        that:
+          - false
+        msg: "The Play Failed"

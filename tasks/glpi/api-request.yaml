@@ -1,0 +1,41 @@
+---
+
+- name: API Create and Trace
+  block:
+
+    - name: "{{ glpi_api_request_name | default('GLPI API Request') }}"
+      ansible.builtin.uri:
+        url: "{{ http_protocol | default('https') | string }}://{{ nfc_pb_glpi_host }}/apirest.php/{{ glpi_api_request_path }}"
+        method: "{{ glpi_api_request_method | default('GET') }}"
+        return_content: true
+        status_code: [200, 201]
+        headers:
+          App-Token: "{{ nfc_pb_glpi_app_token }}"
+          Session-Token: "{{ nfc_pb_glpi_session.valid_id }}"
+        validate_certs: "{{ nfc_pb_glpi_validate_certs | default(true) | bool }}"
+      no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
+      register: glpi_api_request
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
+
+
+    - name: Set fact
+      ansible.builtin.set_fact:
+        "{{ glpi_api_request_register | default('glpi_api_request') | string }}": "{{ glpi_api_request }}"
+      no_log: "{{ nfc_pb_glpi_no_log_sensitive_data | default(true) | bool }}"
+
+
+  always:
+
+
+    - name: "DEBUG {{ glpi_api_request_name | default('GLPI API request') }}"
+      ansible.builtin.debug:
+        msg:
+          elapsed: "{{ glpi_api_request.elapsed | default('-') | string }}"
+          method: "{{ glpi_api_request_method | default('POST') }}"
+          msg: "{{ glpi_api_request.msg | default('-') | string }}"
+          path: "{{ glpi_api_request.path | default('-') | string }}"
+          redirected: "{{ glpi_api_request.redirected | default('-') | string }}"
+          status: "{{ glpi_api_request.status | default('-') | string }}"

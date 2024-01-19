@@ -12,6 +12,19 @@ about: https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks
 This playbook is intended to run our ansible role [git_configuration](../../git_configuration/index.md).
 
 
+## AWX / Ansible Automation Platform
+
+This playbook is setup to tak advantage of configuring AWX via the [awx playbook / Job Template](awx.md). The following job templates will be created:
+
+- Configure Gitlab / Github Repositories
+
+    > Configure Gitlab / Github repositories from code
+
+- Webhook/gitlab/Create Artifact
+
+    > After receiving a Gitlab webhook, Create an Artifact with the webhook data.
+
+
 ## Docs ToDo
 
 - specify cli with tags and variables

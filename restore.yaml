@@ -16,33 +16,257 @@
 #
 - name: Conduct Restoration of Backup(s)
   hosts: all
-  gather_facts: "{% if task_nfc_common_required | default(false) | bool %}false{% else %}true{% endif %}"
+  gather_facts: false
+
+
+  pre_tasks:
+
+
+      # Play and task set time
+    - name: Set Start Time
+      ansible.builtin.set_fact:
+        nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_automation'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_automation: {
+          "time": {
+            "start": "{{ nfc_task_starttime | string }}",
+            "end": 0
+          }
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      when: nfc_automation is not defined
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_task'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "{{ ansible_play_name | default('') | lower | string }}",
+          "error": 0,
+          "roles": "{{ ansible_play_role_names | default('') | string }}",
+          "skip_tags": "{{ ansible_skip_tags | default([])| list }}",
+          "start": "{{ nfc_task_starttime | string }}",
+          "tags": "{{ ansible_run_tags | default([]) | list }}"
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    - name: Block - pre_tasks
+      block:
+
+
+        - name: Variable Setup - project_dir
+          ansible.builtin.include_tasks:
+            file: tasks/var_project_dir.yaml
+            apply:
+              tags:
+                - always
+          when: var_project_dir is not defined
+          tags:
+            - always
+
+
+      rescue:
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+    # Don't use the 'roles' section.
+  roles: []
+    # if the included role(s) do not contain a rescue block, the playbook may stop
+    # executing in this section (roles) with the post_tasks not running. This will
+    # cause the artifacts to be incomplete. It's recommended to include your roles
+    # in section(s) 'pre_tasks', 'tasks' or 'post_tasks' and from within a block with
+   # rescue so that the playbook can complete and ensure that all artifacts are set.
+
 
   tasks:
 
-    - name: Common tasks
-      ansible.builtin.include_role:
-        name: nfc_common
-      vars:
-        common_gather_facts: true
-      when: task_nfc_common_required | default(false) | bool
 
+    - name: Block - tasks
+      block:
 
-    - name: Restore Files
-      ansible.builtin.include_tasks:
-        file: tasks/restore-files.yaml
-        apply:
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error eccured, follow error path to fail play
           tags:
-            - files
-      when: restore.files | default([]) | length | int > 0
-      tags:
-        - files
+            - always
+
+
+        - name: Restoration
+          ansible.builtin.include_tasks:
+            file: tasks/restore.yaml
+          tags:
+            - always
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  post_tasks:
+
+    - name: Tasks post_task
+      block:
+
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, follow error path to fail play
+          tags:
+            - always
+
+
+        ########################################################################
+        #
+        # Your tasks here
+        #
+        ########################################################################
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Task and automation end time.
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set task end time
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | combine({
+                'end': nfc_task_endtime | string
+              }) ] }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set Automation end time.
+          # every playbook must set this variable so that the end time
+          # is equal to the fail time or the end of a group of playbooks.
+        - name: Set automation end time
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'time': nfc_automation.time | combine({
+                  'end': nfc_task_endtime | string
+                })
+              }) }}"
+            nfc_task_endtime: null
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set the artifacts as a fact for subsequent playbook useage
+          # Note: variable 'per_host' must be 'false' so that the artifacts
+          # work within AWX / Ansible Automation Platform.
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
+
+
+          # Final error check to fail the entire play run on error 
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
 
   vars:
     # restore_backup_date:
     # backup_storage_directory: /backup
 
     nfc_pb_awx_tower_template:
+
       - name: "Restore specified backup from Inventory config"
         ask_limit_on_launch: true
         ask_tags_on_launch: true
@@ -88,3 +312,43 @@
               "question_name": "Backup Storage Directory",
               "question_description": "The root directory of where the backups are stored"
           }
+
+      - name: "Restore/Application"
+        ask_limit_on_launch: true
+        ask_tags_on_launch: false
+        ask_credential_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Playbook to restore backups to various systems using config from inventory
+          Available tags:
+            'files' Restore Specified file(s),
+          If no tag is specified, all tasks will run if the applicable variables are set.
+        execution_environment: "No Fuss Computing EE"
+        extra_vars: |
+          nfc_pb_restore:
+            file_restore:                # Mandatory, String. Name of file without extension to restore
+            restore_directory_backups:   # Mandatory, String. Name of backup file to restore without file extension. .enc.tar is assumed
+            applications:
+              - name: vaultwarden           # Mandatory, String. Name of the Application
+                type: kube                  #   Mandatory, string. Kubernetes container engine
+                path:                       # Mandatory*, List of Dict. Required to restore files to path
+                  - name: data                  # Mandatory. String. sub-directory name inside the archive
+                    path: /data                 # Mandatory, String. Path within the container to restore to
+                pod: vaultwarden-0
+                namespace: vaultwarden
+                databases:                  # Mandatory*, dict, choice=mariadb|mysql. Only required if database restoration to be done.
+                  mariadb:                      # Mandatory, string. MariaDB/MySQL databases to restore
+                    - name: vaultwarden                     # Mandatory, String. Backup database filename.
+                      host:                                 # Database connection hosr
+                        name: mariadb-galera.mariadb.svc    # Mandatory. String. DNS or IP of database host to connect
+                        destination: vaultwarden            # Optional, string. default={use name key} database name to restore to.
+        job_type: "run"
+        job_tags: application
+        labels:
+          - restore
+          - files
+          - mariadb
+          - mysql
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: false

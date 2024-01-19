@@ -13,9 +13,9 @@
       # ToDo: check if there is a stat lookup?
       #       if so use to check if host file that matchess group file exists
       #       if so, don't include group file of same name
-      - name: "{{ inventory_dir }}/../templates/groups/awx/config-awx-system.json.j2"
+      - name: "{{ project_dir }}/templates/groups/awx/config-awx-system.json.j2"
         type: template
-      - name: "{{ inventory_dir }}/../templates/groups/awx/config-awx-authentication_saml.json.j2"
+      - name: "{{ project_dir }}/templates/groups/awx/config-awx-authentication_saml.json.j2"
         type: template
         when: my_awx_config.settings.authentication.enabled | default(false) | bool
 
@@ -33,3 +33,7 @@
   loop_control:
     loop_var: settings
   when: settings.stat.exists
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local

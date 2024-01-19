@@ -1,82 +1,364 @@
 ---
 - name: AWX / Tower Setup
-  hosts: localhost
+  hosts: all
   become: false
-  gather_facts: true
+  gather_facts: false
+
+
+  pre_tasks:
+
+
+      # Play and task set time
+    - name: Set Start Time
+      ansible.builtin.set_fact:
+        nfc_task_starttime: "{{ ('%Y-%m-%dT%H:%M:%S %z' | strftime) | string }}"
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_automation'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_automation: {
+          "time": {
+            "start": "{{ nfc_task_starttime | string }}",
+            "end": 0
+          }
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      when: nfc_automation is not defined
+      tags:
+        - always
+
+
+    # Setup dictionary 'nfc_task'
+    - name: Set Automation Facts
+      ansible.builtin.set_fact:
+        nfc_task: {
+          "name": "{{ ansible_play_name | default('') | lower | string }}",
+          "error": 0,
+          "roles": "{{ ansible_play_role_names | default('') | string }}",
+          "skip_tags": "{{ ansible_skip_tags | default([])| list }}",
+          "start": "{{ nfc_task_starttime | string }}",
+          "tags": "{{ ansible_run_tags | default([]) | list }}"
+        }
+      no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+      tags:
+        - always
+
+
+    - name: Block - pre_tasks
+      block:
+
+
+        - name: Ensure Job Tags have been Specified
+          ansible.builtin.assert:
+            that:
+              - ansible_run_tags | default([]) | list | length | int > 0
+              - >
+                not (
+                  ansible_run_tags | default([]) | list | length | int == 1
+                    and
+                  'all' in (ansible_run_tags | default([]) | list)
+                )
+              - >
+                (
+                  'complete' in ansible_run_tags | default([]) | list
+                    or
+                  'credential_types' in ansible_run_tags | default([]) | list
+                    or
+                  'instances' in ansible_run_tags | default([]) | list
+                    or
+                  'instance_groups' in ansible_run_tags | default([]) | list
+                    or
+                  'job_templates' in ansible_run_tags | default([]) | list
+                    or
+                  'organization' in ansible_run_tags | default([]) | list
+                    or
+                  'project' in ansible_run_tags | default([]) | list
+                    or
+                  'settings' in ansible_run_tags | default([]) | list
+                    or
+                  'workflow_templates' in ansible_run_tags | default([]) | list
+                )
+            msg: This playbook requires job tags be set.
+          tags:
+            - always
+
+
+        - name: Variable Setup - project_dir
+          ansible.builtin.include_tasks:
+            file: tasks/var_project_dir.yaml
+            apply:
+              tags:
+                - always
+          when: var_project_dir is not defined
+          tags:
+            - always
+
+
+      rescue:
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+    # Don't use the 'roles' section.
+  roles: []
+    # if the included role(s) do not contain a rescue block, the playbook may stop
+    # executing in this section (roles) with the post_tasks not running. This will
+    # cause the artifacts to be incomplete. It's recommended to include your roles
+    # in section(s) 'pre_tasks', 'tasks' or 'post_tasks' and from within a block with
+   # rescue so that the playbook can complete and ensure that all artifacts are set.
+
 
   tasks:
 
 
-    - name: Configure AWX
-      ansible.builtin.include_tasks:
-        file: tasks/awx/settings.yaml
+    - name: Block - tasks
+      block:
 
-    - name: Credential Types
-      ansible.builtin.include_tasks:
-        file: tasks/awx/credential_type.yaml
-      loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
-      loop_control:
-        loop_var: nfc_pb_awx_credential_type
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error eccured, follow error path to fail play
+          tags:
+            - always
 
-    - name: Instances
-      ansible.builtin.include_tasks:
-        file: tasks/awx/instances.yaml
-      loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
-      loop_control:
-        loop_var: nfc_pb_awx_instance
 
-    - name: Instance Groups
-      ansible.builtin.include_tasks:
-        file: tasks/awx/instance_group.yaml
-      loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
-      loop_control:
-        loop_var: nfc_pb_awx_instance_group
+        - name: TRACE
+          ansible.builtin.debug:
+            msg: "{{ my_awx_config }}"
 
-    - name: Organizations
-      ansible.builtin.include_tasks:
-        file: tasks/awx/organization.yaml
-      loop: "{{ my_awx_config.organizations | default([]) | list }}" # Fix as this var should be dynamic
-      loop_control:
-        loop_var: nfc_pb_awx_organization
+
+        - name: Configure AWX
+          ansible.builtin.include_tasks:
+            file: tasks/awx/settings.yaml
+          tags:
+            - never
+            - complete
+            - settings
+
+
+        - name: Credential Types
+          ansible.builtin.include_tasks:
+            file: tasks/awx/credential_type.yaml
+          loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
+          loop_control:
+            loop_var: nfc_pb_awx_credential_type
+          tags:
+            - never
+            - complete
+            - credential_types
+
+
+        - name: Instances
+          ansible.builtin.include_tasks:
+            file: tasks/awx/instances.yaml
+          loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
+          loop_control:
+            loop_var: nfc_pb_awx_instance
+          tags:
+            - never
+            - complete
+            - instances
+
+
+        - name: Instance Groups
+          ansible.builtin.include_tasks:
+            file: tasks/awx/instance_group.yaml
+          loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
+          loop_control:
+            loop_var: nfc_pb_awx_instance_group
+          tags:
+            - never
+            - complete
+            - instance_groups
+
+
+        - name: Organizations
+          ansible.builtin.include_tasks:
+            file: tasks/awx/organization.yaml
+          loop: "{{ my_awx_config.organizations | default([]) | list }}" # Fix as this var should be dynamic
+          loop_control:
+            loop_var: nfc_pb_awx_organization
+          tags:
+            - always
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Check if error occured and fail task
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
+
+
+  post_tasks:
+
+    - name: Tasks post_task
+      block:
+
+
+          # Check for error and fail play on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, follow error path to fail play
+          tags:
+            - always
+
+
+        ########################################################################
+        #
+        # Your tasks here
+        #
+        ########################################################################
+
+
+      rescue:
+
+
+          # there was an error, set error object
+        - name: Set error fact
+          ansible.builtin.set_fact:
+            nfc_task: "{{ nfc_task | combine({
+                'error': 1
+              }) }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+      always:
+
+
+          # Task and automation end time.
+        - name: Fetch End time
+          ansible.builtin.set_fact:
+            nfc_task_endtime: "{{ '%Y-%m-%dT%H:%M:%S %z' | strftime }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set task end time
+        - name: Set task Facts
+          ansible.builtin.set_fact:
+            nfc_tasks: "{{ nfc_tasks | default([]) + [ nfc_task | combine({
+                'end': nfc_task_endtime | string
+              }) ] }}"
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set Automation end time.
+          # every playbook must set this variable so that the end time
+          # is equal to the fail time or the end of a group of playbooks.
+        - name: Set automation end time
+          ansible.builtin.set_fact:
+            nfc_automation: "{{ nfc_automation | combine({
+                'time': nfc_automation.time | combine({
+                  'end': nfc_task_endtime | string
+                })
+              }) }}"
+            nfc_task_endtime: null
+          no_log: "{{ nfc_pb_no_log_setup_facts | default(false) | bool }}"
+          tags:
+            - always
+
+
+          # Set the artifacts as a fact for subsequent playbook useage
+          # Note: variable 'per_host' must be 'false' so that the artifacts
+          # work within AWX / Ansible Automation Platform.
+        - name: Create Automation Artifact
+          ansible.builtin.set_stats:
+            data:
+              nfc_automation: "{{ nfc_automation }}"
+              nfc_tasks: "{{ nfc_tasks }}"
+            per_host: false
+          tags:
+            - always
+
+
+          # Final error check to fail the entire play run on error
+        - name: Error Check
+          ansible.builtin.assert:
+            that:
+              - nfc_task.error | int == 0
+            msg: Error occured, Fail the play run
+          tags:
+            - always
 
 
   vars:
+
     ansible_connection: local
+
     nfc_pb_awx_tower_template:
+
       - name: "AWX / Tower Configure"
+        new_name: Configure/Application/AWX/All
         ask_tags_on_launch: false
         ask_inventory_on_launch: true
         ask_credential_on_launch: true
+        ask_limit_on_launch: true
         description: Configure AWX from Inventory
         execution_environment: "No Fuss Computing EE"
+        # extra_vars:
         job_type: "run"
+        job_tags: complete
         labels:
+          - application
           - awx
           - configure
-        # credentials:
-        #   - "Local"
         verbosity: 2
         use_fact_cache: true
-        survey_enabled: true
-        survey_spec: |
-          {
-            "name": "",
-            "spec": [
-              {
-                "max": 1024,
-                "min": 3,
-                "type": "text",
-                "choices": "",
-                "default": "my_awx_config",
-                "required": true,
-                "variable": "nfc_pb_awx_config_variable",
-                "new_question": true,
-                "question_name": "Inventory Variable",
-                "question_description": "The Variable in the Inventory the AWX config is under"
-              }
-            ],
-            "description": ""
-          }
+
         credential_types:
           - name: Git Credentials
             description: Creates ~/gitconfig with credentials that enable git operations on a private repository
@@ -107,6 +389,162 @@
                 tower:
                   filename:
                     git_credential_file: "{{ tower.filename.git_credential_file }}"
+
+
+      - name: Configure/Application/AWX/Credential Types
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Credential Types
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: credential_types
+        labels:
+          - application
+          - awx
+          - configure
+          - credential
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Instances
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Instances
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: instances
+        labels:
+          - application
+          - awx
+          - configure
+          - instance
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Instance Groups
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Instance Groups
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: instance_groups
+        labels:
+          - application
+          - awx
+          - configure
+          - group
+          - instance
+          - instance group
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Job Templates
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Job Templates
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: job_templates
+        labels:
+          - application
+          - awx
+          - configure
+          - job
+          - template
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Organizations
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Organizations
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: organization
+        labels:
+          - application
+          - awx
+          - configure
+          - organization
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Project
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Projects
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: project
+        labels:
+          - application
+          - awx
+          - configure
+          - project
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Settings
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Settings
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: settings
+        labels:
+          - application
+          - awx
+          - configure
+          - settings
+        verbosity: 2
+        use_fact_cache: true
+
+
+      - name: Configure/Application/AWX/Workflow Templates
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Configure AWX Workflow Templates
+        execution_environment: "No Fuss Computing EE"
+        # extra_vars:
+        job_type: "run"
+        job_tags: workflow_templates
+        labels:
+          - application
+          - awx
+          - configure
+          - templates
+          - workflow
+        verbosity: 2
+        use_fact_cache: true
 
 
 #################################################################################################################################

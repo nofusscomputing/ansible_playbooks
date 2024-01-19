@@ -1,0 +1,22 @@
+---
+- name: Ensure 'nfc_pb_glpi_host' variable defined
+  ansible.builtin.assert:
+    that:
+      - nfc_pb_glpi_host is defined
+      - "'http' not in nfc_pb_glpi_host"
+    msg: "'nfc_pb_glpi_host' variable is missing' or contains http or https"
+
+
+- name: Ensure 'nfc_pb_glpi_app_token' variable defined
+  ansible.builtin.assert:
+    that:
+      - nfc_pb_glpi_app_token is defined
+    msg: "'nfc_pb_glpi_nfc_pb_glpi_app_token' variable is missing'"
+
+
+- name: Ensure 'user_token' variable defined
+  ansible.builtin.assert:
+    that:
+      - nfc_pb_glpi_user_token is defined
+    msg: "'nfc_pb_glpi_user_token' variable is missing'"
+

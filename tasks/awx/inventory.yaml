@@ -17,6 +17,10 @@
     kind: "{{ nfc_pb_awx_inventory.kind | default(omit) }}"
   # no_log: true
   diff: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
 
 
 - name: Add an inventory source
@@ -54,6 +58,10 @@
   loop: "{{ nfc_pb_awx_inventory.sources | default([]) | list }}"
   loop_control:
     loop_var: nfc_pb_awx_inventory_source
+  delegate_to: localhost
+  run_once: true
+  vars:
+    ansible_connection: local
 
 
 # - name: "Update inventory sources {{ nfc_pb_awx_project.name }}/{{ nfc_pb_awx_project.name }}"

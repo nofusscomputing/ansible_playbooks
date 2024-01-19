@@ -27,19 +27,37 @@ nav:
 
       - projects/ansible/playbooks/awx.md
 
-      - projects/ansible/playbooks/backup.md
+      - Backup: 
+      
+        - projects/ansible/playbooks/backup/index.md
+
+        - projects/ansible/playbooks/backup/application.md
 
       - projects/ansible/playbooks/common.md
 
       - projects/ansible/playbooks/git_configuration.md
 
-      - projects/ansible/playbooks/kubernetes.md
+      - projects/ansible/playbooks/glpi.md
+
+      - projects/ansible/playbooks/keycloak.md
+
+      - Ansible Modules:
+
+        - projects/ansible/playbooks/modules/index.md
+
+        - projects/ansible/playbooks/modules/mysql.md
+
+        - projects/ansible/playbooks/modules/postgres.md
 
       - projects/ansible/playbooks/mariadb.md
 
       - projects/ansible/playbooks/postgresdb.md
 
-      - projects/ansible/playbooks/restore.md
+      - Restoration:
+      
+        - projects/ansible/playbooks/restore/index.md
+
+        - projects/ansible/playbooks/restore/application.md
 
     - Roles:
 

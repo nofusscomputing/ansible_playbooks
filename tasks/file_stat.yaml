@@ -1,0 +1,27 @@
+---
+
+- name: Fetch file Stats
+  ansible.builtin.stat:
+    name: "{{ directory_temp_destination }}/{{ filename | replace('./', '') }}"
+    get_checksum: true
+    checksum_algorithm: sha256
+  become: true
+  register: file_details
+  no_log: true    # Dont log of disposable info
+
+
+- name: Add to stats var
+  ansible.builtin.set_fact:
+    metadata: "{{ metadata + [{
+        'name': filename | replace(directory_temp_destination, '') | replace('./', ''),
+        'checksum': {
+          'algo': 'sha256',
+          'value': file_details.stat.checksum
+        },
+        'uid': file_details.stat.uid,
+        'gid': file_details.stat.gid,
+        'mode': file_details.stat.mode
+      }] }}"
+    cacheable: false
+  when: not file_details.stat.isdir
+  no_log: true    # Dont log the building of variables

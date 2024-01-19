@@ -1,0 +1,178 @@
+---
+
+- name: Always End Session
+  block:
+
+    - name: Validation 'nfc_pb_glpi_itil_category' must exist.
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_itil_category is defined
+          - nfc_pb_glpi_itil_category | int != 0
+        msg: "'nfc_pb_glpi_itil_category' must be defined."
+
+
+    - name: Validation 'nfc_pb_glpi_ticket_type' must exist and be correct
+      ansible.builtin.assert:
+        that:
+          - nfc_pb_glpi_ticket_type is defined
+          - >
+            nfc_pb_glpi_ticket_type == 'request'
+              or
+            nfc_pb_glpi_ticket_type == 'incident'
+        msg: "'nfc_pb_glpi_ticket_type' must be defined and have a value of 'request' or 'incident'."
+
+
+    - name: Start Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-create.yaml
+      when: nfc_pb_glpi_session | default('') == ''
+
+
+    - name: Fetch Ticket Fields
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      vars:
+        glpi_api_request_name: Fetch Ticket Fields
+        glpi_api_request_path: listSearchOptions/Ticket
+        glpi_api_request_register: glpi_ticket_fields
+
+
+    - name: Fetch ITIL Category
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      vars:
+        glpi_api_request_name: Fetch ITIL Category
+        glpi_api_request_path: "ITILCategory/{{ nfc_pb_glpi_itil_category }}"
+        glpi_api_request_register: glpi_itil_category
+
+
+    - name: Set Fact Ticket Fields
+      ansible.builtin.set_fact:
+        glpi_ticket_fields: "{{ glpi_ticket_fields.json | from_yaml }}"
+        glpi_itil_category: "{{ glpi_itil_category.json | from_yaml }}"
+        glpi_ticket_template: {}
+        glpi_ticket_mandatory_fields: []
+
+
+    - name: Fetch Ticket Template TicketTemplate Mandatory Fields
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      when: glpi_itil_category.tickettemplates_id_demand != 0
+      vars:
+        glpi_api_request_name: Fetch Ticket Template TicketTemplate Mandatory Fields
+        glpi_api_request_path: >-
+          TicketTemplate/
+          {%- if nfc_pb_glpi_ticket_type == 'request' -%}
+            {{ glpi_itil_category.tickettemplates_id_demand }}
+          {%- elif nfc_pb_glpi_ticket_type == 'incident' -%}
+            {{ glpi_itil_category.tickettemplates_id_incident }}
+          {%- endif -%}
+          /TicketTemplateMandatoryField
+        glpi_api_request_register: glpi_fetch_ticket_mandatory_fields
+
+
+    - name: Set Fact Ticket Mandatory Fields
+      ansible.builtin.set_fact:
+        glpi_ticket_mandatory_fields: "{{ glpi_ticket_mandatory_fields + [ (glpi_ticket_fields[(field.num | string)].field | string) ] }}"
+      loop: "{{ glpi_fetch_ticket_mandatory_fields.json | default([])}}"
+      loop_control:
+        loop_var: field
+
+
+    - name: Fetch Ticket Template TicketTemplate Predefined Fields
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      when: glpi_itil_category.tickettemplates_id_demand != 0
+      vars:
+        glpi_api_request_name: Fetch Ticket Template TicketTemplate Predefined Fields
+        glpi_api_request_path: "TicketTemplate/{{ glpi_itil_category.tickettemplates_id_demand }}/TicketTemplatePredefinedField"
+        glpi_api_request_register: glpi_ticket_template_predefined_fields
+
+
+      # if glpi_ticket_field.uid > 2 field should be list
+    - name: Add predefined fields from ticket template (Single-Items)
+      ansible.builtin.set_fact:
+        glpi_ticket_template: "{{ glpi_ticket_template | combine(
+          {
+            (glpi_ticket_fields[(field.num | string)].field | string): field.value
+          }) }}"
+      loop: "{{ glpi_ticket_template_predefined_fields.json | default([]) }}"
+      loop_control:
+        loop_var: field
+      when: glpi_ticket_fields[(field.num | string)].uid | split('.') | list | length == 2
+
+
+    - name: Add predefined fields from ticket template (Multi-Items) List create
+      ansible.builtin.set_fact:
+        glpi_ticket_template: "{{ glpi_ticket_template | combine(
+          {
+            (glpi_ticket_fields[(field.num | string)].field | string): []
+          }) }}"
+      loop: "{{ glpi_ticket_template_predefined_fields.json | default([]) }}"
+      loop_control:
+        loop_var: field
+      when: glpi_ticket_fields[(field.num | string)].uid | split('.') | list | length == 3
+
+
+    - name: Add predefined fields from ticket template (Multi-Items)
+      ansible.builtin.set_fact:
+        glpi_ticket_template: "{{ glpi_ticket_template | combine(
+          {
+            (glpi_ticket_fields[(field.num | string)].field | string): glpi_ticket_template[glpi_ticket_fields[(field.num | string)].field] + [ field.value ]
+          }) }}"
+      loop: "{{ glpi_ticket_template_predefined_fields.json| default([]) }}"
+      loop_control:
+        loop_var: field
+      when: glpi_ticket_fields[(field.num | string)].uid | split('.') | list | length == 3
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        ticket:
+          template: "{{ glpi_ticket_template | combine({
+              'itilcategories_id': nfc_pb_glpi_itil_category
+            }) }}"
+          mandatory_fields: "{{ glpi_ticket_mandatory_fields }}"
+      when: nfc_pb_glpi.ticket is not defined
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        ticket: "{{ nfc_pb_glpi.ticket | combine({
+          'template': glpi_ticket_template | combine({
+              'itilcategories_id': nfc_pb_glpi_itil_category
+            }),
+          'mandatory_fields': glpi_ticket_mandatory_fields
+          }) }}"
+      when: nfc_pb_glpi.ticket is defined
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        nfc_pb_glpi:
+          ticket: "{{ ticket }}"
+      when: nfc_pb_glpi is not defined
+
+
+    - name: Set Task Facts
+      ansible.builtin.set_fact:
+        nfc_pb_glpi: "{{ nfc_pb_glpi | combine({
+          'ticket': ticket
+          }) }}"
+      when: nfc_pb_glpi is defined
+
+
+    - name: Create Artifact
+      ansible.builtin.set_stats:
+        data:
+          nfc_pb_glpi: "{{ nfc_pb_glpi }}"
+        per_host: false
+
+
+  always:
+
+
+    - name: End Session
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-session-end.yaml
+      when: glpi_session_get.status | default(0) | int == 200

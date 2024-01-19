@@ -26,24 +26,46 @@
         # default_environment: nfc
         validate_certs: "{{ validate_certs | default(true) }}"
       diff: true
+      tags:
+        - never
+        - complete
+        - project
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
+        apply:
+          tags:
+            - always
       loop: "{{ nfc_pb_awx_project.rbac.project | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_rbac
       vars:
         nfc_pb_awx_project_name: "{{ nfc_pb_awx_project.name }}"
+      tags:
+        - never
+        - complete
+        - project
 
 
     - name: "Inventory - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/inventory.yaml
+        apply:
+          tags:
+            - always
       loop: "{{ nfc_pb_awx_project.inventories | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_inventory
+      tags:
+        - never
+        - complete
+        - project
 
 
     - name: "[helper] Setup Git credentials if present"
@@ -54,6 +76,17 @@
           chown $(whoami):$(whoami) ~/.gitconfig;
       become: true
       when: tower.filename.git_credential_file is defined
+      tags:
+        - never
+        - complete
+        - project
+        - job_templates
+        - workflow_templates
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
+
 
     - name: GIT Checkout Project
       ansible.builtin.git:
@@ -64,8 +97,21 @@
         depth: 1
         # track_submodules: false
         recursive: false
+      timeout: 300
       when: >
         nfc_pb_awx_project.playbook_path is defined
+          or
+        nfc_pb_awx_project.workflow_path is defined
+      tags:
+        - never
+        - complete
+        - project
+        - job_templates
+        - workflow_templates
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
       # ansible.builtin.git.track_submodules=true does not work so this task exists 
@@ -75,11 +121,24 @@
         cmd: git submodule update --init
         chdir: /tmp/project
       changed_when: false
+      tags:
+        - never
+        - complete
+        - project
+        - job_templates
+        - workflow_templates
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
 
     - name: Add Job templates
       ansible.builtin.include_tasks:
         file: tasks/awx/job_templates.yaml
+        apply:
+          tags:
+            - always
       loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.playbook_path | default('')) }}"
       when: >
         item.state == 'file'
@@ -93,14 +152,48 @@
         nfc_pb_awx_playbook_filename: "{{ item.path }}"
         nfc_pb_awx_playbook_dir: "{{ item.root }}"
         nfc_pb_awx_branch: nfc_pb_awx_project.scm_branch
+      tags:
+        - never
+        - complete
+        - job_templates
+
+
+    - name: Search for Workflow templates
+      ansible.builtin.include_tasks:
+        file: tasks/awx/workflow_templates.yaml
+        apply:
+          tags:
+            - always
+      loop: "{{ lookup('community.general.filetree', '/tmp/project/' + nfc_pb_awx_project.workflow_path | default(''), wantlist=true ) | default([]) }}"
+      when: >
+        item.state == 'file'
+          and
+        '.yaml' in item.path|basename
+          and
+        nfc_pb_awx_project.workflow_path is defined
+      vars:
+        nfc_pb_awx_workflow_filename: "{{ item.path }}"
+        nfc_pb_awx_workflow_dir: "{{ item.root }}"
+      tags:
+        - never
+        - complete
+        - workflow_templates
 
 
     - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
+        apply:
+          tags:
+            - always
       loop: "{{ nfc_pb_awx_project.rbac.project | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_rbac
+      tags:
+        - never
+        - complete
+        - project
+
 
   always:
 
@@ -109,6 +202,12 @@
         name: /tmp/project
         state: absent
       no_log: true
+      tags:
+        - always
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local
 
     - name: "Clean-up Git credentials"
       ansible.builtin.file:
@@ -116,3 +215,9 @@
         state: absent
       become: true
       when: tower.filename.git_credential_file is defined
+      tags:
+        - always
+      delegate_to: localhost
+      run_once: true
+      vars:
+        ansible_connection: local

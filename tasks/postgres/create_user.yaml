@@ -1,0 +1,151 @@
+---
+
+- name: Confirm required variables exist
+  ansible.builtin.assert:
+    that:
+      - postgresql_user_name is defined
+      - postgresql_user_password is defined
+    msg: To Create a user, username and password must be defined
+  when: >
+    postgresql_user.name is not defined
+      and
+    postgresql_user.password is not defined
+
+
+- name: Create Variable
+  ansible.builtin.set_fact:
+    postgresql_user: "{{ postgresql_user | default({}) | combine({
+        'name': postgresql_user_name,
+        'password': postgresql_user_password
+      }) }}"
+  when: >
+    postgresql_user.name is not defined
+      and
+    postgresql_user.password is not defined
+
+
+- name: Create Postgres User
+  community.postgresql.postgresql_user:
+    login_host: "{{ postgresdb_host }}"
+    login_user: "{{ postgresdb_user }}"
+    login_password: "{{ postgresdb_password }}"
+
+    name: "{{ postgresql_user.name }}"
+      # description:
+      # - Name of the user (role) to add or remove.
+      # type: str
+      # required: true
+    password: "{{ postgresql_user.password }}"
+      # description:
+      # - Set the user's password, before 1.4 this was required.
+      # - Password can be passed unhashed or hashed (MD5-hashed).
+      # - An unhashed password is automatically hashed when saved into the
+      #   database if I(encrypted) is set, otherwise it is saved in
+      #   plain text format.
+      # - When passing an MD5-hashed password, you must generate it with the format
+      #   C('str["md5"] + md5[ password + username ]'), resulting in a total of
+      #   35 characters. An easy way to do this is
+      #   C(echo "md5`echo -n 'verysecretpasswordJOE' | md5sum | awk '{print $1}'`").
+      # - Note that if the provided password string is already in MD5-hashed
+      #   format, then it is used as-is, regardless of I(encrypted) option.
+      # type: str
+    db: "{{ postgresql_user.db  | default(omit) }}"
+      # description:
+      # - Name of database to connect to and where user's permissions are granted.
+      # type: str
+      # default: ''
+    fail_on_user: "{{ postgresql_user.fail_on_user | default(omit) }}"
+      # description:
+      # - If C(true), fails when the user (role) cannot be removed. Otherwise just log and continue.
+      # default: true
+      # type: bool
+    priv: "{{ postgresql_user.priv | default(omit) }}"
+      # description:
+      # - This option has been B(deprecated) and will be removed in
+      #   community.postgresql 4.0.0. Please use the M(community.postgresql.postgresql_privs) module to
+      #   GRANT/REVOKE permissions instead.
+      # - "Slash-separated PostgreSQL privileges string: C(priv1/priv2), where
+      #   you can define the user's privileges for the database ( allowed options - 'CREATE',
+      #   'CONNECT', 'TEMPORARY', 'TEMP', 'ALL'. For example C(CONNECT) ) or
+      #   for table ( allowed options - 'SELECT', 'INSERT', 'UPDATE', 'DELETE',
+      #   'TRUNCATE', 'REFERENCES', 'TRIGGER', 'ALL'. For example
+      #   C(table:SELECT) ). Mixed example of this string:
+      #   C(CONNECT/CREATE/table1:SELECT/table2:INSERT)."
+      # - When I(priv) contains tables, the module uses the schema C(public) by default.
+      #   If you need to specify a different schema, use the C(schema_name.table_name) notation,
+      #   for example, C(pg_catalog.pg_stat_database:SELECT).
+      # type: str
+    role_attr_flags: "{{ postgresql_user.role_attr_flags | default(omit) }}"
+      # description:
+      # - "PostgreSQL user attributes string in the format: CREATEDB,CREATEROLE,SUPERUSER."
+      # - Note that '[NO]CREATEUSER' is deprecated.
+      # - To create a simple role for using it like a group, use C(NOLOGIN) flag.
+      # - See the full list of supported flags in documentation for your PostgreSQL version.
+      # type: str
+      # default: ''
+    session_role: "{{ postgresql_user.session_role | default(omit) }}"
+      # description:
+      # - Switch to session role after connecting.
+      # - The specified session role must be a role that the current login_user is a member of.
+      # - Permissions checking for SQL commands is carried out as though the session role
+      #   were the one that had logged in originally.
+      # type: str
+    state: "{{ postgresql_user.state | default('present') }}"
+      # description:
+      # - The user (role) state.
+      # type: str
+      # default: present
+      # choices: [ absent, present ]
+    encrypted: "{{ postgresql_user.encrypted | default(true) | bool }}"
+      # description:
+      # - Whether the password is stored hashed in the database.
+      # - You can specify an unhashed password, and PostgreSQL ensures
+      #   the stored password is hashed when I(encrypted=true) is set.
+      #   If you specify a hashed password, the module uses it as-is,
+      #   regardless of the setting of I(encrypted).
+      # - "Note: Postgresql 10 and newer does not support unhashed passwords."
+      # - Previous to Ansible 2.6, this was C(false) by default.
+      # default: true
+      # type: bool
+    expires: "{{ postgresql_user.expires | default(omit) }}"
+      # description:
+      # - The date at which the user's password is to expire.
+      # - If set to C('infinity'), user's password never expires.
+      # - Note that this value must be a valid SQL date and time type.
+      # type: str
+    no_password_changes: "{{ postgresql_user.no_password_changes | default(omit) }}"
+      # description:
+      # - If C(true), does not inspect the database for password changes.
+      #   If the user already exists, skips all password related checks.
+      #   Useful when C(pg_authid) is not accessible (such as in AWS RDS).
+      #   Otherwise, makes password changes as necessary.
+      # default: false
+      # type: bool
+    conn_limit: "{{ postgresql_user.conn_limit | default(omit) }}"
+      # description:
+      # - Specifies the user (role) connection limit.
+      # type: int
+    ssl_mode: "{{ postgresql_user.ssl_mode | default(omit) }}"
+      # description:
+      #   - Determines how an SSL session is negotiated with the server.
+      #   - See U(https://www.postgresql.org/docs/current/static/libpq-ssl.html) for more information on the modes.
+      #   - Default of C(prefer) matches libpq default.
+      # type: str
+      # default: prefer
+      # choices: [ allow, disable, prefer, require, verify-ca, verify-full ]
+    ca_cert: "{{ postgresql_user.ca_cert | default(omit) }}"
+      # description:
+      #   - Specifies the name of a file containing SSL certificate authority (CA) certificate(s).
+      #   - If the file exists, verifies that the server's certificate is signed by one of these authorities.
+      # type: str
+    comment: "{{ postgresql_user.comment | default(omit) }}"
+      # description:
+      # - Adds a comment on the user (equivalent to the C(COMMENT ON ROLE) statement).
+      # type: str
+    trust_input: "{{ postgresql_user.trust_input | default(omit) }}"
+      # description:
+      # - If C(false), checks whether values of options I(name), I(password), I(privs), I(expires),
+      #   I(role_attr_flags), I(comment), I(session_role) are potentially dangerous.
+      # - It makes sense to use C(false) only when SQL injections through the options are possible.
+      # type: bool
+      # default: true
