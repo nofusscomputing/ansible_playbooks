@@ -454,48 +454,45 @@
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
-          {
-            "name": "",
-            "description": "",
-            "spec": [
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresql_user_name",
-                    "new_question": true,
-                    "question_name": "User Name",
-                    "question_description": "User to create"
-                },
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "password",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresql_user_password",
-                    "new_question": false,
-                    "question_name": "User Password",
-                    "question_description": "Password for user to create"
-                },
-                {
-                    "max": 1024,
-                    "min": 2,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": false,
-                    "variable": "postgresql_user_priv",
-                    "new_question": true,
-                    "question_name": "User Privileges",
-                    "question_description": "Privileges to grant user"
-                }
-            ]
-          }
+          [
+            {
+                "max": 1024,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": true,
+                "variable": "postgresql_user_name",
+                "new_question": true,
+                "question_name": "User Name",
+                "question_description": "User to create"
+            },
+            {
+                "max": 1024,
+                "min": 3,
+                "type": "password",
+                "choices": "",
+                "default": "",
+                "required": true,
+                "variable": "postgresql_user_password",
+                "new_question": false,
+                "question_name": "User Password",
+                "question_description": "Password for user to create"
+            },
+            {
+                "max": 1024,
+                "min": 2,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "postgresql_user_priv",
+                "new_question": true,
+                "question_name": "User Privileges",
+                "question_description": "Privileges to grant user"
+            }
+          ]
+
 
 
       - name: "postgres/database/create"

@@ -287,30 +287,33 @@
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "restore_backup_date",
-            "new_question": true,
-            "question_name": "Date of backup to restore",
-            "question_description": "Enter the backup Date-Time stamp. this is the suffix of the backup file."
-          },
-          {
-              "max": 100,
-              "min": 1,
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
-              "default": "/backup",
+              "default": "",
               "required": true,
-              "variable": "backup_storage_directory",
+              "variable": "restore_backup_date",
               "new_question": true,
-              "question_name": "Backup Storage Directory",
-              "question_description": "The root directory of where the backups are stored"
-          }
+              "question_name": "Date of backup to restore",
+              "question_description": "Enter the backup Date-Time stamp. this is the suffix of the backup file."
+            },
+            {
+                "max": 100,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "/backup",
+                "required": true,
+                "variable": "backup_storage_directory",
+                "new_question": true,
+                "question_name": "Backup Storage Directory",
+                "question_description": "The root directory of where the backups are stored"
+            }
+          ]
+
 
       - name: "Restore/Application"
         ask_limit_on_launch: true
