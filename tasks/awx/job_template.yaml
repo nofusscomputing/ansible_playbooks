@@ -176,7 +176,7 @@
       loop: "{{ nfc_pb_awx_project.rbac.job | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_rbac
-      #when: nfc_pb_awx_project.playbook_path | default('') != ''
+      when: nfc_pb_awx_project.state | default('present') == 'present'
       vars:
         nfc_pb_awx_job_template_name: "{{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
 
@@ -187,3 +187,4 @@
       loop: "{{ nfc_pb_awx_job_template.credential_types | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_credential_type
+      when: nfc_pb_awx_project.state | default('present') == 'present'
