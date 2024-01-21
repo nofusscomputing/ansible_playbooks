@@ -439,6 +439,7 @@
 
 
       - name: "postgres/user/create"
+        new_name: Database/PostgreSQL/User/Create
         ask_tags_on_launch: false
         description: |
           Playbook to create PostgreSQL User
