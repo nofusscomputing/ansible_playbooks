@@ -311,7 +311,6 @@
           - configure
           - keycloak
         use_fact_cache: true
-        survey_enabled: true
         credential_types:
           - name: playbook/keycloak/api
             description: Creates The variables required to log in to a keycloak instance
@@ -366,4 +365,3 @@
           - fetch
           - keycloak
         use_fact_cache: true
-        survey_enabled: true
