@@ -307,7 +307,7 @@
             injectors: >
               extra_vars:
                 nfc_pb_postgres_username: '{{ username }}'
-                nfc_pb_podtgres_password: '{{ password }}'
+                nfc_pb_postgres_password: '{{ password }}'
 
 
       - name: "Database/PostgreSQL/Database/Create"
