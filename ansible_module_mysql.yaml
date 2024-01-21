@@ -242,7 +242,7 @@
             - always
 
 
-          # Final error check to fail the entire play run on error 
+          # Final error check to fail the entire play run on error
         - name: Error Check
           ansible.builtin.assert:
             that:
@@ -366,7 +366,7 @@
                 "variable": "module_database.host.port",
                 "new_question": true,
                 "question_name": "Port Number",
-                "question_description": "Database Host Port to use for the connection.
+                "question_description": "Database Host Port to use for the connection."
             },
             {
                 "max": 254,
@@ -440,7 +440,7 @@
                 "variable": "module_database.host.port",
                 "new_question": true,
                 "question_name": "Port Number",
-                "question_description": "Database Host Port to use for the connection.
+                "question_description": "Database Host Port to use for the connection."
             },
             {
                 "max": 254,
@@ -515,7 +515,7 @@
                 "variable": "module_database.host.port",
                 "new_question": true,
                 "question_name": "Port Number",
-                "question_description": "Database Host Port to use for the connection.
+                "question_description": "Database Host Port to use for the connection."
             },
             {
                 "max": 254,
@@ -602,7 +602,7 @@
                 "variable": "module_database.host.port",
                 "new_question": true,
                 "question_name": "Port Number",
-                "question_description": "Database Host Port to use for the connection.
+                "question_description": "Database Host Port to use for the connection."
             },
             {
                 "max": 254,

@@ -242,7 +242,7 @@
             - always
 
 
-          # Final error check to fail the entire play run on error 
+          # Final error check to fail the entire play run on error
         - name: Error Check
           ansible.builtin.assert:
             that:
