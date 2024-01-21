@@ -274,25 +274,25 @@
         description: |
           Playbook to backup an Installed Application
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
+        extra_vars:
           encryption_algorithm: aes256                   # Encryption algorithm
           applications:
-            - name: glpi                                 # Mandatory, String. Name of the Application
-              type: docker                               # Mandatory. choice=docker|kube. Container engine type
-              container: glpi                            # Mandatory. String. Name of the container to backup.
-              path:                                      # Mandatory. List of String. Path within the container to backup
+            - name: glpi
+              type: docker
+              container: glpi
+              path:
                 - /var/www/html/config
                 - /var/www/html/files
                 - /var/log
                 - /var/www/html/marketplace
                 - /var/www/html/plugins
               databases:
-                - names:                                 # Mandatory. List of String. name(s) of database to backup
+                - names:
                     - glpi
-                  type: mariadb                          # Mandatory, choice=mariadb|mysql|postgres
-                  method: docker                         # Optional, choice=docker|direct. default=direct specify the method to backup the database
-                  encrypt: false                         # Optional, Boolean. default=true. Encrypt the database backup
-                  socket: /var/run/mysqld/mysqld.sock    # Mandatory. String. Path to the MySQL socket.
+                  type: mariadb
+                  method: docker
+                  encrypt: false
+                  socket: /var/run/mysqld/mysqld.sock
         forks: 3
         job_type: "run"
         job_tags: application
@@ -304,7 +304,6 @@
           - postgres
         # credentials:
         #   - "Local"
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -325,5 +324,4 @@
           - files
           - mariadb
           - postgres
-        verbosity: 2
         use_fact_cache: true

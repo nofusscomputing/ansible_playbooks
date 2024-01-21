@@ -24,6 +24,8 @@ Items supported for configuration:
 
 - Job Templates from playbooks
 
+    - Renaming of job_templates that have already been imported
+
 - Workflow Templates from code
 
 !!! note Info

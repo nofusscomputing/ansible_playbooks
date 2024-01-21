@@ -284,34 +284,36 @@
           - files
         # credentials:
         #   - "Local"
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "restore_backup_date",
-            "new_question": true,
-            "question_name": "Date of backup to restore",
-            "question_description": "Enter the backup Date-Time stamp. this is the suffix of the backup file."
-          },
-          {
-              "max": 100,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
-              "default": "/backup",
+              "default": "",
               "required": true,
-              "variable": "backup_storage_directory",
+              "variable": "restore_backup_date",
               "new_question": true,
-              "question_name": "Backup Storage Directory",
-              "question_description": "The root directory of where the backups are stored"
-          }
+              "question_name": "Date of backup to restore",
+              "question_description": "Enter the backup Date-Time stamp. this is the suffix of the backup file."
+            },
+            {
+                "max": 100,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "/backup",
+                "required": true,
+                "variable": "backup_storage_directory",
+                "new_question": true,
+                "question_name": "Backup Storage Directory",
+                "question_description": "The root directory of where the backups are stored"
+            }
+          ]
+
 
       - name: "Restore/Application"
         ask_limit_on_launch: true
@@ -324,24 +326,24 @@
             'files' Restore Specified file(s),
           If no tag is specified, all tasks will run if the applicable variables are set.
         execution_environment: "No Fuss Computing EE"
-        extra_vars: |
+        extra_vars:
           nfc_pb_restore:
-            file_restore:                # Mandatory, String. Name of file without extension to restore
-            restore_directory_backups:   # Mandatory, String. Name of backup file to restore without file extension. .enc.tar is assumed
+            file_restore:
+            restore_directory_backups:
             applications:
-              - name: vaultwarden           # Mandatory, String. Name of the Application
-                type: kube                  #   Mandatory, string. Kubernetes container engine
-                path:                       # Mandatory*, List of Dict. Required to restore files to path
-                  - name: data                  # Mandatory. String. sub-directory name inside the archive
-                    path: /data                 # Mandatory, String. Path within the container to restore to
+              - name: vaultwarden
+                type: kube
+                path:
+                  - name: data
+                    path: /data
                 pod: vaultwarden-0
                 namespace: vaultwarden
-                databases:                  # Mandatory*, dict, choice=mariadb|mysql. Only required if database restoration to be done.
-                  mariadb:                      # Mandatory, string. MariaDB/MySQL databases to restore
-                    - name: vaultwarden                     # Mandatory, String. Backup database filename.
-                      host:                                 # Database connection hosr
-                        name: mariadb-galera.mariadb.svc    # Mandatory. String. DNS or IP of database host to connect
-                        destination: vaultwarden            # Optional, string. default={use name key} database name to restore to.
+                databases:
+                  mariadb:
+                    - name: vaultwarden
+                      host:
+                        name: mariadb-galera.mariadb.svc
+                        destination: vaultwarden
         job_type: "run"
         job_tags: application
         labels:
@@ -349,6 +351,5 @@
           - files
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: false

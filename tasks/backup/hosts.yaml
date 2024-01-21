@@ -113,8 +113,8 @@
         file: tasks/file_system/copy_remote_local.yaml
       vars:
         directory_source: "{{ directory_tasks }}"
-        directory_destination: "{{ backup.directory }}"
-        file_name: "{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        directory_destination: "{{ nfc_pb_backup.directory }}"
+        file_name: "{{ file_backup_no_extension }}-{{ nfc_pb_backup.encryption_algorithm }}.enc.tar.gz"
         permissions:
           owner: root
           group: backup
@@ -124,7 +124,7 @@
 
     - name: Remove Backup Archive
       ansible.builtin.file:
-        name: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ backup.encryption_algorithm }}.enc.tar.gz"
+        name: "{{ directory_tasks }}/{{ file_backup_no_extension }}-{{ nfc_pb_backup.encryption_algorithm }}.enc.tar.gz"
         state: absent
 
 

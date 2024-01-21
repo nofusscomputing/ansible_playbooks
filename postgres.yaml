@@ -432,94 +432,14 @@
     postgresdb_filename_restore: ""    # String, Required for Restore ONLY
 
     nfc_pb_awx_tower_template:
+
+
       - name: "PostgresDB"
-        ask_tags_on_launch: true
-        description: |
-          Playbook to backup or restore a PostgreSQL database
-          Available tags:
-            'backup' Backup a postgres Database,
-            'restore' Resotre a postgres database from specified file.
-        execution_environment: "No Fuss Computing EE"
-        job_type: "run"
-        job_tags: backup, restore
-        labels:
-          - backup
-          - database
-          - restore
-          - postgres
-        verbosity: 2
-        use_fact_cache: true
-        survey_enabled: true
-        survey_spec: |
-          {
-            "name": "",
-            "description": "",
-            "spec": [
-                {
-                    "max": 1024,
-                    "min": 2,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresdb_database_name",
-                    "new_question": true,
-                    "question_name": "Database",
-                    "question_description": "Database name to backup/restore"
-                },
-                {
-                    "max": 1024,
-                    "min": 4,
-                    "type": "text",
-                    "choices": "",
-                    "default": "/backup",
-                    "required": true,
-                    "variable": "postgresdb_directory_backup",
-                    "new_question": true,
-                    "question_name": "Backup Directory",
-                    "question_description": "Directory to store Backup in"
-                },
-                {
-                    "max": 1024,
-                    "min": 5,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": false,
-                    "variable": "postgresdb_filename_restore",
-                    "new_question": true,
-                    "question_name": "Restore Filename",
-                    "question_description": "(Only required for Restore) Name of the SQL dump file to restore"
-                }
-            ]
-          }
-        credential_types:
-          - name: playbook/postgres/Login
-            description: Credentials to login to a PostgreSQL Server
-            inputs: |
-              fields:
-                - id: username
-                  type: string
-                  label: Username
-                - id: password
-                  type: string
-                  label: Password
-                  secret: true
-                - id: host
-                  type: string
-                  label: Keycloak URL
-              required:
-                - username
-                - password
-                - host
-            injectors: >
-              extra_vars:
-                postgresdb_user: "{{ username }}"
-                postgresdb_password: "{{ password }}"
-                postgresdb_host: "{{ host }}"
+        state: absent
 
 
       - name: "postgres/user/create"
+        new_name: Database/PostgreSQL/User/Create
         ask_tags_on_launch: false
         description: |
           Playbook to create PostgreSQL User
@@ -531,84 +451,49 @@
           - database
           - postgres
           - user
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
-          {
-            "name": "",
-            "description": "",
-            "spec": [
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresql_user_name",
-                    "new_question": true,
-                    "question_name": "User Name",
-                    "question_description": "User to create"
-                },
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "password",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresql_user_password",
-                    "new_question": false,
-                    "question_name": "User Password",
-                    "question_description": "Password for user to create"
-                },
-                {
-                    "max": 1024,
-                    "min": 2,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": false,
-                    "variable": "postgresql_user_priv",
-                    "new_question": true,
-                    "question_name": "User Privileges",
-                    "question_description": "Privileges to grant user"
-                }
-            ]
-          }
+          [
+            {
+                "max": 1024,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": true,
+                "variable": "postgresql_user_name",
+                "new_question": true,
+                "question_name": "User Name",
+                "question_description": "User to create"
+            },
+            {
+                "max": 1024,
+                "min": 3,
+                "type": "password",
+                "choices": "",
+                "default": "",
+                "required": true,
+                "variable": "postgresql_user_password",
+                "new_question": false,
+                "question_name": "User Password",
+                "question_description": "Password for user to create"
+            },
+            {
+                "max": 1024,
+                "min": 2,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "postgresql_user_priv",
+                "new_question": true,
+                "question_name": "User Privileges",
+                "question_description": "Privileges to grant user"
+            }
+          ]
+
 
 
       - name: "postgres/database/create"
-        ask_tags_on_launch: false
-        description: |
-          Playbook to create PostgreSQL Database
-        execution_environment: "No Fuss Computing EE"
-        job_type: "run"
-        job_tags: create_database
-        labels:
-          - create
-          - database
-          - postgres
-        verbosity: 2
-        use_fact_cache: true
-        survey_enabled: true
-        survey_spec: |
-          {
-            "name": "",
-            "description": "",
-            "spec": [
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresql_db_name",
-                    "new_question": true,
-                    "question_name": "Database Name",
-                    "question_description": "Database name to create"
-                }
-            ]
-          }
+        state: absent

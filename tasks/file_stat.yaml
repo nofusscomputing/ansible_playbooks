@@ -1,27 +1,72 @@
 ---
 
-- name: Fetch file Stats
-  ansible.builtin.stat:
-    name: "{{ directory_temp_destination }}/{{ filename | replace('./', '') }}"
-    get_checksum: true
-    checksum_algorithm: sha256
-  become: true
-  register: file_details
-  no_log: true    # Dont log of disposable info
+- name: Try Catch
+  block:
+
+    - name: Fetch file Stats
+      ansible.builtin.stat:
+        name: "{{ directory_temp_destination }}/{{ filename | replace('./', '') }}"
+        get_checksum: true
+        checksum_algorithm: sha256
+      become: true
+      register: file_details
+      no_log: true    # Dont log of disposable info
+      failed_when: false
 
 
-- name: Add to stats var
-  ansible.builtin.set_fact:
-    metadata: "{{ metadata + [{
-        'name': filename | replace(directory_temp_destination, '') | replace('./', ''),
-        'checksum': {
-          'algo': 'sha256',
-          'value': file_details.stat.checksum
-        },
-        'uid': file_details.stat.uid,
-        'gid': file_details.stat.gid,
-        'mode': file_details.stat.mode
-      }] }}"
-    cacheable: false
-  when: not file_details.stat.isdir
-  no_log: true    # Dont log the building of variables
+    - name: Add to stats var
+      ansible.builtin.set_fact:
+        metadata: "{{ metadata + [{
+            'name': filename | replace(directory_temp_destination, '') | replace('./', ''),
+            'checksum': {
+              'algo': 'sha256',
+              'value': file_details.stat.checksum
+            },
+            'uid': file_details.stat.uid,
+            'gid': file_details.stat.gid,
+            'mode': file_details.stat.mode
+          }] }}"
+        cacheable: false
+      when: not file_details.stat.isdir
+      no_log: true    # Dont log the building of variables
+      failed_when: false
+
+
+    - name: Add stat entry when gather failed
+      ansible.builtin.set_fact:
+        metadata: "{{ metadata + [{
+            'name': filename | replace(directory_temp_destination, '') | replace('./', ''),
+            'checksum': {
+              'algo': 'None',
+              'value': 'unable to gather'
+            },
+            'uid': file_details.stat.uid,
+            'gid': file_details.stat.gid,
+            'mode': file_details.stat.mode
+          }] }}"
+        cacheable: false
+      when: file_details.failed
+      no_log: true    # Dont log the building of variables
+      failed_when: false
+
+
+  rescue:
+
+
+    - name: TRACE - Show currect metadata
+      ansible.builtin.debug:
+        msg: "{{ metadata }}"
+      failed_when: false
+
+
+    - name: TRACE - Show last stats
+      ansible.builtin.debug:
+        msg: "{{ file_details | from_yaml }}"
+      failed_when: false
+
+
+    - name: Task Failed Force Kill Play
+      ansible.builtin.assert:
+        that:
+          - false
+        msg: "The Play Failed"

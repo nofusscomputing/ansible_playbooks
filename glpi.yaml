@@ -396,7 +396,6 @@
           - ticket
         survey_enabled: false
         use_fact_cache: false
-        verbosity: 2
 
       - name: "ITIL/GLPI/Plugin/FormCreator/to_JSON_Object"
         ask_credential_on_launch: true
@@ -422,7 +421,6 @@
           - ticket
         survey_enabled: false
         use_fact_cache: false
-        verbosity: 2
 
       - name: "ITIL/GLPI/Ticket/Close"
         ask_credential_on_launch: true
@@ -444,7 +442,6 @@
           - ticket
         survey_enabled: false
         use_fact_cache: false
-        verbosity: 2
 
       - name: "ITIL/GLPI/Ticket/Create"
         ask_credential_on_launch: true
@@ -476,7 +473,6 @@
           - template
         survey_enabled: false
         use_fact_cache: false
-        verbosity: 2
 
       - name: "ITIL/GLPI/Ticket/Task/Create"
         ask_credential_on_launch: true
@@ -514,7 +510,6 @@
           - template
         survey_enabled: false
         use_fact_cache: false
-        verbosity: 2
 
       - name: "ITIL/GLPI/Ticket/Assign/Error"
         ask_credential_on_launch: true
@@ -540,7 +535,6 @@
           - template
         survey_enabled: false
         use_fact_cache: true
-        verbosity: 2
 
       - name: "ITIL/GLPI/Ticket/Template/From_ITIL_Category"
         ask_credential_on_launch: true
@@ -566,7 +560,6 @@
           - template
         survey_enabled: false
         use_fact_cache: false
-        verbosity: 2
         credential_types:
 
           - name: playbook/glpi/api

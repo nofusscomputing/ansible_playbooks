@@ -44,73 +44,155 @@
         ansible_connection: local
 
 
-    - name: "Configure Job Template {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
-      awx.awx.job_template:
-        name: "{{ nfc_pb_awx_job_template.name }}"
-        new_name: "{{ nfc_pb_awx_job_template.name | default(omit) }}"
-        description: "{{ nfc_pb_awx_job_template.description | default(omit) }}"
-        controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
-        controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
-        controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
-        controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
-
-        concurrent_jobs_enabled: "{{ nfc_pb_awx_job_template.concurrent_jobs_enabled | default(false) | bool }}"
-        execution_environment: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
-        extra_vars: "{{ nfc_pb_awx_job_template.extra_vars | default(omit) }}"
-        forks: "{{ nfc_pb_awx_job_template.forks| default(1) }}"
-        job_type: "{{ nfc_pb_awx_job_template.job_type | default('run') }}"
-        job_tags: "{{ nfc_pb_awx_job_template.job_tags | default(omit) }}"
-        organization: "{{ nfc_pb_awx_organization.name }}"
-        # inventory: "{{ nfc_pb_awx_inventory.name | default(omit) }}"
-        project: "{{ nfc_pb_awx_project.name }}"
-        playbook: "{{ nfc_pb_awx_project.playbook_path | default('') }}{{ nfc_pb_awx_playbook_filename }}"
-        # scm_branch: "{{ nfc_pb_awx_branch }}"
-        ask_tags_on_launch: "{{ nfc_pb_awx_job_template.ask_tags_on_launch | default(false) | bool }}"
-        ask_inventory_on_launch: "{{ nfc_pb_awx_job_template.ask_inventory_on_launch | default(true) | bool }}"
-        credentials: "{{ nfc_pb_awx_job_template.credentials | default(omit) }}"
-        skip_tags: "{{ nfc_pb_awx_job_template.skip_tags | default(omit) }}"
-        state: "{{ nfc_pb_awx_job_template.state | default('present') }}"
-        survey_enabled: "{{ nfc_pb_awx_job_template.survey_enabled | default(false) | bool }}"
-        # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
-        survey_spec: >-
-          {%- if nfc_pb_awx_job_template.survey_spec | default ('') == '' -%}
-          {{ omit }}
-          {%- else -%}
-          {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
-          {%- endif -%}
-        labels: "{{ nfc_pb_awx_job_template.labels | default(omit) }}"
-        verbosity: "{{ nfc_pb_awx_job_template.verbosity | default(2) }}"
-        ask_scm_branch_on_launch: "{{ nfc_pb_awx_job_template.ask_scm_branch_on_launch | default(false) | bool }}"
-        ask_limit_on_launch: "{{ nfc_pb_awx_job_template.ask_limit_on_launch | default(true) | bool }}"
-        ask_instance_groups_on_launch: "{{ nfc_pb_awx_job_template.ask_instance_groups_on_launch | default(true) | bool }}"
-        ask_job_type_on_launch: "{{ nfc_pb_awx_job_template.ask_job_type_on_launch | default(true) | bool }}"
-        ask_credential_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(true) | bool }}"
-        ask_variables_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(true) | bool }}"
-        use_fact_cache: "{{ nfc_pb_awx_job_template.use_fact_cache | default(true) | bool }}"
-        validate_certs: "{{ validate_certs | default(true) }}"
-      # no_log: true
-      # when: nfc_pb_awx_tower_template | default('') != ''
-      diff: true
-      delegate_to: localhost
-      run_once: true
-      vars:
-        ansible_connection: local
+    - name: Cater for name changes
+      block:
 
 
-    - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Job/{{ nfc_pb_awx_job_template.name }}"
+        # This lock exists for catering for a name change.
+        # the task `awx.awx.job_template` must match the rescue block except name = new_name in the rescue block
+
+
+        - name: "Configure Job Template {{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
+          awx.awx.job_template:
+            name: "{{ nfc_pb_awx_job_template.name }}"
+            new_name: "{{ nfc_pb_awx_job_template.new_name | default(omit) }}"
+            description: "{{ nfc_pb_awx_job_template.description | default(omit) }}"
+            controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+            controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+            controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+            controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+
+            concurrent_jobs_enabled: "{{ nfc_pb_awx_job_template.concurrent_jobs_enabled | default(false) | bool }}"
+            execution_environment: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
+            extra_vars: "{{ nfc_pb_awx_job_template.extra_vars | default(omit) }}"
+            forks: "{{ nfc_pb_awx_job_template.forks| default(1) }}"
+            job_type: "{{ nfc_pb_awx_job_template.job_type | default('run') }}"
+            job_tags: "{{ nfc_pb_awx_job_template.job_tags | default(omit) }}"
+            organization: "{{ nfc_pb_awx_organization.name }}"
+            # inventory: "{{ nfc_pb_awx_inventory.name | default(omit) }}"
+            project: "{{ nfc_pb_awx_project.name }}"
+            playbook: "{{ nfc_pb_awx_project.playbook_path | default('') }}{{ nfc_pb_awx_playbook_filename }}"
+            # scm_branch: "{{ nfc_pb_awx_branch }}"
+            ask_tags_on_launch: "{{ nfc_pb_awx_job_template.ask_tags_on_launch | default(false) | bool }}"
+            ask_inventory_on_launch: "{{ nfc_pb_awx_job_template.ask_inventory_on_launch | default(true) | bool }}"
+            credentials: "{{ nfc_pb_awx_job_template.credentials | default(omit) }}"
+            skip_tags: "{{ nfc_pb_awx_job_template.skip_tags | default(omit) }}"
+            state: "{{ nfc_pb_awx_job_template.state | default('present') }}"
+            survey_enabled: "{{ nfc_pb_awx_job_template.survey_enabled | default(false) | bool }}"
+            # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
+            survey_spec: >-
+              {%- if
+                nfc_pb_awx_job_template.survey_spec is defined
+                  or
+                nfc_pb_awx_job_template.survey_enabled | default(false) | bool
+              -%}
+                {
+                  "name": "",
+                  "description": "",
+                  "spec": {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
+                }
+              {%- else -%}
+                {{ omit }}
+              {%- endif %}
+            labels: "{{ nfc_pb_awx_job_template.labels | default(omit) }}"
+            verbosity: "{{ nfc_pb_awx_job_template.verbosity | default(0) }}"
+            ask_scm_branch_on_launch: "{{ nfc_pb_awx_job_template.ask_scm_branch_on_launch | default(false) | bool }}"
+            ask_limit_on_launch: "{{ nfc_pb_awx_job_template.ask_limit_on_launch | default(true) | bool }}"
+            ask_instance_groups_on_launch: "{{ nfc_pb_awx_job_template.ask_instance_groups_on_launch | default(true) | bool }}"
+            ask_job_type_on_launch: "{{ nfc_pb_awx_job_template.ask_job_type_on_launch | default(true) | bool }}"
+            ask_credential_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(true) | bool }}"
+            ask_variables_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(true) | bool }}"
+            use_fact_cache: "{{ nfc_pb_awx_job_template.use_fact_cache | default(true) | bool }}"
+            validate_certs: "{{ validate_certs | default(true) }}"
+          # no_log: true
+          # when: nfc_pb_awx_tower_template | default('') != ''
+          diff: true
+          delegate_to: localhost
+          run_once: true
+          vars:
+            ansible_connection: local
+
+
+      rescue:
+
+          # If there was a name change and the import template hasn't been updated this rescue task will pass
+          # if it doesn't pass something else is wrong.
+        - name: "Configure Job Template [re-named] {{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
+          awx.awx.job_template:
+            name: "{{ nfc_pb_awx_job_template.new_name }}"
+            new_name: "{{ omit }}"
+            description: "{{ nfc_pb_awx_job_template.description | default(omit) }}"
+            controller_host: "{{ nfc_pb_awx_controller_host | default(omit) }}"
+            controller_oauthtoken: "{{ nfc_pb_awx_controller_oauthtoken | default(omit) }}"
+            controller_username: "{{ nfc_pb_awx_controller_username | default(omit) }}"
+            controller_password: "{{ nfc_pb_awx_controller_password | default(omit) }}"
+
+            concurrent_jobs_enabled: "{{ nfc_pb_awx_job_template.concurrent_jobs_enabled | default(false) | bool }}"
+            execution_environment: "{{ nfc_pb_awx_job_template.execution_environment | default(omit) }}"
+            extra_vars: "{{ nfc_pb_awx_job_template.extra_vars | default(omit) }}"
+            forks: "{{ nfc_pb_awx_job_template.forks| default(1) }}"
+            job_type: "{{ nfc_pb_awx_job_template.job_type | default('run') }}"
+            job_tags: "{{ nfc_pb_awx_job_template.job_tags | default(omit) }}"
+            organization: "{{ nfc_pb_awx_organization.name }}"
+            # inventory: "{{ nfc_pb_awx_inventory.name | default(omit) }}"
+            project: "{{ nfc_pb_awx_project.name }}"
+            playbook: "{{ nfc_pb_awx_project.playbook_path | default('') }}{{ nfc_pb_awx_playbook_filename }}"
+            # scm_branch: "{{ nfc_pb_awx_branch }}"
+            ask_tags_on_launch: "{{ nfc_pb_awx_job_template.ask_tags_on_launch | default(false) | bool }}"
+            ask_inventory_on_launch: "{{ nfc_pb_awx_job_template.ask_inventory_on_launch | default(true) | bool }}"
+            credentials: "{{ nfc_pb_awx_job_template.credentials | default(omit) }}"
+            skip_tags: "{{ nfc_pb_awx_job_template.skip_tags | default(omit) }}"
+            state: "{{ nfc_pb_awx_job_template.state | default('present') }}"
+            survey_enabled: "{{ nfc_pb_awx_job_template.survey_enabled | default(false) | bool }}"
+            # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
+            survey_spec: >-
+              {%- if
+                nfc_pb_awx_job_template.survey_spec is defined
+                  or
+                nfc_pb_awx_job_template.survey_enabled | default(false) | bool
+              -%}
+                {
+                  "name": "",
+                  "description": "",
+                  "spec": {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
+                }
+              {%- else -%}
+                {{ omit }}
+              {%- endif %}
+            labels: "{{ nfc_pb_awx_job_template.labels | default(omit) }}"
+            verbosity: "{{ nfc_pb_awx_job_template.verbosity | default(0) }}"
+            ask_scm_branch_on_launch: "{{ nfc_pb_awx_job_template.ask_scm_branch_on_launch | default(false) | bool }}"
+            ask_limit_on_launch: "{{ nfc_pb_awx_job_template.ask_limit_on_launch | default(true) | bool }}"
+            ask_instance_groups_on_launch: "{{ nfc_pb_awx_job_template.ask_instance_groups_on_launch | default(true) | bool }}"
+            ask_job_type_on_launch: "{{ nfc_pb_awx_job_template.ask_job_type_on_launch | default(true) | bool }}"
+            ask_credential_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(true) | bool }}"
+            ask_variables_on_launch: "{{ nfc_pb_awx_job_template.ask_credential_on_launch | default(true) | bool }}"
+            use_fact_cache: "{{ nfc_pb_awx_job_template.use_fact_cache | default(true) | bool }}"
+            validate_certs: "{{ validate_certs | default(true) }}"
+          # no_log: true
+          # when: nfc_pb_awx_tower_template | default('') != ''
+          diff: true
+          delegate_to: localhost
+          run_once: true
+          vars:
+            ansible_connection: local
+
+
+    - name: "RBAC - {{ nfc_pb_awx_organization.name }}/Project/{{ nfc_pb_awx_project.name }}/Job/{{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/rbac.yaml
       loop: "{{ nfc_pb_awx_project.rbac.job | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_rbac
-      #when: nfc_pb_awx_project.playbook_path | default('') != ''
+      when: nfc_pb_awx_job_template.state | default('present') == 'present'
       vars:
-        nfc_pb_awx_job_template_name: "{{ nfc_pb_awx_job_template.name }}"
+        nfc_pb_awx_job_template_name: "{{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
 
 
-    - name: Add Credential Type from Playbook template
+    - name: "Add Credential Type from Playbook template - {{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/credential_type.yaml
       loop: "{{ nfc_pb_awx_job_template.credential_types | default([]) | list }}"
       loop_control:
         loop_var: nfc_pb_awx_credential_type
+      when: nfc_pb_awx_job_template.state | default('present') == 'present'
