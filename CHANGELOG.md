@@ -1,3 +1,48 @@
+## 0.4.0 (2024-01-21)
+
+### Bug Fixes
+
+- **awx_import**: [3c627093](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/3c627093186464c6ecf4bd1f0d6d6063074b9f0d) - postgres module. incorrect survey syntax. [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx_import**: [eef079ba](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/eef079baa5b3452d99257e33307b932b8b595891) - mysql module. incorrect survey syntax. [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [52ee0085](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/52ee0085ecbb180bcfcb7ad9f1b9d082a3728900) - job_template import. correctly setup survey_spec json [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [d156dd4f](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/d156dd4ff446745a7adddc4d069ba7dc34a4dd79) - job_template. use correct var to check for state [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [2914b426](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/2914b42666be413a2588d1b6957cf86584e1caad) - job_template import. dont add rbac or credentials if job template is to be deleted [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **postgres**: [2dfc1e52](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/2dfc1e5247bb7c678dae3e1cc54872c29a519cb4) - module playbook credential "Playbook/Postgres/Login" incorrect password var [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [13681a8c](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/13681a8ce2a7211b3cd7e41fbf711b9dd7bfd8c7) - job template import for survey uses survey_spec as var [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) [#21](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/issues/21) ]
+- **awx**: [c8f8c099](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/c8f8c099ce85cdae2275ff84e60f64fe30acb9cd) - detect and correct job_template if name changes [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [c25da3d7](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/c25da3d70937f5cb41ea054394a2f87268cec616) - job_template. new_name must use new_name var [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [2d095eb4](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/2d095eb43ccb59161809982261f17142d53c189d) - ensure tagged job does run instance_groups task [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [1a3dfb26](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/1a3dfb26def002ab189c592ffbd309875e34fde7) - ensure tagged job does run instances task [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [726df4a4](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/726df4a4240ee471d8cb3aa24e6334be300c4a53) - ensure tagged job does run credential_types task [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **module_postgres_db**: [b469f436](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/b469f4361443348d4ba8e9ab1e01f031449c7259) - credential type fixed required fields wrong. [ [!75](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/75) ]
+- **module_mysql_db**: [b4f5a534](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/b4f5a534af882ed6d770c80ab7245f5da8c316ae) - credential type fixed required fields wrong. [ [!75](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/75) ]
+- **backup**: [741cb384](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/741cb384c7943e6ff9913feb8d73dfdafe300a22) - backup was renamed to nfc_pb_backup [ [!74](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/74) ]
+- **awx_import**: [f3873d09](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/f3873d093ce2d328d9aee75f46f4ef7be2a2ddf9) - extra_vars must be of type dict [ [!73](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/73) ]
+
+### Code Refactor
+
+- [7396e7ba](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/7396e7ba90c48c4b5287a576651cdf34382a3f45) - dont specify verbosity for awx job template import [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) [#20](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/issues/20) ]
+- **awx_import**: [91024cc6](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/91024cc620efdc7d772476371c21c56b11d010c5) - keycloak. no survey dont add enabled [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx_import**: [f9d55282](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/f9d55282295cd773398b9a2d614b98fbdbc3509d) - add job template to task name [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [c9c61b8f](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/c9c61b8fa802201ad20ca1cea16b7d3d52a1766c) - dont use negative conditionals to obtain positives [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [ebc2af6c](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/ebc2af6cc8ae3e591c3bfd452ba100e2b5ce4927) - job_template rescue task pre-fixed with rename [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+
+### Documentaton / Guides
+
+- **restore**: [7ada8071](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/7ada8071cb73c28a3ad688994005bcc644d0455e) - correct postgres section. syntax [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+
+### Features
+
+- **backup**: [d7f6838a](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/d7f6838a44341459699606d73916878372f27460) - remove metadata file creation [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **file_stat**: [c6c60675](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/c6c606758ed6af8bf1668275e84251b4c916c7f9) - dont fail play if unable to gather stats (metadata) [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **postgres**: [69add653](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/69add653e8cebb2b6ef333b25684d7abb32ca893) - rename job_template postgres/user/create ->  Database/PostgreSQL/User/Create [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **postgres**: [726ecb90](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/726ecb90a65b845c1ac7bdeddeceee75039eb5af) - remove job_template postgres/database/create as this is handled by module [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **postgres**: [87b6ea0e](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/87b6ea0ecb485247df01bb8b65cb55dd4399619a) - remove job_template PostgresDB as this is handled by module [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [b48a11bc](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/b48a11bc44d48e72aa97348f705b0a34fd704262) - job_template force job to fail if survey_enabled=true and survey_spec not defined [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) ]
+- **awx**: [cd3edeca](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/cd3edeca3b24d357277c1919a5420355853ceff9) - template import verbosity default=0 [ [!76](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/76) [#20](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/issues/20) ]
+- **backup**: [84d594c3](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/84d594c3fefdb95a833268a32e2403da31c5cefa) - metadata. if file stats fail, show the output for tracing purposes [ [!75](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/75) ]
+- **copy_remote_local**: [d5e87d1f](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/commit/d5e87d1f48b4711a04924fdb78a2c06dc9a9b0b0) - dont fail play if unable to set permissions [ [!75](https://gitlab.com/nofusscomputing/projects/ansible/ansible_playbooks/-/merge_requests/75) ]
+
 ## 0.3.0 (2024-01-19)
 
 ### Bug Fixes
