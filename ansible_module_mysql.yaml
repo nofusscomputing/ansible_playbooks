@@ -242,7 +242,7 @@
             - always
 
 
-          # Final error check to fail the entire play run on error 
+          # Final error check to fail the entire play run on error
         - name: Error Check
           ansible.builtin.assert:
             that:
@@ -285,7 +285,6 @@
           - mariadb
           - module
           - mysql
-        verbosity: 2
         use_fact_cache: true
         credential_types:
           - name: Playbook/MariaDB/Login
@@ -327,58 +326,59 @@
           - database
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "mariadb-galera.mariadb.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
+              "required": true,
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "mariadb-galera.mariadb.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            }
+          ]
 
 
       - name: "Database/MySQL/Database/Delete"
@@ -399,58 +399,59 @@
           - delete
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "mariadb-galera.mariadb.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "mariadb-galera.mariadb.svc",
-              "required": false,
-              "variable": "module_database.host.port",
-              "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
+              "required": true,
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "mariadb-galera.mariadb.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "mariadb-galera.mariadb.svc",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            }
+          ]
 
 
       - name: "Database/MySQL/Database/Dump"
@@ -472,70 +473,71 @@
           - dump
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "mariadb-galera.mariadb.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
+              "required": true,
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "/tmp/mysql_database_dump.sql",
-              "required": false,
-              "variable": "module_database.target",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Dump file Path"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "mariadb-galera.mariadb.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "/tmp/mysql_database_dump.sql",
+                "required": false,
+                "variable": "module_database.target",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Dump file Path"
+            }
+          ]
 
 
       - name: "Database/MySQL/Database/Import"
@@ -557,67 +559,68 @@
           - dump
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "mariadb-galera.mariadb.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
+              "required": true,
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "/tmp/mysql_database_dump.sql",
-              "required": false,
-              "variable": "module_database.target",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Dump file Path"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "mariadb-galera.mariadb.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "/tmp/mysql_database_dump.sql",
+                "required": false,
+                "variable": "module_database.target",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Dump file Path"
+            }
+          ]

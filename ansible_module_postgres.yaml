@@ -242,7 +242,7 @@
             - always
 
 
-          # Final error check to fail the entire play run on error 
+          # Final error check to fail the entire play run on error
         - name: Error Check
           ansible.builtin.assert:
             that:
@@ -286,7 +286,6 @@
           - database
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         credential_types:
           - name: Playbook/Postgres/Login
@@ -307,7 +306,7 @@
             injectors: >
               extra_vars:
                 nfc_pb_postgres_username: '{{ username }}'
-                nfc_pb_podtgres_password: '{{ password }}'
+                nfc_pb_postgres_password: '{{ password }}'
 
 
       - name: "Database/PostgreSQL/Database/Create"
@@ -328,58 +327,59 @@
           - database
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "main-postgresql-ha-pgpool.postgres.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
+              "required": true,
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "main-postgresql-ha-pgpool.postgres.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            }
+          ]
 
 
       - name: "Database/PostgreSQL/Database/Delete"
@@ -400,73 +400,74 @@
           - delete
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
-              "default": "main-postgresql-ha-pgpool.postgres.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
-              "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "multiplechoice",
-              "choices": [
-                "true",
-                "false"
-              ],
               "default": "",
               "required": true,
-              "variable": "module_database.force",
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Force delete database",
-              "question_description": "Force deleting alows the database to be deleted when there are active connections"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "main-postgresql-ha-pgpool.postgres.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "multiplechoice",
+                "choices": [
+                  "true",
+                  "false"
+                ],
+                "default": "",
+                "required": true,
+                "variable": "module_database.force",
+                "new_question": true,
+                "question_name": "Force delete database",
+                "question_description": "Force deleting alows the database to be deleted when there are active connections"
+            }
+          ]
 
 
       - name: "Database/PostgresSQL/Database/Dump"
@@ -488,70 +489,71 @@
           - dump
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "main-postgresql-ha-pgpool.postgres.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
+              "required": true,
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "/tmp/postgres_database_dump.sql",
-              "required": false,
-              "variable": "module_database.target",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Dump file Path"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "main-postgresql-ha-pgpool.postgres.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "/tmp/postgres_database_dump.sql",
+                "required": false,
+                "variable": "module_database.target",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Dump file Path"
+            }
+          ]
 
 
       - name: "Database/PostgresSQL/Database/Import"
@@ -573,70 +575,71 @@
           - import
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "main-postgresql-ha-pgpool.postgres.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
+              "required": true,
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "/tmp/postgres_database_dump.sql",
-              "required": false,
-              "variable": "module_database.target",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Dump file Path"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "main-postgresql-ha-pgpool.postgres.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "/tmp/postgres_database_dump.sql",
+                "required": false,
+                "variable": "module_database.target",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Dump file Path"
+            }
+          ]
 
 
       - name: "Database/PostgresSQL/Database/Rename"
@@ -657,67 +660,68 @@
           - module
           - postgres
           - rename
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
-        survey: |
-          {
-            "max": 25,
-            "min": 25,
-            "type": "text",
-            "choices": "",
-            "default": "",
-            "required": true,
-            "variable": "module_database.name",
-            "new_question": true,
-            "question_name": "Name",
-            "question_description": "Name of the database"
-          },
-          {
-              "max": 50,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "main-postgresql-ha-pgpool.postgres.svc",
-              "required": false,
-              "variable": "module_database.host.name",
-              "new_question": true,
-              "question_name": "DNS / IP Address",
-              "question_description": "Database Host connection point. If using socket for connection this is not required."
-          },
-          {
-              "max": 4,
-              "min": 1,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.port",
-              "new_question": true,
-              "question_name": "Port Number",
-              "question_description": "Database Host Port to use for the connection.
-          },
-          {
-              "max": 254,
-              "min": 3,
-              "type": "text",
-              "choices": "",
-              "default": "",
-              "required": false,
-              "variable": "module_database.host.socket",
-              "new_question": true,
-              "question_name": "Socket Path",
-              "question_description": "Database Socket to use for the connection"
-          },
-          {
-              "max": 20,
-              "min": 3,
+        survey_spec: |
+          [
+            {
+              "max": 25,
+              "min": 25,
               "type": "text",
               "choices": "",
               "default": "",
               "required": true,
-              "variable": "module_database.target",
+              "variable": "module_database.name",
               "new_question": true,
-              "question_name": "New Name",
-              "question_description": "The name the database will be renamed to"
-          }
+              "question_name": "Name",
+              "question_description": "Name of the database"
+            },
+            {
+                "max": 50,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "main-postgresql-ha-pgpool.postgres.svc",
+                "required": false,
+                "variable": "module_database.host.name",
+                "new_question": true,
+                "question_name": "DNS / IP Address",
+                "question_description": "Database Host connection point. If using socket for connection this is not required."
+            },
+            {
+                "max": 4,
+                "min": 1,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.port",
+                "new_question": true,
+                "question_name": "Port Number",
+                "question_description": "Database Host Port to use for the connection."
+            },
+            {
+                "max": 254,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": false,
+                "variable": "module_database.host.socket",
+                "new_question": true,
+                "question_name": "Socket Path",
+                "question_description": "Database Socket to use for the connection"
+            },
+            {
+                "max": 20,
+                "min": 3,
+                "type": "text",
+                "choices": "",
+                "default": "",
+                "required": true,
+                "variable": "module_database.target",
+                "new_question": true,
+                "question_name": "New Name",
+                "question_description": "The name the database will be renamed to"
+            }
+          ]

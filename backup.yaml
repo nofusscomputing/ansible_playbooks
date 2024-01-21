@@ -304,7 +304,6 @@
           - postgres
         # credentials:
         #   - "Local"
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -325,5 +324,4 @@
           - files
           - mariadb
           - postgres
-        verbosity: 2
         use_fact_cache: true

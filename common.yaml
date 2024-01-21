@@ -285,7 +285,6 @@
         labels:
           - common
           - soe
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -307,5 +306,4 @@
           - hosts
           - ITSM
           - stats
-        verbosity: 2
         use_fact_cache: true

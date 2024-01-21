@@ -310,9 +310,7 @@
         labels:
           - configure
           - keycloak
-        verbosity: 2
         use_fact_cache: true
-        survey_enabled: true
         credential_types:
           - name: playbook/keycloak/api
             description: Creates The variables required to log in to a keycloak instance
@@ -366,6 +364,4 @@
           - certificate
           - fetch
           - keycloak
-        verbosity: 2
         use_fact_cache: true
-        survey_enabled: true

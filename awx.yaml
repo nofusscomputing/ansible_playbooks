@@ -166,6 +166,9 @@
         - name: Credential Types
           ansible.builtin.include_tasks:
             file: tasks/awx/credential_type.yaml
+            apply:
+              tags:
+                - always
           loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_credential_type
@@ -178,6 +181,9 @@
         - name: Instances
           ansible.builtin.include_tasks:
             file: tasks/awx/instances.yaml
+            apply:
+              tags:
+                - always
           loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_instance
@@ -190,6 +196,9 @@
         - name: Instance Groups
           ansible.builtin.include_tasks:
             file: tasks/awx/instance_group.yaml
+            apply:
+              tags:
+                - always
           loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_instance_group
@@ -356,7 +365,6 @@
           - application
           - awx
           - configure
-        verbosity: 2
         use_fact_cache: true
 
         credential_types:
@@ -406,7 +414,6 @@
           - awx
           - configure
           - credential
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -425,7 +432,6 @@
           - awx
           - configure
           - instance
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -446,7 +452,6 @@
           - group
           - instance
           - instance group
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -466,7 +471,6 @@
           - configure
           - job
           - template
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -485,7 +489,6 @@
           - awx
           - configure
           - organization
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -504,7 +507,6 @@
           - awx
           - configure
           - project
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -523,7 +525,6 @@
           - awx
           - configure
           - settings
-        verbosity: 2
         use_fact_cache: true
 
 
@@ -543,7 +544,6 @@
           - configure
           - templates
           - workflow
-        verbosity: 2
         use_fact_cache: true
 
 
