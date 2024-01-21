@@ -81,7 +81,11 @@
             survey_enabled: "{{ nfc_pb_awx_job_template.survey_enabled | default(false) | bool }}"
             # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
             survey_spec: >-
-              {%- if nfc_pb_awx_job_template.survey_spec | default ('') == '' -%}
+              {%- if
+                nfc_pb_awx_job_template.survey_spec | default ('') == ''
+                  and
+                not survey_enabled | default(false) | bool
+              -%}
               {{ omit }}
               {%- else -%}
               {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
@@ -138,7 +142,11 @@
             survey_enabled: "{{ nfc_pb_awx_job_template.survey_enabled | default(false) | bool }}"
             # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
             survey_spec: >-
-              {%- if nfc_pb_awx_job_template.survey_spec | default ('') == '' -%}
+              {%- if
+                nfc_pb_awx_job_template.survey_spec | default ('') == ''
+                  and
+                not survey_enabled | default(false) | bool
+              -%}
               {{ omit }}
               {%- else -%}
               {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
