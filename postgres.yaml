@@ -498,34 +498,4 @@
 
 
       - name: "postgres/database/create"
-        ask_tags_on_launch: false
-        description: |
-          Playbook to create PostgreSQL Database
-        execution_environment: "No Fuss Computing EE"
-        job_type: "run"
-        job_tags: create_database
-        labels:
-          - create
-          - database
-          - postgres
-        use_fact_cache: true
-        survey_enabled: true
-        survey_spec: |
-          {
-            "name": "",
-            "description": "",
-            "spec": [
-                {
-                    "max": 1024,
-                    "min": 3,
-                    "type": "text",
-                    "choices": "",
-                    "default": "",
-                    "required": true,
-                    "variable": "postgresql_db_name",
-                    "new_question": true,
-                    "question_name": "Database Name",
-                    "question_description": "Database name to create"
-                }
-            ]
-          }
+        state: absent
