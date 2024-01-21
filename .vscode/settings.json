@@ -1,6 +1,7 @@
 {
     "gitlab.aiAssistedCodeSuggestions.enabled": false,
     "yaml.schemas": {
-        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks": "file:///home/sysadmin/git/ansible_playbooks/tasks/**"
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": "*.yaml",
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks": "tasks/**"
     }
 }
