@@ -166,6 +166,9 @@
         - name: Credential Types
           ansible.builtin.include_tasks:
             file: tasks/awx/credential_type.yaml
+            apply:
+              tags:
+                - always
           loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_credential_type
