@@ -109,7 +109,7 @@
 
           # If there was a name change and the import template hasn't been updated this rescue task will pass
           # if it doesn't pass something else is wrong.
-        - name: "Configure Job Template {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
+        - name: "Configure Job Template [re-named] {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
           awx.awx.job_template:
             name: "{{ nfc_pb_awx_job_template.new_name }}"
             new_name: "{{ omit }}"
