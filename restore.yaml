@@ -286,7 +286,7 @@
         #   - "Local"
         use_fact_cache: true
         survey_enabled: true
-        survey: |
+        survey_spec: |
           {
             "max": 25,
             "min": 25,
