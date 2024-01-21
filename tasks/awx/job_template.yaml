@@ -82,13 +82,13 @@
             # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
             survey_spec: >-
               {%- if
-                nfc_pb_awx_job_template.survey_spec | default ('') == ''
-                  and
-                not survey_enabled | default(false) | bool
+                nfc_pb_awx_job_template.survey_spec is defined
+                  or
+                nfc_pb_awx_job_template.survey_enabled | default(false) | bool
               -%}
-              {{ omit }}
+                {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
               {%- else -%}
-              {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
+                {{ omit }}
               {%- endif -%}
             labels: "{{ nfc_pb_awx_job_template.labels | default(omit) }}"
             verbosity: "{{ nfc_pb_awx_job_template.verbosity | default(0) }}"
@@ -143,13 +143,13 @@
             # survey_spec: "{{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json | default(omit) }}"
             survey_spec: >-
               {%- if
-                nfc_pb_awx_job_template.survey_spec | default ('') == ''
-                  and
-                not survey_enabled | default(false) | bool
+                nfc_pb_awx_job_template.survey_spec is defined
+                  or
+                nfc_pb_awx_job_template.survey_enabled | default(false) | bool
               -%}
-              {{ omit }}
+                {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
               {%- else -%}
-              {{ nfc_pb_awx_job_template.survey_spec | from_yaml | to_json }}
+                {{ omit }}
               {%- endif -%}
             labels: "{{ nfc_pb_awx_job_template.labels | default(omit) }}"
             verbosity: "{{ nfc_pb_awx_job_template.verbosity | default(0) }}"
