@@ -285,7 +285,6 @@
           - mariadb
           - module
           - mysql
-        verbosity: 2
         use_fact_cache: true
         credential_types:
           - name: Playbook/MariaDB/Login
@@ -327,7 +326,6 @@
           - database
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -401,7 +399,6 @@
           - delete
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -476,7 +473,6 @@
           - dump
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -563,7 +559,6 @@
           - dump
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |

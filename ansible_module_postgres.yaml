@@ -286,7 +286,6 @@
           - database
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         credential_types:
           - name: Playbook/Postgres/Login
@@ -328,7 +327,6 @@
           - database
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -402,7 +400,6 @@
           - delete
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -492,7 +489,6 @@
           - dump
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -579,7 +575,6 @@
           - import
           - module
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -665,7 +660,6 @@
           - module
           - postgres
           - rename
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
