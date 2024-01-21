@@ -52,7 +52,7 @@
         # the task `awx.awx.job_template` must match the rescue block except name = new_name in the rescue block
 
 
-        - name: "Configure Job Template {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
+        - name: "Configure Job Template {{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
           awx.awx.job_template:
             name: "{{ nfc_pb_awx_job_template.name }}"
             new_name: "{{ nfc_pb_awx_job_template.new_name | default(omit) }}"
@@ -117,7 +117,7 @@
 
           # If there was a name change and the import template hasn't been updated this rescue task will pass
           # if it doesn't pass something else is wrong.
-        - name: "Configure Job Template [re-named] {{ nfc_pb_awx_playbook_dir | default('') }}{{ nfc_pb_awx_playbook_filename }}"
+        - name: "Configure Job Template [re-named] {{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
           awx.awx.job_template:
             name: "{{ nfc_pb_awx_job_template.new_name }}"
             new_name: "{{ omit }}"
@@ -189,7 +189,7 @@
         nfc_pb_awx_job_template_name: "{{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
 
 
-    - name: Add Credential Type from Playbook template
+    - name: "Add Credential Type from Playbook template - {{ nfc_pb_awx_job_template.new_name | default(nfc_pb_awx_job_template.name) }}"
       ansible.builtin.include_tasks:
         file: tasks/awx/credential_type.yaml
       loop: "{{ nfc_pb_awx_job_template.credential_types | default([]) | list }}"
