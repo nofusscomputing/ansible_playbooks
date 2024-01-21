@@ -310,7 +310,6 @@
         labels:
           - configure
           - keycloak
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         credential_types:
@@ -366,6 +365,5 @@
           - certificate
           - fetch
           - keycloak
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true

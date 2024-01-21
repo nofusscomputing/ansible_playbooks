@@ -299,7 +299,6 @@
         labels:
           - configure
           - ldap
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: false
         credential_types:

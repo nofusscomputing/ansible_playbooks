@@ -284,7 +284,6 @@
           - files
         # credentials:
         #   - "Local"
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey: |
@@ -349,6 +348,5 @@
           - files
           - mariadb
           - mysql
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: false

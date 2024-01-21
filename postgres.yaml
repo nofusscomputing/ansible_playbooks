@@ -447,7 +447,6 @@
           - database
           - restore
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -531,7 +530,6 @@
           - database
           - postgres
           - user
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
@@ -590,7 +588,6 @@
           - create
           - database
           - postgres
-        verbosity: 2
         use_fact_cache: true
         survey_enabled: true
         survey_spec: |
