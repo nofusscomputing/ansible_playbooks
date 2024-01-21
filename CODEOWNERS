@@ -1,0 +1,11 @@
+[Default] @developers
+*
+
+
+[CI] @nofusscomputing/infrastructure/website @maintainers
+.gitlab-ci.yml
+
+
+[Website] @nofusscomputing/infrastructure/website
+docs/*
+mkdocs.yml
