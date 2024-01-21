@@ -181,6 +181,9 @@
         - name: Instances
           ansible.builtin.include_tasks:
             file: tasks/awx/instances.yaml
+            apply:
+              tags:
+                - always
           loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_instance
