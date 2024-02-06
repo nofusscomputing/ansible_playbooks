@@ -29,6 +29,7 @@
           - nfc_pb_glpi.plugins.form_creator.answer_id is defined
           - nfc_pb_glpi.plugins.form_creator.answer_id | int > 0
         msg: answer_id not found or had a falue of '1'.
+        when: nfc_pb_glpi_plugin_formcreator_delete_id is not defined
 
 
     - name: Start Session
