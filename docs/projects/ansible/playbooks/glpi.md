@@ -115,6 +115,7 @@ This play utilizes the following variables.
 
 ``` yaml
 nfc_pb_glpi_host: glpi.hostname.tld      # Mandatory, string. FQDN that forms part of the url. Don't specify http|https.
+nfc_pb_awx_hostname: host.domain.tld     # Optional, String. FQDN of the awx host. used to build job url for ticket description.
 nfc_pb_glpi_app_token: ''                # Mandatory, string. application token as generated from GLPI.
 nfc_pb_glpi_user_token: ''               # Mandatory, string. user token as generated from GLPI.
 nfc_pb_glpi_ticket_create:               # Mandatory, dict. The ticket body in API Format.

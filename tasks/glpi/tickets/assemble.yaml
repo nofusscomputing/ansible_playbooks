@@ -72,6 +72,13 @@
           &#60;ul&#62;
           \r\n&#60;li&#62;Job Name: {{ tower_workflow_job_name | default('') }} (id: {{ tower_workflow_job_id | default('') }})&#60;/li&#62;
           \r\n&#60;li&#62;Job Launch Type: {{ tower_job_launch_type | default('') }}&#60;/li&#62;
+          {% if
+            nfc_pb_awx_hostname is defined
+              and
+            tower_job_launch_type | default('') | lower == 'workflow'
+          %}
+          \r\n&#60;li&#62;Job URL: https://{{ nfc_pb_awx_hostname }}/#/jobs/workflow/{{ tower_workflow_job_id | default('') }}&#60;/li&#62;
+          {% endif %}
           \r\n&#60;li&#62;Project SCM Branch: {{ tower_project_scm_branch | default('') }}@{{ tower_project_revision | default('') }}&#60;/li&#62;
           \r\n&#60;li&#62;Job SCM Branch: {{ tower_job_scm_branch | default('') }}&#60;/li&#62;
           \r\n&#60;li&#62;Launched by: {{ tower_user_name | default('') }}&#60;/li&#62;
