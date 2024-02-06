@@ -86,6 +86,7 @@
                   'ticket_close' in ansible_run_tags | default([]) | list
                 )
             msg: This playbook requires job tags be set.
+          when: not nfc_pb_glpi_ticket_assign_error_user is defined
           tags:
             - always
 
