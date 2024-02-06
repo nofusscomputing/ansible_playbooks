@@ -1,7 +1,13 @@
 {
     "gitlab.aiAssistedCodeSuggestions.enabled": false,
     "yaml.schemas": {
-        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": "*.yaml",
-        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks": "tasks/**"
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": [
+            "./*.yaml"
+        ],
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks": [
+            "tasks/**.yaml",
+            "tasks/*/*.yaml",
+            "tasks/*/*/*.yaml"
+        ]
     }
 }
