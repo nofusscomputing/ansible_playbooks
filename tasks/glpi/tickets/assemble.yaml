@@ -70,6 +70,7 @@
           &#60;h3&#62;Automation Details&#60;/h3&#62;
           &#60;div&#62;
           &#60;ul&#62;
+          \r\n&#60;li&#62;Job ID: {{ awx_job_id | default('') }}&#60;/li&#62;
           \r\n&#60;li&#62;Job Name: {{ tower_workflow_job_name | default('') }} (id: {{ tower_workflow_job_id | default('') }})&#60;/li&#62;
           \r\n&#60;li&#62;Job Launch Type: {{ tower_job_launch_type | default('') }}&#60;/li&#62;
           {% if
