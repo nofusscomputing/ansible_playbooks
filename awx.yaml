@@ -157,6 +157,9 @@
         - name: Configure AWX
           ansible.builtin.include_tasks:
             file: tasks/awx/settings.yaml
+          delegate_to: localhost
+          delegate_facts: localhost
+          run_once: true
           tags:
             - never
             - complete
@@ -169,9 +172,12 @@
             apply:
               tags:
                 - always
+          delegate_to: localhost
+          delegate_facts: localhost
           loop: "{{ my_awx_config.credential_types | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_credential_type
+          run_once: true
           tags:
             - never
             - complete
@@ -184,9 +190,12 @@
             apply:
               tags:
                 - always
+          delegate_to: localhost
+          delegate_facts: localhost
           loop: "{{ my_awx_config.instances | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_instance
+          run_once: true
           tags:
             - never
             - complete
@@ -199,9 +208,12 @@
             apply:
               tags:
                 - always
+          delegate_to: localhost
+          delegate_facts: localhost
           loop: "{{ my_awx_config.instance_groups | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_instance_group
+          run_once: true
           tags:
             - never
             - complete
@@ -211,9 +223,12 @@
         - name: Organizations
           ansible.builtin.include_tasks:
             file: tasks/awx/organization.yaml
+          delegate_to: localhost
+          delegate_facts: localhost
           loop: "{{ my_awx_config.organizations | default([]) | list }}" # Fix as this var should be dynamic
           loop_control:
             loop_var: nfc_pb_awx_organization
+          run_once: true
           tags:
             - always
 
