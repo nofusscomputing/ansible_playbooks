@@ -205,13 +205,10 @@ nfc_pb_glpi_no_log_sensitive_data: true      # Optional, boolean. used to turn `
 ```
 
 !!! tip
-    If you wish to delete multiple forms you can by setting variable `nfc_pb_glpi_plugin_formcreator_delete_id` as a list. i.e.
+    If you wish to delete multiple forms you can by setting variable `nfc_pb_glpi_plugin_formcreator_delete_id` as a JSON list. i.e.
     
     ``` yaml
-    nfc_pb_glpi_plugin_formcreator_delete_id:
-      - 1
-      - 2
-      - 3
+    nfc_pb_glpi_plugin_formcreator_delete_id: [1,2,3]
     ```
 
 
