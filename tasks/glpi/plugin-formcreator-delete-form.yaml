@@ -13,7 +13,7 @@
       ansible.builtin.set_fact:
         form_list: |-
             {%- if
-              ',' not in nfc_pb_glpi_plugin_formcreator_delete_id
+              ',' not in nfc_pb_glpi_plugin_formcreator_delete_id | string
             -%}
               [ {{ nfc_pb_glpi_plugin_formcreator_delete_id | int }} ]
             {%- else -%}
