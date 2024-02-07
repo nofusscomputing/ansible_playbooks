@@ -411,7 +411,7 @@
         extra_vars:
           nfc_pb_glpi_form_to_ticket: false
           nfc_pb_glpi_ticket_task_category: 0
-        job_tags: ticket_template_from_itil_category,ticket_create,ticket_task_create
+        job_tags: plugin_form_fetch_json,ticket_template_from_itil_category,ticket_create,ticket_task_create
         job_type: "run"
         labels:
           - forms
