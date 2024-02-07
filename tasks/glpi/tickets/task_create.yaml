@@ -55,15 +55,7 @@
       when: nfc_pb_glpi_ticket_task_create.users_id_tech is defined
 
 
-    - name: Confirm no state set for task creation
-      ansible.builtin.assert:
-        that:
-          - "'state' not in nfc_pb_glpi_ticket_task_create"
-        msg: "'item' must be sepcified in variable 'nfc_pb_glpi_ticket_task_create'"
-      when: nfc_pb_glpi_ticket_task_create.id is not defined
-
-
-    - name: Confirm state set for task Update
+    - name: Confirm state set for task Update is valid
       ansible.builtin.assert:
         that:
           - "'state' in nfc_pb_glpi_ticket_task_create"
@@ -73,8 +65,6 @@
             nfc_pb_glpi_ticket_task_create.state <= 2
         msg: "'item' must be sepcified in variable 'nfc_pb_glpi_ticket_task_create'"
       when: >
-        nfc_pb_glpi_ticket_task_create.id is defined
-          and
         nfc_pb_glpi_ticket_task_create.state is defined
 
 
@@ -140,7 +130,7 @@
       ansible.builtin.set_fact:
         nfc_pb_glpi_ticket_task_assemble: "{{ nfc_pb_glpi_ticket_task_assemble | combine({
             'users_id': nfc_pb_glpi_session.glpiID,
-            'state': 1
+            'state': nfc_pb_glpi_ticket_task_create.state | default(1) | int
             })}}"
       when: nfc_pb_glpi_ticket_task_create.users_id_tech is not defined
 

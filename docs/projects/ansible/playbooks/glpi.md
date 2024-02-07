@@ -115,6 +115,7 @@ This play utilizes the following variables.
 
 ``` yaml
 nfc_pb_glpi_host: glpi.hostname.tld      # Mandatory, string. FQDN that forms part of the url. Don't specify http|https.
+nfc_pb_awx_hostname: host.domain.tld     # Optional, String. FQDN of the awx host. used to build job url for ticket description.
 nfc_pb_glpi_app_token: ''                # Mandatory, string. application token as generated from GLPI.
 nfc_pb_glpi_user_token: ''               # Mandatory, string. user token as generated from GLPI.
 nfc_pb_glpi_ticket_create:               # Mandatory, dict. The ticket body in API Format.
@@ -188,7 +189,7 @@ Prior to the play completing the following artifact/stats are set:
 ```
 
 
-## Plugin - FormCreator Form to JSON Object
+## Plugin - Delete FormCreator Form
 
 - Job tag is `plugin_form_delete_answer`
 
@@ -197,11 +198,21 @@ This Deletes a form answer from the GLPI Plugin Form Creator. Within the playboo
 This play utilizes the following variables.
 
 ``` yaml
-nfc_pb_glpi_plugin_formcreator_delete_id: 0  # Mandatory*, integer. ID of the form answers to delete. Only required if task ran alone.
+nfc_pb_glpi_plugin_formcreator_delete_id: 0  # Mandatory*, integer or list of integer. ID of the form answers to delete. Only required if task ran alone.
                                              # Note: This var takes precedence over artifact 'nfc_pb_glpi.plugins.form_creator.answer_id'
 nfc_pb_glpi_no_log_sensitive_data: true      # Optional, boolean. used to turn `no_log` on/off for logging sensitive data
                                              # NOTE: Sensitive data will be logged. i.e. user and app token.
 ```
+
+!!! tip
+    If you wish to delete multiple forms you can by setting variable `nfc_pb_glpi_plugin_formcreator_delete_id` as a list. i.e.
+    
+    ``` yaml
+    nfc_pb_glpi_plugin_formcreator_delete_id:
+      - 1
+      - 2
+      - 3
+    ```
 
 
 ## Closing the Ticket

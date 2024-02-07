@@ -4,12 +4,35 @@
   block:
 
 
-    - name: Ensure that the form data exists
+    - name: Ensure that the form data exists - Int
       ansible.builtin.assert:
         that:
           - nfc_pb_glpi_plugin_formcreator_delete_id | int > 0
         msg: "var 'nfc_pb_glpi_plugin_formcreator_delete_id' must be a value above '0'"
-      when: nfc_pb_glpi_plugin_formcreator_delete_id is defined
+      when: >
+        nfc_pb_glpi_plugin_formcreator_delete_id is defined
+          and
+        (
+          nfc_pb_glpi_plugin_formcreator_delete_id is integer
+            and
+          nfc_pb_glpi_plugin_formcreator_delete_id is not list
+        )
+
+
+    - name: Ensure that the form data exists - list
+      ansible.builtin.assert:
+        that:
+          - item | int > 0
+        msg: "var 'nfc_pb_glpi_plugin_formcreator_delete_id' must be a value above '0'"
+      loop: "{{ nfc_pb_glpi_plugin_formcreator_delete_id }}"
+      when: >
+        nfc_pb_glpi_plugin_formcreator_delete_id is defined
+          and
+        (
+          nfc_pb_glpi_plugin_formcreator_delete_id is not integer
+            and
+          nfc_pb_glpi_plugin_formcreator_delete_id is list
+        )
 
 
     - name: Ensure that the form data exists
@@ -29,6 +52,7 @@
           - nfc_pb_glpi.plugins.form_creator.answer_id is defined
           - nfc_pb_glpi.plugins.form_creator.answer_id | int > 0
         msg: answer_id not found or had a falue of '1'.
+        when: nfc_pb_glpi_plugin_formcreator_delete_id is not defined
 
 
     - name: Start Session
@@ -37,7 +61,7 @@
       when: nfc_pb_glpi_session | default('') == ''
 
 
-    - name: Delete Form
+    - name: Delete Single Form
       ansible.builtin.include_tasks:
         file: tasks/glpi/api-request.yaml
       vars:
@@ -45,6 +69,29 @@
         glpi_api_request_name: Delete Form
         glpi_api_request_path: "PluginFormcreatorFormAnswer/{{ nfc_pb_glpi_plugin_formcreator_delete_id | default(nfc_pb_glpi.plugins.form_creator.answer_id) }}"
         glpi_api_request_register: glpi_plugin_formcreator_form_deleted
+      when: >
+        nfc_pb_glpi_plugin_formcreator_delete_id is not defined
+          or
+        (
+          nfc_pb_glpi_plugin_formcreator_delete_id | default(0) is integer
+            and
+          nfc_pb_glpi_plugin_formcreator_delete_id | default(0) is not list
+        )
+
+
+    - name: Delete a List of Forms
+      ansible.builtin.include_tasks:
+        file: tasks/glpi/api-request.yaml
+      loop: "{{ nfc_pb_glpi_plugin_formcreator_delete_id | default([]) }}"
+      vars:
+        glpi_api_request_method: DELETE
+        glpi_api_request_name: Delete Form
+        glpi_api_request_path: "PluginFormcreatorFormAnswer/{{ item }}"
+        glpi_api_request_register: glpi_plugin_formcreator_form_deleted
+      when: >
+        nfc_pb_glpi_plugin_formcreator_delete_id | default([]) is not integer
+          and
+        nfc_pb_glpi_plugin_formcreator_delete_id | default([]) is list
 
 
     - name: Confirm Deleted

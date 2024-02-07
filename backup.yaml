@@ -271,6 +271,7 @@
         ask_tags_on_launch: false
         ask_credential_on_launch: true
         ask_variables_on_launch: true
+        concurrent_jobs_enabled: true
         description: |
           Playbook to backup an Installed Application
         execution_environment: "No Fuss Computing EE"
@@ -312,6 +313,7 @@
         ask_tags_on_launch: false
         ask_credential_on_launch: true
         ask_variables_on_launch: false
+        concurrent_jobs_enabled: true
         description: |
           Playbook to backup an Installed Application using inventory Variables
         execution_environment: "No Fuss Computing EE"
