@@ -122,6 +122,9 @@
         - name: Ansible Module postgresql.postgresql_db
           ansible.builtin.include_tasks:
             file: tasks/modules/community-postgresql-postgresql_db.yaml
+            apply:
+              tags:
+                - always
           tags:
             - community-postgresql-postgresql_db
 
