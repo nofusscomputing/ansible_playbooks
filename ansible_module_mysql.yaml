@@ -122,6 +122,9 @@
         - name: Ansible Module community.mysql.mysql_db
           ansible.builtin.include_tasks:
             file: tasks/modules/community-mysql-mysql_db.yaml
+            apply:
+              tags:
+                - always
           tags:
             - community-mysql-mysql_db
 
@@ -332,7 +335,7 @@
           [
             {
               "max": 25,
-              "min": 25,
+              "min": 3,
               "type": "text",
               "choices": "",
               "default": "",
@@ -405,7 +408,7 @@
           [
             {
               "max": 25,
-              "min": 25,
+              "min": 3,
               "type": "text",
               "choices": "",
               "default": "",
@@ -479,7 +482,7 @@
           [
             {
               "max": 25,
-              "min": 25,
+              "min": 3,
               "type": "text",
               "choices": "",
               "default": "",
@@ -565,7 +568,7 @@
           [
             {
               "max": 25,
-              "min": 25,
+              "min": 3,
               "type": "text",
               "choices": "",
               "default": "",
