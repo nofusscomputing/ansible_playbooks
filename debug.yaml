@@ -1,7 +1,7 @@
 ---
 - name: Debug
   hosts: all
-  gather_facts: true
+  # gather_facts: true
   # become: true
 
 
@@ -10,3 +10,35 @@
     - name: Show All Variables
       ansible.builtin.debug:
         msg: "{{ vars }}"
+      when: >
+        vars is defined
+      tags:
+        - never
+        - show_vars
+
+
+    - name: Show All facts
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts }}"
+      when: >
+        ansible_facts is defined
+      tags:
+        - never
+        - show_facts
+
+  vars:
+
+    - name: Debug/Show/Facts
+      ask_credential_on_launch: true
+      ask_inventory_on_launch: true
+      ask_limit_on_launch: true
+      ask_tags_on_launch: false
+      description: Show ansible_facts for host(s)
+      execution_environment: "No Fuss Computing EE"
+      # extra_vars:
+      job_type: "run"
+      job_tags: show_facts
+      labels:
+        - debug
+        - facts
+      use_fact_cache: false
