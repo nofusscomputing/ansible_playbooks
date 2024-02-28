@@ -31,10 +31,31 @@
 
 # kubectl cp copies files to specified path
 # docker cp copies named dir to tmp loc
+# - name: Backup Path
+#   ansible.builtin.command:
+#     cmd: |-
+#       cp --force --recursive --verbose --preserve --target-directory={{ host_app_backup_tmp_dir }} {{ host_path }}
+#   become: true
+#   changed_when: false
+
 - name: Backup Path
-  ansible.builtin.command:
+  ansible.builtin.shell:
     cmd: |-
-      cp --force --recursive --verbose --preserve --target-directory={{ host_app_backup_tmp_dir }} {{ host_path }}
+      rsync \
+        --acls \
+        --xattrs \
+        --owner \
+        --group \
+        --times \
+        --atimes \
+        --open-noatime \
+        --numeric-ids \
+        --recursive \
+        --compress-level=0 \
+        --progress \
+        -h \
+        --bwlimit=2000 {{ host_path }} {{ host_app_backup_tmp_dir }}
+    executable: bash
   become: true
   changed_when: false
 
