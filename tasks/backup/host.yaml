@@ -54,7 +54,7 @@
         --compress-level=0 \
         --progress \
         -h \
-        --bwlimit=3000 {{ host_path }} {{ host_app_backup_tmp_dir }}
+        --bwlimit=2000 {{ host_path }} {{ host_app_backup_tmp_dir }}
     executable: bash
   become: true
   changed_when: false
