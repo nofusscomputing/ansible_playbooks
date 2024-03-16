@@ -1,0 +1,61 @@
+---
+- name: Install K3s Kubernetes
+  hosts: |-
+    {%- if nfc_pb_host is defined -%}
+
+      {{ nfc_pb_host }}
+
+    {%- elif nfc_pb_kubernetes_cluster_name is defined -%}
+
+      kubernetes_cluster_{{ nfc_pb_kubernetes_cluster_name | lower }}
+
+    {%- else -%}
+
+      {%- if ansible_limit is defined -%}
+
+        {{ ansible_limit }}
+
+      {%- else -%}
+
+        localhost
+
+      {%- endif -%}
+
+    {%- endif %}
+  become: true
+  gather_facts: true
+
+
+  tasks:
+
+
+    - name: Install/Configure Kubernetes
+      ansible.builtin.include_role:
+        name: nofusscomputing.kubernetes.install
+      tags:
+        - always
+
+
+  vars:
+
+
+    nfc_pb_awx_tower_template:
+
+
+      - name: "Playbook/NoFussComputing/Kubernetes/Install"
+        ask_credential_on_launch: true
+        ask_job_type_on_launch: true
+        ask_limit_on_launch: true
+        ask_tags_on_launch: true
+        ask_variables_on_launch: true
+        description: |
+          Install/Configure Kubernetes using nfc collection kubernetes.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "check"
+        labels:
+          - cluster
+          - k3s
+          - kubernetes
+        verbosity: 2
+        use_fact_cache: true
+        survey_enabled: false
