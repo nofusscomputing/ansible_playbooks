@@ -152,6 +152,8 @@
         - name: TRACE
           ansible.builtin.debug:
             msg: "{{ my_awx_config }}"
+          tags:
+            - always
 
 
         - name: Configure AWX
