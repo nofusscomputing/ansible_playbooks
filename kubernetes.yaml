@@ -31,7 +31,7 @@
 
     - name: Install/Configure Kubernetes
       ansible.builtin.include_role:
-        name: nofusscomputing.kubernetes.install
+        name: nofusscomputing.kubernetes.nfc_kubernetes
       tags:
         - always
 
