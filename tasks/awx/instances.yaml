@@ -19,6 +19,7 @@
     peers_from_control_nodes: "{{ nfc_pb_awx_instance.peers_from_control_nodes | default(false) | bool }}"
   diff: true
   delegate_to: localhost
+  retries: 2
   run_once: true
   vars:
     ansible_connection: local

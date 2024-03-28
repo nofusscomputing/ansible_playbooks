@@ -34,6 +34,7 @@
     loop_var: settings
   when: settings.stat.exists
   delegate_to: localhost
+  retries: 2
   run_once: true
   vars:
     ansible_connection: local

@@ -108,6 +108,7 @@
           # when: nfc_pb_awx_tower_template | default('') != ''
           diff: true
           delegate_to: localhost
+          retries: 3
           run_once: true
           vars:
             ansible_connection: local

@@ -14,6 +14,7 @@
   # no_log: true
   diff: true
   delegate_to: localhost
+  retries: 2
   run_once: true
   vars:
     ansible_connection: local

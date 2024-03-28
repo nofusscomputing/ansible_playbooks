@@ -13,6 +13,7 @@
     state: present
   loop: "{{ workflow_job_template.labels | default([]) }}"
   delegate_to: localhost
+  retries: 2
   run_once: true
   vars:
     ansible_connection: local
@@ -427,6 +428,7 @@
       # type: bool
       # default: False
   delegate_to: localhost
+  retries: 2
   run_once: true
   vars:
     ansible_connection: local
