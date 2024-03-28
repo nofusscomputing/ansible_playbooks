@@ -39,6 +39,7 @@
         validate_certs: "{{ validate_certs | default(true) }}"
       loop: "{{ nfc_pb_awx_job_template.labels | default([]) }}"
       delegate_to: localhost
+      retries: 3
       run_once: true
       vars:
         ansible_connection: local
@@ -174,6 +175,7 @@
           # when: nfc_pb_awx_tower_template | default('') != ''
           diff: true
           delegate_to: localhost
+          retries: 3
           run_once: true
           vars:
             ansible_connection: local

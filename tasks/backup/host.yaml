@@ -57,6 +57,7 @@
         --bwlimit=2000 {{ host_path }} {{ host_app_backup_tmp_dir }}
     executable: bash
   become: true
+  retries: 3
   changed_when: false
 
 
