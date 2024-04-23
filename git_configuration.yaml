@@ -1,6 +1,11 @@
 ---
 - name: Git Configuration as Code
-  hosts: localhost
+  hosts: |-
+    {%- if nfc_pb_host is defined -%}
+      {{ nfc_pb_host }}
+    {%- else -%}
+      all
+    {%- endif %}
   gather_facts: false
 
 
