@@ -17,6 +17,8 @@ This playbook includes the [AWX feature](awx.md) where it imports the playbook a
 
 - **Playbook/Role/Helm Chart** Deploy a Helm Chart
 
+- **Playbook/Role/Kubernetes Manifest** Deploy a Kubernetes Manifest
+
 
 ## Requirements
 
@@ -43,6 +45,8 @@ This playbook is broken up into different role types, they are:
 - Ansible Role
 
 - Helm Chart
+
+- Kubernetes Manifest
 
 
 ### Ansible Role
@@ -92,6 +96,35 @@ role_map:                                                # Mandatory, Dict.
 
 !!! tip
     AS a helm repository can contain multiple helm charts, keeping the `repo` dictionary the same across different helm role is recommended so that you don't end up with multiple helm repositories pointing to the same content.
+
+The following environmental variables must be set so that the ansible controller can connect to the kubernetes host:
+
+- `K8S_AUTH_HOST`, `K8S_AUTH_API_KEY`, `K8S_AUTH_SSL_CA_CERT` and optionally `K8S_AUTH_VERIFY_SSL`
+
+or
+
+- `K8S_AUTH_KUBECONFIG`
+
+The remaining required variables that must be set are those that are required by the template file if specified. These variables must be part of the device/virtual machine rendered configuration or included in the Ansible Inventory.
+
+
+### Kubernetes Manifest
+
+On the Ansible Controller, helm must be installed as must the PyYaml Python module.
+
+- job tag `kubernetes_manifest`
+
+This playbook requires the following variables be set.
+
+``` yaml
+
+role_map:                                                # Mandatory, Dict.
+  ingress_my_website:                                    # Mandatory, String. Chart Name
+    name: The ingress for my website                     # Mandatory, String. Arbitrary name.
+    state: present                                       # Optional, String. present or absent
+    # Mandatory, String. Template filename containing the kubernetes manifest.
+    template: "{{ inventory_dir + '/../../templates/kubernetes/my_website.yaml.j2'}}"
+```
 
 The following environmental variables must be set so that the ansible controller can connect to the kubernetes host:
 
