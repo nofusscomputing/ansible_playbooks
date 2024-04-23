@@ -1,0 +1,11 @@
+---
+
+- name: Role nofusscomputing.kubernetes.nfc_kubernetes
+  ansible.builtin.include_tasks:
+    file: tasks/role/validation/nfc_kubernetes.yaml
+    apply:
+      tags:
+        - always
+  tags:
+    - never
+    - ansible_role

@@ -19,6 +19,8 @@
           - lookup('env', 'NETBOX_API') != ''
           - lookup('env', 'NETBOX_TOKEN') != ''
         msg: "'NETBOX_API' and 'NETBOX_TOKEN' environmental variables must be set"
+      tags:
+        - always
 
 
     - name: Fetch DCIM ID from NetBox
@@ -40,6 +42,8 @@
       delegate_to: localhost
       no_log: true    # Contains a secret that logging shows
       register: host_details
+      tags:
+        - always
 
 
     - name: Fetch Rendered Config from NetBox
@@ -61,12 +65,16 @@
       delegate_to: localhost
       no_log: true    # Contains a secret that logging shows
       register: host_configuration
+      tags:
+        - always
 
 
     - name: TRACE Rendered Config
       ansible.builtin.debug:
         msg: "{{ host_configuration.json.content | from_yaml }}"
       check_mode: true
+      tags:
+        - always
 
 
     - name: Try / Catch
@@ -81,6 +89,8 @@
           changed_when: false
           check_mode: false
           delegate_to: localhost
+          tags:
+            - always
 
 
         - name: Load Vars as hostvars
@@ -88,6 +98,8 @@
             file: "/tmp/vars_{{ inventory_hostname }}.json"
           check_mode: false
           delegate_to: localhost
+          tags:
+            - always
 
 
       always:
@@ -100,37 +112,15 @@
           changed_when: false
           check_mode: false
           delegate_to: localhost
+          tags:
+            - always
 
 
-    - name: Role Variable Validation - Kubernetes
-      ansible.builtin.assert:
-        that:
-          - nfc_role_kubernetes_cluster_domain is defined
-          - nfc_role_kubernetes_cluster_domain != ''
-          - nfc_role_kubernetes_configure_firewall is defined
-          - nfc_role_kubernetes_configure_firewall != ''
-          - nfc_role_kubernetes_etcd_enabled is defined
-          - nfc_role_kubernetes_etcd_enabled != ''
-          - nfc_role_kubernetes_install_olm is defined
-          - nfc_role_kubernetes_install_olm != ''
-          - nfc_role_kubernetes_install_helm is defined
-          - nfc_role_kubernetes_install_helm != ''
-          - nfc_role_kubernetes_install_kubevirt is defined
-          - nfc_role_kubernetes_install_kubevirt != ''
-          - nfc_role_kubernetes_kubevirt_operator_replicas is defined
-          - nfc_role_kubernetes_kubevirt_operator_replicas != ''
-          - nfc_kubernetes_enable_metallb is defined
-          - nfc_kubernetes_enable_metallb != ''
-          - nfc_kubernetes_enable_servicelb is defined
-          - nfc_kubernetes_enable_servicelb != ''
-          - nfc_role_kubernetes_pod_subnet is defined
-          - nfc_role_kubernetes_pod_subnet != ''
-          - nfc_role_kubernetes_service_subnet is defined
-          - nfc_role_kubernetes_service_subnet != ''
-        msg: Missing Required Variable
-      check_mode: false
-      when: >
-        role == 'kubernetes_node'
+    - name: Role Validation
+      ansible.builtin.include_tasks:
+        file: tasks/role/validation.yaml
+      tags:
+        - always
 
 
   tasks:
@@ -139,26 +129,32 @@
       ansible.builtin.debug:
         msg: "{{ role }}"
       check_mode: false
+      tags:
+        - always
 
 
-    - name: "Deploy Role - {{ role_map[role].name }}"
+    - name: "Ansible Role - {{ role_map[role].name }}"
       ansible.builtin.include_role:
         name: "{{ role_map[role].name }}"
         tasks_from: "{{ role_map[role].tasks_from | default(omit) }}"
+      tags:
+        - never
+        - ansible_role
 
 
   vars:
 
     nfc_pb_awx_tower_template:
 
-      - name: "Playbook/Role"
+      - name: "Playbook/Role/Ansible"
         ask_tags_on_launch: false
         ask_inventory_on_launch: true
         ask_credential_on_launch: true
         ask_limit_on_launch: true
-        description: Setup a hosts configured role.
+        description: Run an Ansible Role against a host.
         execution_environment: "No Fuss Computing EE"
         job_type: "check"
+        job_tags: ansible_role
         labels:
           - initial
           - onboarding

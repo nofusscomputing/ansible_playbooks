@@ -13,7 +13,7 @@ This playbook is designed to fetch a device's/virtual machine's rendered configu
 
 This playbook includes the [AWX feature](awx.md) where it imports the playbook as job templates in to AWX / Ansible Automation Platform. The following job templates that will be created:
 
-- **Playbook/Role** Setup a hosts configured role
+- **Playbook/Role/Ansible** Setup a hosts configured role
 
 
 ## Requirements
@@ -35,6 +35,15 @@ This playbook includes the [AWX feature](awx.md) where it imports the playbook a
 
 
 ## Usage
+
+This playbook is broken up into different role types, they are:
+
+- Ansible Role
+
+
+### Ansible Role
+
+- job tag `ansible_role`
 
 This playbook requires the following variables be set.
 
@@ -68,7 +77,9 @@ This playbook has the following workflow:
 
 1. Removes tmp file
 
-1. _Role `kubernetes_node` ONLY_ Confirms required variables are set
+1. Variable Validation
+
+    - _Role `kubernetes_node`_ Confirms required variables are set
 
 1. Runs the role as specified in `role_map`
 
