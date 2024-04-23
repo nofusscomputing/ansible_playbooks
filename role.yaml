@@ -23,6 +23,18 @@
         - always
 
 
+    - name: Confirm Existance of Required Host Variables
+      ansible.builtin.assert:
+        that:
+          - is_virtual is defined
+          - is_virtual != is_virtual
+          - role is defined
+          - role != ''
+        msg: "Missing required variables variables must be set"
+      tags:
+        - always
+
+
     - name: Fetch DCIM ID from NetBox
       ansible.builtin.uri:
         url: |-
