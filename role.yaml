@@ -154,6 +154,66 @@
         - ansible_role
 
 
+    - name: Confirm Existance of Kubernetes Connection Variables
+      ansible.builtin.assert:
+        that:
+          - |
+            (
+              lookup('env', 'K8S_AUTH_HOST') != ''
+                and
+              lookup('env', 'K8S_AUTH_API_KEY') != ''
+                and
+              lookup('env', 'K8S_AUTH_SSL_CA_CERT') != ''
+            ) or
+            (
+              lookup('env', 'K8S_AUTH_KUBECONFIG') != ''
+            )
+        msg: "Missing Helm Chart/Kubernetes required environmental variables"
+      tags:
+        - never
+        - helm_chart
+
+
+    - name: Confirm Existance of Required Helm Chart Variables
+      ansible.builtin.assert:
+        that:
+          - chart is defined
+          - chart != is_virtual
+        msg: "Missing helm chart required variables"
+      tags:
+        - never
+        - helm_chart
+
+
+    - name: "Add Helm Chart Repository - {{ role_map[chart].repo.name }}"
+      kubernetes.core.helm_repository:
+        name: "{{ role_map[chart].repo.name }}"
+        repo_url: "{{ role_map[chart].repo.url }}"
+      tags:
+        - never
+        - helm_chart
+
+
+    - name: "Deploy Helm Chart - {{ role_map[chart].name }}"
+      kubernetes.core.helm:
+        name: "{{ role_map[chart].name }}"
+        chart_ref: "{{ role_map[chart].repo.name }}/{{ role_map[chart].chart }}"
+        chart_version: "{{ role_map[chart].version }}"
+        release_values: |
+          {{ lookup('template', role_map[chart].template_file) | default(role_map[chart].release_values) | default(omit) }}
+        create_namespace: "{{ role_map[chart].create_namespace | default(omit) | bool }}"
+        namespace: "{{ role_map[chart].namespace | default(omit) }}"
+        wait: false
+        state: "{{ role_map[chart].state | default('present') }}"
+        skip_crds: false
+      delay: 5
+      delegate_to: localhost
+      diff: true
+      retries: 3
+      tags:
+        - never
+        - helm_chart
+
   vars:
 
     nfc_pb_awx_tower_template:
@@ -169,6 +229,25 @@
         job_tags: ansible_role
         labels:
           - initial
+          - onboarding
+          - role
+          - soe
+        use_fact_cache: true
+
+      - name: "Playbook/Role/Helm Chart"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Deploy a Helm Chart.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "check"
+        job_tags: helm_chart
+        labels:
+          - chart
+          - helm
+          - initial
+          - kubernetes
           - onboarding
           - role
           - soe

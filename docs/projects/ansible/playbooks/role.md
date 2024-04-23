@@ -15,6 +15,8 @@ This playbook includes the [AWX feature](awx.md) where it imports the playbook a
 
 - **Playbook/Role/Ansible** Setup a hosts configured role
 
+- **Playbook/Role/Helm Chart** Deploy a Helm Chart
+
 
 ## Requirements
 
@@ -40,6 +42,8 @@ This playbook is broken up into different role types, they are:
 
 - Ansible Role
 
+- Helm Chart
+
 
 ### Ansible Role
 
@@ -59,6 +63,45 @@ role_map:                                              # Mandatory, Dict.
 Environmental variables `NETBOX_API` and `NETBOX_TOKEN`, must be set for the url (with protocol) and token to access NetBox.
 
 The remaining required variables that must be set are those that are required by the Ansible Role. These variables must be part of the device/virtual machine rendered configuration.
+
+
+### Helm Chart
+
+On the Ansible Controller, helm must be installed as must the PyYaml Python module.
+
+- job tag `helm_chart`
+
+This playbook requires the following variables be set.
+
+``` yaml
+
+role_map:                                                # Mandatory, Dict.
+  nginx_ingress:                                         # Mandatory, String. Chart Name
+    name: nginx                                          # Mandatory, String. Helm deployment name
+    repo: 
+      name: nginx                                        # Mandatory, String. Name to give the repository
+      url: https://kubernetes.github.io/ingress-nginx    # Mandatory, String. Helm Chart repository URL
+    chart: ingress-nginx                                 # Mandatory, String. Name of the chart withing the helm repo.
+    version: '4.8.2'                                     # Mandatory, String. Chart version to deploy
+    namespace: ingress                                   # Optional, String. Kubernetes namespace to deploy chart to.
+    create_namespace: true                               # Optional, String. Create Namespoace?
+    release_values:                                      # Optional, Dict. Chart Values.
+    # Optional, String. Template filename for chart values
+    template_file: "{{ inventory_dir + '/../../templates/helm-chart-values/nginx.yaml.j2'}}"
+```
+
+!!! tip
+    AS a helm repository can contain multiple helm charts, keeping the `repo` dictionary the same across different helm role is recommended so that you don't end up with multiple helm repositories pointing to the same content.
+
+The following environmental variables must be set so that the ansible controller can connect to the kubernetes host:
+
+- `K8S_AUTH_HOST`, `K8S_AUTH_API_KEY`, `K8S_AUTH_SSL_CA_CERT` and optionally `K8S_AUTH_VERIFY_SSL`
+
+or
+
+- `K8S_AUTH_KUBECONFIG`
+
+The remaining required variables that must be set are those that are required by the template file if specified. These variables must be part of the device/virtual machine rendered configuration or included in the Ansible Inventory.
 
 
 ### Workflow
