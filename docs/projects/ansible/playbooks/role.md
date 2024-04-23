@@ -23,6 +23,16 @@ This playbook includes the [AWX feature](awx.md) where it imports the playbook a
     !!! tip
         The `netbox.netbox.nb_inventory` inventory plugin does contain the required variables.
 
+- NetBox has been setup with the required custom fields. 
+
+    !!! info
+        You can use our Ansible Role `nofusscomputing.kubernetes.nfc_kubernetes` to setup NetBox with the required fields. See [Documentation for more info](../collection/kubernetes/roles/kubernetes_netbox/index.md).
+
+- Rendered configuration contains the required variables for the Ansible Role being used.
+
+    !!! info
+        We provide [publicly accessible templates](https://gitlab.com/nofusscomputing/infrastructure/configuration-management/netbox/-/tree/development/templates) for our roles, should you wish not to create your own.
+
 
 ## Usage
 
