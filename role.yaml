@@ -105,6 +105,8 @@
     - name: Role Variable Validation - Kubernetes
       ansible.builtin.assert:
         that:
+          - nfc_role_kubernetes_cluster_domain is defined
+          - nfc_role_kubernetes_cluster_domain != ''
           - nfc_role_kubernetes_configure_firewall is defined
           - nfc_role_kubernetes_configure_firewall != ''
           - nfc_role_kubernetes_etcd_enabled is defined
