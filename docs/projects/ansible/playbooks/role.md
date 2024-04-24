@@ -110,7 +110,7 @@ The remaining required variables that must be set are those that are required by
 
 ### Kubernetes Manifest
 
-On the Ansible Controller, helm must be installed as must the PyYaml Python module.
+On the Ansible Controller, kubectl must be installed as must the PyYaml and jsonpatch Python module.
 
 - job tag `kubernetes_manifest`
 
