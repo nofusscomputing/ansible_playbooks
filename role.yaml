@@ -27,7 +27,7 @@
       ansible.builtin.assert:
         that:
           - is_virtual is defined
-          - is_virtual != is_virtual
+          - is_virtual != ''
           - role is defined
           - role != ''
         msg: "Missing required variables variables must be set"
@@ -179,7 +179,7 @@
       ansible.builtin.assert:
         that:
           - chart is defined
-          - chart != is_virtual
+          - chart != ''
         msg: "Missing helm chart required variables"
       tags:
         - never
@@ -220,7 +220,7 @@
       ansible.builtin.assert:
         that:
           - manifest is defined
-          - manifest != is_virtual
+          - manifest != ''
         msg: "Missing Kubernetes required variables"
       tags:
         - never
