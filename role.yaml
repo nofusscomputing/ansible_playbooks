@@ -1,0 +1,302 @@
+---
+- name: Host Role Configuration / Deployment
+  hosts: |-
+    {%- if nfc_pb_host is defined -%}
+      {{ nfc_pb_host }}
+    {%- else -%}
+      all
+    {%- endif %}
+  become: false
+  gather_facts: false
+
+
+  pre_tasks:
+
+
+    - name: Confirm Existance of NetBox Connection Variables
+      ansible.builtin.assert:
+        that:
+          - lookup('env', 'NETBOX_API') != ''
+          - lookup('env', 'NETBOX_TOKEN') != ''
+        msg: "'NETBOX_API' and 'NETBOX_TOKEN' environmental variables must be set"
+      tags:
+        - always
+
+
+    - name: Confirm Existance of Required Host Variables
+      ansible.builtin.assert:
+        that:
+          - is_virtual is defined
+          - is_virtual != ''
+          - role is defined
+          - role != ''
+        msg: "Missing required variables variables must be set"
+      tags:
+        - always
+
+
+    - name: Fetch DCIM ID from NetBox
+      ansible.builtin.uri:
+        url: |-
+          {{ lookup('env', 'NETBOX_API') }}/api/
+          {%- if is_virtual -%}
+            virtualization/virtual-machines
+          {%- else -%}
+            dcim/devices
+          {%- endif -%}
+          /?name={{ inventory_hostname }}&serial={{ serial }}
+        method: GET
+        headers:
+          Authorization: Token {{ lookup('env', 'NETBOX_TOKEN') }}
+        return_content: true
+        validate_certs: "{{ lookup('env', 'NETBOX_VALIDATE_CERTS') | default(true) | bool }}"
+      check_mode: false
+      delegate_to: localhost
+      no_log: true    # Contains a secret that logging shows
+      register: host_details
+      tags:
+        - always
+
+
+    - name: Fetch Rendered Config from NetBox
+      ansible.builtin.uri:
+        url: |-
+          {{ lookup('env', 'NETBOX_API') }}/api/
+          {%- if is_virtual -%}
+            virtualization/virtual-machines
+          {%- else -%}
+            dcim/devices
+          {%- endif -%}
+          /{{ host_details.json.results[0].id }}/render-config/
+        method: POST
+        headers:
+          Authorization: Token {{ lookup('env', 'NETBOX_TOKEN') }}
+        return_content: true
+        validate_certs: "{{ lookup('env', 'NETBOX_VALIDATE_CERTS') | default(true) | bool }}"
+      check_mode: false
+      delegate_to: localhost
+      no_log: true    # Contains a secret that logging shows
+      register: host_configuration
+      tags:
+        - always
+
+
+    - name: TRACE Rendered Config
+      ansible.builtin.debug:
+        msg: "{{ host_configuration.json.content | from_yaml }}"
+      check_mode: true
+      tags:
+        - always
+
+
+    - name: Try / Catch
+      block:
+
+
+        - name: Save Vars to temp file so they can be loaded as hostvars
+          ansible.builtin.copy:
+            content: "{{ host_configuration.json.content | from_yaml | to_nice_json(indent=0) }}"
+            dest: "/tmp/vars_{{ inventory_hostname }}.json"
+            mode: '777'
+          changed_when: false
+          check_mode: false
+          delegate_to: localhost
+          tags:
+            - always
+
+
+        - name: Load Vars as hostvars
+          ansible.builtin.include_vars:
+            file: "/tmp/vars_{{ inventory_hostname }}.json"
+          check_mode: false
+          delegate_to: localhost
+          tags:
+            - always
+
+
+      always:
+
+
+        - name: Clean tmp var files
+          ansible.builtin.file:
+            path: "/tmp/vars_{{ inventory_hostname }}.json"
+            state: absent
+          changed_when: false
+          check_mode: false
+          delegate_to: localhost
+          tags:
+            - always
+
+
+    - name: Role Validation
+      ansible.builtin.include_tasks:
+        file: tasks/role/validation.yaml
+      tags:
+        - always
+
+
+  tasks:
+
+    - name: TRACE
+      ansible.builtin.debug:
+        msg: "{{ role }}"
+      check_mode: false
+      tags:
+        - always
+
+
+    - name: "Ansible Role - {{ role_map[role].name }}"
+      ansible.builtin.include_role:
+        name: "{{ role_map[role].name }}"
+        tasks_from: "{{ role_map[role].tasks_from | default(omit) }}"
+      tags:
+        - never
+        - ansible_role
+
+
+    - name: Confirm Existance of Kubernetes Connection Variables
+      ansible.builtin.assert:
+        that:
+          - |
+            (
+              lookup('env', 'K8S_AUTH_HOST') != ''
+                and
+              lookup('env', 'K8S_AUTH_API_KEY') != ''
+                and
+              lookup('env', 'K8S_AUTH_SSL_CA_CERT') != ''
+            ) or
+            (
+              lookup('env', 'K8S_AUTH_KUBECONFIG') != ''
+            )
+        msg: "Missing Helm Chart/Kubernetes required environmental variables"
+      tags:
+        - never
+        - helm_chart
+        - kubernetes_manifest
+
+
+    - name: Confirm Existance of Required Helm Chart Variables
+      ansible.builtin.assert:
+        that:
+          - chart is defined
+          - chart != ''
+        msg: "Missing helm chart required variables"
+      tags:
+        - never
+        - helm_chart
+
+
+    - name: "Add Helm Chart Repository - {{ role_map[chart].repo.name }}"
+      kubernetes.core.helm_repository:
+        name: "{{ role_map[chart].repo.name }}"
+        repo_url: "{{ role_map[chart].repo.url }}"
+      tags:
+        - never
+        - helm_chart
+
+
+    - name: "Deploy Helm Chart - {{ role_map[chart].name }}"
+      kubernetes.core.helm:
+        name: "{{ role_map[chart].name }}"
+        chart_ref: "{{ role_map[chart].repo.name }}/{{ role_map[chart].chart }}"
+        chart_version: "{{ role_map[chart].version }}"
+        release_values: |
+          {{ lookup('template', role_map[chart].template_file) | default(role_map[chart].release_values) | default(omit) }}
+        create_namespace: "{{ role_map[chart].create_namespace | default(omit) | bool }}"
+        namespace: "{{ role_map[chart].namespace | default(omit) }}"
+        wait: false
+        state: "{{ role_map[chart].state | default('present') }}"
+        skip_crds: false
+      delay: 5
+      delegate_to: localhost
+      diff: true
+      retries: 3
+      tags:
+        - never
+        - helm_chart
+
+
+    - name: Confirm Existance of Required Kubernetes Variables
+      ansible.builtin.assert:
+        that:
+          - manifest is defined
+          - manifest != ''
+        msg: "Missing Kubernetes required variables"
+      tags:
+        - never
+        - kubernetes_manifest
+
+
+    - name: Deploy Kubernetes Manifest - {{ role_map[manifest].name }}"
+      kubernetes.core.k8s:
+        apply: true
+        template: "{{ role_map[manifest].template }}"
+        server_side_apply:
+          field_manager: ansible
+          force_conflicts: true
+        state: "{{ role_map[manifest].state | default(present) }}"
+      delay: 5
+      delegate_to: localhost
+      diff: true
+      retries: 3
+      tags:
+        - never
+        - kubernetes_manifest
+
+
+  vars:
+
+    nfc_pb_awx_tower_template:
+
+      - name: "Playbook/Role/Ansible"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Run an Ansible Role against a host.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "check"
+        job_tags: ansible_role
+        labels:
+          - initial
+          - onboarding
+          - role
+          - soe
+        use_fact_cache: true
+
+      - name: "Playbook/Role/Helm Chart"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Deploy a Helm Chart.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "check"
+        job_tags: helm_chart
+        labels:
+          - chart
+          - helm
+          - initial
+          - kubernetes
+          - onboarding
+          - role
+          - soe
+        use_fact_cache: true
+
+      - name: "Playbook/Role/Kubernetes Manifest"
+        ask_tags_on_launch: false
+        ask_inventory_on_launch: true
+        ask_credential_on_launch: true
+        ask_limit_on_launch: true
+        description: Deploy a Kubernetes Manifest.
+        execution_environment: "No Fuss Computing EE"
+        job_type: "check"
+        job_tags: kubernetes_manifest
+        labels:
+          - initial
+          - kubernetes
+          - manifest
+          - onboarding
+          - role
+          - soe
+        use_fact_cache: true

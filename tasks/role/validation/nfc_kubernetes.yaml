@@ -1,0 +1,31 @@
+---
+
+- name: Role Variable Validation - 'nofusscomputing.kubernetes.nfc_kubernetes'
+  ansible.builtin.assert:
+    that:
+      - nfc_role_kubernetes_cluster_domain is defined
+      - nfc_role_kubernetes_cluster_domain != ''
+      - nfc_role_kubernetes_configure_firewall is defined
+      - nfc_role_kubernetes_configure_firewall != ''
+      - nfc_role_kubernetes_etcd_enabled is defined
+      - nfc_role_kubernetes_etcd_enabled != ''
+      - nfc_role_kubernetes_install_olm is defined
+      - nfc_role_kubernetes_install_olm != ''
+      - nfc_role_kubernetes_install_helm is defined
+      - nfc_role_kubernetes_install_helm != ''
+      - nfc_role_kubernetes_install_kubevirt is defined
+      - nfc_role_kubernetes_install_kubevirt != ''
+      - nfc_role_kubernetes_kubevirt_operator_replicas is defined
+      - nfc_role_kubernetes_kubevirt_operator_replicas != ''
+      - nfc_kubernetes_enable_metallb is defined
+      - nfc_kubernetes_enable_metallb != ''
+      - nfc_kubernetes_enable_servicelb is defined
+      - nfc_kubernetes_enable_servicelb != ''
+      - nfc_role_kubernetes_pod_subnet is defined
+      - nfc_role_kubernetes_pod_subnet != ''
+      - nfc_role_kubernetes_service_subnet is defined
+      - nfc_role_kubernetes_service_subnet != ''
+    msg: Missing Required Variable
+  check_mode: false
+  when: >
+    role == 'kubernetes_node'

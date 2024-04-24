@@ -59,6 +59,8 @@ nav:
 
         - projects/ansible/playbooks/restore/application.md
 
+      - projects/ansible/playbooks/role.md
+
     - Roles:
 
       - projects/ansible/roles/index.md

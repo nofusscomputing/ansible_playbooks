@@ -25,7 +25,7 @@
 - name: OpenSSH Server Setup
   hosts: all
   become: true
-  gather_facts: false
+  gather_facts: true
 
 
   pre_tasks:
