@@ -52,7 +52,8 @@
         validate_certs: "{{ lookup('env', 'NETBOX_VALIDATE_CERTS') | default(true) | bool }}"
       check_mode: false
       delegate_to: localhost
-      no_log: true    # Contains a secret that logging shows
+      no_log: >    # Contains a secret that logging shows
+        {{ nfc_pb_disable_log | default(true) }}
       register: host_details
       tags:
         - always
@@ -75,7 +76,8 @@
         validate_certs: "{{ lookup('env', 'NETBOX_VALIDATE_CERTS') | default(true) | bool }}"
       check_mode: false
       delegate_to: localhost
-      no_log: true    # Contains a secret that logging shows
+      no_log: >    # Contains a secret that logging shows
+        {{ nfc_pb_disable_log | default(true) }}
       register: host_configuration
       tags:
         - always
