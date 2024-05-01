@@ -57,6 +57,8 @@
       register: host_details
       tags:
         - always
+      vars:
+        ansible_connection: local
 
 
     - name: Fetch Rendered Config from NetBox
@@ -81,6 +83,8 @@
       register: host_configuration
       tags:
         - always
+      vars:
+        ansible_connection: local
 
 
     - name: TRACE Rendered Config
@@ -105,6 +109,8 @@
           delegate_to: localhost
           tags:
             - always
+          vars:
+            ansible_connection: local
 
 
         - name: Load Vars as hostvars
@@ -114,6 +120,8 @@
           delegate_to: localhost
           tags:
             - always
+          vars:
+            ansible_connection: local
 
 
       always:
@@ -128,6 +136,8 @@
           delegate_to: localhost
           tags:
             - always
+          vars:
+            ansible_connection: local
 
 
     - name: Role Validation
@@ -216,6 +226,8 @@
       tags:
         - never
         - helm_chart
+      vars:
+        ansible_connection: local
 
 
     - name: Confirm Existance of Required Kubernetes Variables
@@ -244,6 +256,8 @@
       tags:
         - never
         - kubernetes_manifest
+      vars:
+        ansible_connection: local
 
 
   vars:
