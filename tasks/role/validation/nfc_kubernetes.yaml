@@ -15,8 +15,30 @@
       - nfc_role_kubernetes_install_helm != ''
       - nfc_role_kubernetes_install_kubevirt is defined
       - nfc_role_kubernetes_install_kubevirt != ''
-      - nfc_role_kubernetes_kubevirt_operator_replicas is defined
-      - nfc_role_kubernetes_kubevirt_operator_replicas != ''
+      - >
+        not (
+          nfc_role_kubernetes_install_kubevirt | default(false)
+            and
+          nfc_role_kubernetes_kubevirt_operator_replicas is defined
+        )
+          or
+        (
+          nfc_role_kubernetes_install_kubevirt | default(false)
+            and
+          nfc_role_kubernetes_kubevirt_operator_replicas is defined
+        )
+      - >
+        not (
+          nfc_role_kubernetes_install_kubevirt | default(false)
+            and
+          nfc_role_kubernetes_kubevirt_operator_replicas != ''
+        )
+          or
+        (
+          nfc_role_kubernetes_install_kubevirt | default(false)
+            and
+          nfc_role_kubernetes_kubevirt_operator_replicas != ''
+        )
       - nfc_kubernetes_enable_metallb is defined
       - nfc_kubernetes_enable_metallb != ''
       - nfc_kubernetes_enable_servicelb is defined
