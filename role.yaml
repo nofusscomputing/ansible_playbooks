@@ -6,7 +6,7 @@
     {%- else -%}
       all
     {%- endif %}
-  become: false
+  become: true
   gather_facts: false
 
 
