@@ -44,7 +44,9 @@
           {%- else -%}
             dcim/devices
           {%- endif -%}
-          /?name={{ inventory_hostname }}&serial={{ serial }}
+          /?name={{ inventory_hostname }}{% if serial is defined -%}
+            &serial={{ serial }}
+          {%- endif %}
         method: GET
         headers:
           Authorization: Token {{ lookup('env', 'NETBOX_TOKEN') }}
