@@ -47,6 +47,8 @@
       - nfc_role_kubernetes_pod_subnet != ''
       - nfc_role_kubernetes_service_subnet is defined
       - nfc_role_kubernetes_service_subnet != ''
+      - nfc_role_kubernetes_node_prime is defined
+      - nfc_role_kubernetes_node_prime != ''
     msg: Missing Required Variable
   check_mode: false
   when: >
