@@ -1,7 +1,7 @@
 ---
 - name: Git Configuration as Code
   hosts: |-
-    {%- if lookup('env', 'CI_COMMIT_SHA') -%}
+    {%- if lookup('env', 'CI_PIPELINE_SOURCE') -%}
       localhost
     {%- else -%}
       {%- if nfc_pb_host is defined -%}
